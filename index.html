@@ -164,8 +164,9 @@
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 18px;
-    max-width: 900px;
+    max-width: 1400px;
   }
+  .module-tile { max-height: 200px; }
 
   .module-tile {
     aspect-ratio: 1;
@@ -182,7 +183,7 @@
   }
   .module-tile:hover { border-color: var(--gold); transform: translateY(-2px); }
 
-  .module-grid-header { max-width: 900px; display: flex; justify-content: flex-end; margin-bottom: 10px; }
+  .module-grid-header { max-width: 1400px; display: flex; justify-content: flex-end; margin-bottom: 10px; }
   .module-tile .tile-reorder-controls {
     position: absolute; top: 6px; left: 6px; display: none; gap: 4px;
   }
@@ -5119,12 +5120,12 @@
 
   function showPlayerAccessInfo(p) {
     document.getElementById('accessPlayerName').textContent = p.name;
-    document.getElementById('accessPlayerLink').textContent = p.link;
+    document.getElementById('accessPlayerLink').value = p.link;
     document.getElementById('accessPlayerCode').textContent = p.code;
     openModal('modalPlayerAccess');
   }
   function copyPlayerAccessLink() {
-    navigator.clipboard.writeText(document.getElementById('accessPlayerLink').textContent);
+    navigator.clipboard.writeText(document.getElementById('accessPlayerLink').value);
     showToast('Lien copié !');
   }
 
