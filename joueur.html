@@ -5694,7 +5694,7 @@
       spells[lvl].push({
         id: r.id, name: r.nom, action: deriveSpellAction(r.temps_incantation),
         concentration: !!r.concentration, ritual: !!r.rituel, upcastable: !!(r.effet_slot_superieur && r.effet_slot_superieur.trim()),
-        school: (r.ecole || '').toLowerCase(), schoolLabel: r.ecole || '',
+        school: (r.ecole || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(), schoolLabel: r.ecole || '',
         effect: r.phrase_courte || '', range: r.portee || '', components: r.composantes || '',
         duration: r.duree || '', desc: r.description_complete || '',
         rollHint: r.phrase_courte || '',

@@ -3234,7 +3234,7 @@
           source: r.source, cache_aux_joueurs: r.cache_aux_joueurs,
         }) },
       { table: 'sorts', target: spellsDatabase, map: r => ({
-          id: r.id, name: r.nom, level: r.niveau, school: r.ecole, castTime: r.temps_incantation,
+          id: r.id, name: r.nom, level: r.niveau, school: normalizeText(r.ecole).trim(), castTime: r.temps_incantation,
           range: r.portee, components: r.composantes, duration: r.duree, concentration: r.concentration,
           ritual: r.rituel, classes: r.classes || [], description: r.description_complete,
           shortDesc: r.phrase_courte, source: r.source, upcast: r.effet_slot_superieur,
