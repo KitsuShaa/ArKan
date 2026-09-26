@@ -162,7 +162,7 @@
 
   .module-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(6, 1fr);
     gap: 18px;
     max-width: 900px;
   }
@@ -5099,7 +5099,7 @@
       id: newId, name: nom, race: race, classes: classesLabel,
       pv: `${pv}/${pv}`, ca: 10 + dex,
       xp: parseInt(document.getElementById('wXP').value) || 0, xpNext: 999999, level: parseInt(document.getElementById('wNiveauTotal').textContent) || 1,
-      code: newCode, link: `joueur.html?j=${newId}`,
+      code: newCode, link: window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + `joueur.html?j=${newId}`,
       states: [], exhaustion: 0,
     };
     players.push(newPlayer);
