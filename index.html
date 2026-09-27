@@ -3568,7 +3568,7 @@
       <div class="player-banner">
         <h2>${p.name}${p.active === false ? ' <span style="font-size:11px; color:var(--ink-faint); font-family:var(--font-sans); text-transform:uppercase;">— désactivé</span>' : ''}</h2>
         <div class="banner-link-group">
-          <div class="banner-item">Lien : <strong>${p.link}</strong><button class="copy-btn" onclick="copyText('${p.link}')">Copier</button></div>
+          <div class="banner-item">Lien : <strong>${p.link}</strong><button class="copy-btn" onclick="copyText('${p.link}')">Copier</button><a class="copy-btn" href="${p.link}" target="_blank" rel="noopener" style="text-decoration:none; display:inline-block;">Ouvrir la fiche ↗</a></div>
           <div class="banner-item">Code : <strong>${p.code}</strong><button class="copy-btn" onclick="copyText('${p.code}')">Copier</button></div>
           <button class="copy-btn" style="${p.active === false ? 'color:var(--success); border-color:var(--success);' : 'color:var(--garnet); border-color:var(--garnet);'}" onclick="toggleCharacterActive('${p.id}')">${p.active === false ? '↩️ Réactiver' : '🚫 Désactiver'}</button>
           <button class="copy-btn" style="color:var(--garnet); border-color:var(--garnet);" onclick="deletePlayerCharacter('${p.id}')">🗑️ Supprimer définitivement</button>
@@ -4314,8 +4314,11 @@
     document.getElementById('sfScaling11').value = s ? (s.scalingNiv11 || '') : '';
     document.getElementById('sfScaling17').value = s ? (s.scalingNiv17 || '') : '';
 
+    const unmatchedClasses = s ? s.classes.filter(sc => !classList.some(c => normalizeText(sc) === normalizeText(c))) : [];
     document.getElementById('sfClasses').innerHTML = classList.map(c => `
       <label class="filter-checkbox-line"><input type="checkbox" value="${c}" ${s && s.classes.some(sc => normalizeText(sc) === normalizeText(c)) ? 'checked' : ''}> ${c}</label>
+    `).join('') + unmatchedClasses.map(uc => `
+      <label class="filter-checkbox-line" style="color:var(--garnet);"><input type="checkbox" value="${uc}" checked> ${uc} ⚠️</label>
     `).join('');
 
     openModal('modalSpellForm');
