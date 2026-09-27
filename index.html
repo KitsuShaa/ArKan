@@ -3515,11 +3515,16 @@
     const row = document.getElementById('charChipRow');
     row.innerHTML = '';
     players.forEach(p => {
-      const chip = document.createElement('div');
-      chip.className = 'char-chip' + (p.id === currentPlayerId ? ' active' : '') + (p.active === false ? ' disabled-char' : '');
-      chip.innerHTML = `<div class="avatar">${p.name.split(' ').map(w => w[0]).join('').slice(0,2)}</div><span>${p.name}</span><div class="chip-notif-dot ${p.pendingLevelUp ? 'visible' : ''}"></div>`;
-      chip.addEventListener('click', () => selectPlayer(p.id));
-      row.appendChild(chip);
+      try {
+        if (!p.name) { console.error('Joueur sans nom, ignoré dans la liste :', p); return; }
+        const chip = document.createElement('div');
+        chip.className = 'char-chip' + (p.id === currentPlayerId ? ' active' : '') + (p.active === false ? ' disabled-char' : '');
+        chip.innerHTML = `<div class="avatar">${p.name.split(' ').map(w => w[0]).join('').slice(0,2)}</div><span>${p.name}</span><div class="chip-notif-dot ${p.pendingLevelUp ? 'visible' : ''}"></div>`;
+        chip.addEventListener('click', () => selectPlayer(p.id));
+        row.appendChild(chip);
+      } catch (e) {
+        console.error('Erreur rendu chip joueur', p, e);
+      }
     });
     const addChip = document.createElement('div');
     addChip.className = 'char-chip add-chip';
@@ -3548,9 +3553,18 @@
       container.innerHTML = '<p style="color:var(--ink-faint); font-size:13px;">Sélectionne un personnage ci-dessus pour voir sa fiche.</p>';
       return;
     }
+    try {
+      renderPlayerDetailInner(container);
+    } catch (e) {
+      console.error('Erreur affichage fiche joueur', e);
+      container.innerHTML = `<p style="color:var(--garnet); font-size:13px;">Erreur d'affichage de cette fiche (voir la Console F12 pour le détail) : ${e.message}</p>`;
+    }
+  }
+
+  function renderPlayerDetailInner(container) {
     const p = players.find(pl => pl.id === currentPlayerId);
 
-    const statesHtml = p.states.map(s => `<span class="active-tag">${s}</span>`).join('')
+    const statesHtml = (p.states || []).map(s => `<span class="active-tag">${s}</span>`).join('')
       + (p.exhaustion > 0 ? `<span class="active-tag exhaustion">Épuisement : ${p.exhaustion}</span>` : '');
 
     const pendingBanner = p.pendingLevelUp ? `
@@ -3588,8 +3602,8 @@
 
           <div class="qi-hp-label">Points de vie</div>
           <div class="qi-hp-bar">
-            <div class="qi-hp-fill" style="width:${(parseInt(p.pv.split('/')[0]) / parseInt(p.pv.split('/')[1]) * 100)}%;"></div>
-            <div class="qi-hp-numbers">${p.pv.replace('/', ' / ')}</div>
+            <div class="qi-hp-fill" style="width:${(() => { const parts=(p.pv||'1/1').split('/'); return (parseInt(parts[0])||0) / (parseInt(parts[1])||1) * 100; })()}%;"></div>
+            <div class="qi-hp-numbers">${(p.pv || '1/1').replace('/', ' / ')}</div>
           </div>
 
           <div class="qi-stat-row">
