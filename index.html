@@ -3392,6 +3392,22 @@
     { id: 'joueur6', name: 'Kael Tornoire', race: 'Tieffelin', classes: 'Magicien 5', classList: [{name:'Magicien', level:5}], conMod: 0, pv: '26/26', ca: 12, xp: 6500, xpNext: 14000, level: 5, code: 'KTN-5W3J', link: 'https://fiche.app/j/KTN-5W3J', states: [], exhaustion: 0, inspiration: false, huntBoard: [], wallet: 30 },
   ];
 
+  async function loadPlayersFromSupabase() {
+    if (!sb) return;
+    const { data, error } = await sb.from('joueurs').select('*');
+    if (error || !data) { console.error('Échec chargement joueurs', error); return; }
+    if (!data.length) return; // base encore vide : on garde les personnages de démo pour ne pas se retrouver sans rien
+    players.length = 0;
+    data.forEach(row => {
+      const base = row.data && Object.keys(row.data).length ? row.data : {};
+      players.push({
+        classList: [], conMod: 0, inspiration: false, huntBoard: [], wallet: 0, states: [], exhaustion: 0,
+        ...base,
+        id: row.id, name: row.nom || base.name, code: row.code || base.code, active: row.actif,
+      });
+    });
+  }
+
   const exhaustionEffects = [
     "Désavantage aux jets de caractéristique",
     "Vitesse diminuée de moitié",
@@ -3555,6 +3571,7 @@
           <div class="banner-item">Lien : <strong>${p.link}</strong><button class="copy-btn" onclick="copyText('${p.link}')">Copier</button></div>
           <div class="banner-item">Code : <strong>${p.code}</strong><button class="copy-btn" onclick="copyText('${p.code}')">Copier</button></div>
           <button class="copy-btn" style="${p.active === false ? 'color:var(--success); border-color:var(--success);' : 'color:var(--garnet); border-color:var(--garnet);'}" onclick="toggleCharacterActive('${p.id}')">${p.active === false ? '↩️ Réactiver' : '🚫 Désactiver'}</button>
+          <button class="copy-btn" style="color:var(--garnet); border-color:var(--garnet);" onclick="deletePlayerCharacter('${p.id}')">🗑️ Supprimer définitivement</button>
         </div>
       </div>
       <p class="wizard-hint" style="margin-top:-10px;">Aperçu de test — <a href="#" onclick="event.preventDefault(); simulateLevelUp('${p.id}')" style="color:var(--gold);">simuler un passage de niveau</a></p>
@@ -4155,7 +4172,7 @@
     abjuration: 'Abjuration', divination: 'Divination', enchantement: 'Enchantement', evocation: 'Évocation',
     illusion: 'Illusion', invocation: 'Invocation', necromancie: 'Nécromancie', transmutation: 'Transmutation',
   };
-  const classList = ['Barde', 'Clerc', 'Druide', 'Ensorceleur', 'Guerrier', 'Magicien', 'Occultiste', 'Paladin', 'Rôdeur', 'Roublard', 'Artificier'];
+  const classList = ['Barbare', 'Barde', 'Clerc', 'Druide', 'Ensorceleur', 'Guerrier', 'Magicien', 'Moine', 'Occultiste', 'Paladin', 'Rôdeur', 'Roublard', 'Artificier'];
 
   const spellsDatabase = [
     { id: 's1', name: "Boule de feu", level: 3, school: 'evocation', classes: ["Ensorceleur", "Magicien"], castTime: "1 action", range: "45 mètres", components: "V, S, M (une toute petite boule de guano de chauve-souris et du souffre)", duration: "instantanée", concentration: false, ritual: false, description: "Une éclatante traînée lumineuse est émise de la pointe de votre doigt vers un point de votre choix dans la portée du sort, puis s'amplifie dans un rugissement grave jusqu'à éclater en flammes. Chaque créature située dans une sphère de 6 mètres de rayon centrée sur le point doit effectuer un jet de sauvegarde de Dextérité, subissant 8D6 dégâts de feu en cas d'échec, ou la moitié de ces dégâts en cas de réussite.\n\nLe feu contourne les coins. Il enflamme les objets inflammables qui ne sont pas portés ou transportés.", shortDesc: "Chaque créature dans une sphère de 6 m doit réussir un JdS de DEX ou subit 8D6 dégâts feu (moitié en cas de réussite).", source: "Player's Handbook", upcast: "Si lancé avec un emplacement de sort supérieur, les dégâts sont augmentés de 1D6 pour chaque niveau d'emplacement au-delà du niveau 3.", scalingNiv5: "", scalingNiv11: "", scalingNiv17: "" },
@@ -4298,7 +4315,7 @@
     document.getElementById('sfScaling17').value = s ? (s.scalingNiv17 || '') : '';
 
     document.getElementById('sfClasses').innerHTML = classList.map(c => `
-      <label class="filter-checkbox-line"><input type="checkbox" value="${c}" ${s && s.classes.includes(c) ? 'checked' : ''}> ${c}</label>
+      <label class="filter-checkbox-line"><input type="checkbox" value="${c}" ${s && s.classes.some(sc => normalizeText(sc) === normalizeText(c)) ? 'checked' : ''}> ${c}</label>
     `).join('');
 
     openModal('modalSpellForm');
@@ -4600,6 +4617,17 @@
     { name: 'Demi-orc', speed: 9 }, { name: 'Tieffelin', speed: 9 }, { name: 'Gnome', speed: 7.5 },
     { name: 'Drakéide', speed: 9 },
   ];
+  function getWizardRacesData() {
+    const parseSpeed = (txt) => {
+      const m = (txt || '').match(/(\d+(?:[.,]\d+)?)\s*m/);
+      return m ? parseFloat(m[1].replace(',', '.')) : 9;
+    };
+    const combined = [
+      ...racesDatabase.map(r => ({ name: r.name, speed: parseSpeed(r.vitesse) })),
+      ...sousracesDatabase.map(r => ({ name: r.name, speed: parseSpeed(r.vitesse) || 9 })),
+    ];
+    return combined.length ? combined : racesData;
+  }
 
   const classesData = [
     { name: 'Barbare', hitDie: 12, saves: ['Force', 'Constitution'], casting: 'none' },
@@ -4694,7 +4722,7 @@
     document.getElementById('wPhotoPlaceholder').style.display = 'flex';
     document.getElementById('wPhotoRecadrerBtn').style.display = 'none';
     document.getElementById('wPhotoInput').value = '';
-    fillSelect('wRace', racesData.map(r => r.name));
+    fillSelect('wRace', getWizardRacesData().map(r => r.name));
     fillSelect('wHistorique', backgroundsData);
     fillSelect('wAlignement', alignmentsData);
     fillSelect('wDieu', deitiesData);
@@ -4938,7 +4966,7 @@
 
   function renderAutoRecap() {
     const raceName = document.getElementById('wRace').value;
-    const race = racesData.find(r => r.name === raceName);
+    const race = getWizardRacesData().find(r => r.name === raceName);
     const dex = computeMod(document.getElementById('wDex').value);
 
     let items = [
@@ -5081,6 +5109,23 @@
     if (wizardStep === 1) return;
     wizardStep--;
     renderWizardStep();
+  }
+
+  function deletePlayerCharacter(id) {
+    const p = players.find(pl => pl.id === id);
+    if (!p) return;
+    if (!confirm(`Supprimer définitivement la fiche de « ${p.name} » ? Cette action est irréversible — le lien et le code d'accès cesseront de fonctionner.`)) return;
+    const idx = players.findIndex(pl => pl.id === id);
+    players.splice(idx, 1);
+    if (currentPlayerId === id) currentPlayerId = null;
+    if (sb) {
+      sb.from('joueurs').delete().eq('id', id).then(({ error }) => {
+        if (error) { console.error('Supabase joueurs delete:', error); showToast('⚠️ Suppression en ligne échouée'); }
+      });
+    }
+    showToast(`« ${p.name} » supprimé`);
+    renderCharChips();
+    renderPlayerDetail();
   }
 
   function finalizeCharacterCreation() {
@@ -41406,6 +41451,7 @@
       const failCount = await loadLoreFromSupabase();
       await loadEnnemisFromSupabase();
       await loadMessagesFromSupabase();
+      await loadPlayersFromSupabase();
       if (failCount > 0) {
         showToast(`${failCount} table(s) de lore n'ont pas pu être chargées, données de secours utilisées`);
       }
