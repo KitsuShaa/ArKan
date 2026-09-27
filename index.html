@@ -5094,6 +5094,38 @@
     const pv = document.getElementById('wPV').value;
     const dex = computeMod(document.getElementById('wDex').value);
 
+    const abilities = {
+      for: parseInt(document.getElementById('wFor').value) || 10,
+      dex: parseInt(document.getElementById('wDex').value) || 10,
+      con: parseInt(document.getElementById('wCon').value) || 10,
+      int: parseInt(document.getElementById('wInt').value) || 10,
+      sag: parseInt(document.getElementById('wSag').value) || 10,
+      cha: parseInt(document.getElementById('wCha').value) || 10,
+    };
+
+    const saveThrows = [document.getElementById('wSave1').value, document.getElementById('wSave2').value];
+
+    const skills = skillsData.map((sk, i) => ({
+      name: sk.name, ability: sk.ability,
+      trained: document.getElementById('wSkillT' + i).checked,
+      expert: document.getElementById('wSkillE' + i).checked,
+    }));
+
+    const weaponProfs = [];
+    weaponCategories.forEach(cat => {
+      if (document.getElementById('wcat_' + cat.key).checked) weaponProfs.push(cat.label);
+      cat.items.forEach((it, i) => { const el = document.getElementById(`witem_${cat.key}_${i}`); if (el && el.checked) weaponProfs.push(it); });
+    });
+    const armorProfs = armorCategories.filter((a, i) => document.getElementById('warmor_' + i).checked);
+    const toolProfs = [];
+    toolCategories.forEach(cat => cat.items.forEach((it, i) => { const el = document.getElementById(`wtool_${cat.key}_${i}`); if (el && el.checked) toolProfs.push(it); }));
+    generalToolItems.forEach((it, i) => { const el = document.getElementById('wtoolgen_' + i); if (el && el.checked) toolProfs.push(it); });
+    const languages = languagesData.filter((l, i) => { const el = document.getElementById('wlang_' + i); return el && el.checked; });
+
+    const capacites = Array.from(document.querySelectorAll('#wCapacitesList .capacite-block')).map(div => ({
+      source: div.querySelector('.cb-source').value, title: div.querySelector('.cb-title').value, text: div.querySelector('.cb-text').value,
+    }));
+
     const newId = 'joueur_' + Date.now();
     const newCode = String(Math.floor(1000 + Math.random() * 9000));
     const newPlayer = {
@@ -5102,6 +5134,16 @@
       xp: parseInt(document.getElementById('wXP').value) || 0, xpNext: 999999, level: parseInt(document.getElementById('wNiveauTotal').textContent) || 1,
       code: newCode, link: window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + `joueur.html?j=${newId}`,
       states: [], exhaustion: 0,
+      historique: document.getElementById('wHistorique').value,
+      alignement: document.getElementById('wAlignement').value,
+      dieu: document.getElementById('wDieu').value,
+      poids: document.getElementById('wPoids').value, taille: document.getElementById('wTaille').value,
+      age: document.getElementById('wAge').value, anniversaire: document.getElementById('wAnniv').value,
+      classe1: c1, niveau1: parseInt(n1) || 1, classe2: c2 || '', niveau2: c2 ? (parseInt(n2) || 1) : 0,
+      abilities, saveThrows, skills, weaponProfs, armorProfs, toolProfs, languages, capacites,
+      origine: document.getElementById('wOrigine').value, avantAventure: document.getElementById('wAvantAventure').value, ellipse: document.getElementById('wEllipse').value,
+      maxHp: parseInt(pv) || 1, currentHp: parseInt(pv) || 1,
+      knownSpellNames: [],
     };
     players.push(newPlayer);
 

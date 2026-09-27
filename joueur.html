@@ -6694,6 +6694,96 @@
     }
   }
 
+  const SKILL_ABILITY = {
+    'Acrobaties': 'dex', 'Arcanes': 'int', 'Athlétisme': 'for', 'Discrétion': 'dex', 'Dressage': 'sag',
+    'Escamotage': 'dex', 'Histoire': 'int', 'Intimidation': 'cha', 'Investigation': 'int', 'Médecine': 'sag',
+    'Nature': 'int', 'Perception': 'sag', 'Perspicacité': 'sag', 'Persuasion': 'cha', 'Religion': 'int',
+    'Représentation': 'cha', 'Survie': 'sag', 'Tromperie': 'cha',
+  };
+  function abilityMod(score) { return Math.floor((score - 10) / 2); }
+  function fmtSignedMod(n) { return (n >= 0 ? '+' : '') + n; }
+  function profBonusForLevel(level) { return Math.ceil(level / 4) + 1; }
+
+  function applyIdentity(p) {
+    if (!p) return;
+    try {
+      document.querySelector('.hero-glyph').textContent = (p.name || '').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+      document.querySelector('.name-plate h1').textContent = p.name || '';
+      const chips = document.querySelectorAll('.chip-row .chip-value');
+      if (chips[0]) chips[0].textContent = p.race || '';
+      if (chips[1]) chips[1].textContent = p.classes || (p.classe1 || '');
+      if (chips[2]) chips[2].textContent = p.historique || '';
+      if (chips[3]) chips[3].textContent = p.alignement || '';
+      const infoVals = document.querySelectorAll('.info-card .info-value');
+      if (infoVals[0]) infoVals[0].textContent = p.poids || '';
+      if (infoVals[1]) infoVals[1].textContent = p.taille || '';
+      if (infoVals[2]) infoVals[2].innerHTML = (p.anniversaire || '') + '<br>' + (p.age || '');
+      if (infoVals[3]) infoVals[3].textContent = p.dieu || '';
+
+      if (p.abilities) {
+        const ab = p.abilities;
+        const order = ['for', 'dex', 'con', 'int', 'sag', 'cha'];
+        const idSuffix = { for: 'force', dex: 'dex', con: 'con', int: 'int', sag: 'sag', cha: 'cha' };
+        order.forEach(key => {
+          const nameEl = document.getElementById('statname-' + idSuffix[key]);
+          if (!nameEl) return;
+          const block = nameEl.closest('.stat-block');
+          block.querySelector('.stat-score').textContent = ab[key];
+          block.querySelector('.stat-mod').textContent = fmtSignedMod(abilityMod(ab[key]));
+        });
+        const profBonus = profBonusForLevel(p.level || 1);
+        if (p.saveThrows) {
+          const abilityFullName = { for: 'Force', dex: 'Dextérité', con: 'Constitution', int: 'Intelligence', sag: 'Sagesse', cha: 'Charisme' };
+          order.forEach(key => {
+            const nameEl = document.getElementById('savename-' + idSuffix[key]);
+            if (!nameEl) return;
+            const block = nameEl.closest('.save-block');
+            const proficient = p.saveThrows.includes(abilityFullName[key]);
+            const mod = abilityMod(ab[key]) + (proficient ? profBonus : 0);
+            block.classList.toggle('proficient', proficient);
+            block.querySelector('.save-mod').textContent = fmtSignedMod(mod);
+          });
+        }
+
+        if (p.skills && p.skills.length) {
+          const grid = document.getElementById('skillsGrid');
+          grid.innerHTML = '';
+          p.skills.forEach(s => {
+            const abKey = SKILL_ABILITY[s.name] || 'sag';
+            let mod = abilityMod(ab[abKey]);
+            let state = '';
+            if (s.expert) { mod += profBonus * 2; state = 'expert'; }
+            else if (s.trained) { mod += profBonus; state = 'trained'; }
+            const row = document.createElement('div');
+            row.className = 'skill-row ' + state;
+            row.innerHTML = `<span class="skill-pip ${state}"></span><span class="skill-name">${s.name}</span><span class="skill-mod">${fmtSignedMod(mod)}</span>`;
+            grid.appendChild(row);
+          });
+        }
+      }
+
+      if (p.capacites && p.capacites.length) {
+        capacities.length = 0;
+        p.capacites.forEach((c, i) => {
+          const groupLabel = c.source === 'Race' ? `Race — ${p.race || ''}` : c.source === 'Classe' ? `Classe — ${p.classe1 || ''}` : c.source === 'Historique' ? `Historique — ${p.historique || ''}` : (c.source || 'Autre');
+          capacities.push({ id: 'cap' + i, name: c.title || 'Capacité', group: groupLabel, desc: c.text || '', inCombat: false });
+        });
+        capGroups.length = 0;
+        capGroups.push(
+          { title: `Capacités de race — ${p.race || ''}`, match: g => g.startsWith('Race') },
+          { title: `Capacités de classe — ${p.classe1 || ''}`, match: g => g.startsWith('Classe') },
+          { title: `Capacités d'historique — ${p.historique || ''}`, match: g => g.startsWith('Historique') },
+          { title: 'Autres capacités', match: g => !g.startsWith('Race') && !g.startsWith('Classe') && !g.startsWith('Historique') },
+        );
+        if (typeof renderCapacities === 'function') renderCapacities();
+      }
+
+      if (p.maxHp != null) { maxHp = p.maxHp; currentHp = p.currentHp != null ? p.currentHp : p.maxHp; updateHpDisplay(); }
+    } catch (e) {
+      console.error('Erreur application identité joueur', e);
+    }
+  }
+
   let playerStateSaveTimer = null;
   function schedulePlayerStateSave() {
     if (!sb || !window._gatePlayerId) return;
@@ -6710,6 +6800,7 @@
     const { data, error } = await sb.from('joueurs').select('data').eq('id', window._gatePlayerId).single();
     if (error) { console.error('Échec chargement de ta fiche', error); return; }
     if (data && data.data && Object.keys(data.data).length) {
+      applyIdentity(data.data);
       applyPlayerState(data.data);
     } else {
       schedulePlayerStateSave(); // première connexion : on enregistre l'état de départ
