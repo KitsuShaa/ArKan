@@ -1603,7 +1603,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 30/09 (4)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 30/09 (5)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3409,6 +3409,7 @@
         ...base,
         id: row.id, name: row.nom || base.name, code: row.code || base.code, active: row.actif,
       });
+      syncPlayerFromData(players[players.length - 1], base);
     });
   }
 
@@ -3747,9 +3748,45 @@
     window.open(playerSheetUrl(p) + '&vue=mj', '_blank', 'noopener');
   }
 
+  // Valeurs affichées dans la console, recalculées depuis la fiche enregistrée
+  function syncPlayerFromData(p, d) {
+    if (!d) return;
+    const maxHp = parseInt(d.maxHp) || 0;
+    const cur = d.currentHp != null ? parseInt(d.currentHp) : maxHp;
+    if (maxHp) p.pv = `${cur}/${maxHp}`;
+    p.maxHp = d.maxHp; p.currentHp = d.currentHp;
+    if (d.appData && d.appData.computedCA != null) p.ca = d.appData.computedCA;
+    else if (d.ca != null) p.ca = d.ca;
+    p.coins = d.coins || {};
+    p.wallet = parseInt(p.coins.po) || 0;
+    ['states', 'exhaustion', 'xp', 'xpNext', 'level', 'classes', 'classe1', 'niveau1', 'classe2', 'niveau2', 'knownSpellNames',
+     'capacites', 'items', 'themeColor', 'inspiration', 'huntBoard', 'pendingLevelUp', 'levelUpChecklist', 'abilities']
+      .forEach(k => { if (d[k] !== undefined) p[k] = d[k]; });
+    p.states = p.states || []; p.exhaustion = p.exhaustion || 0;
+  }
+  let lastLiveSnapshot = '';
+  async function refreshPlayersLive() {
+    if (!sb || document.hidden) return;
+    if (document.querySelector('.modal-backdrop.open')) return; // pas de rafraîchissement pendant une saisie
+    const { data, error } = await sb.from('joueurs').select('id, data');
+    if (error || !data) return;
+    const snap = JSON.stringify(data.map(r => [r.id, r.data && r.data.currentHp, r.data && r.data.maxHp, r.data && r.data.coins,
+      r.data && r.data.appData && r.data.appData.computedCA, r.data && r.data.states, r.data && r.data.exhaustion, r.data && r.data.xp,
+      r.data && r.data.level, r.data && r.data.pendingLevelUp, (r.data && r.data.huntBoard || []).length, r.data && r.data.inspiration]));
+    if (snap === lastLiveSnapshot) return;
+    lastLiveSnapshot = snap;
+    data.forEach(r => { const p = players.find(pl => pl.id === r.id); if (p) syncPlayerFromData(p, r.data); });
+    renderPlayerDetail();
+    if (typeof renderCharChips === 'function') renderCharChips();
+    if (typeof renderNotifBadges === 'function') renderNotifBadges();
+  }
+  setInterval(refreshPlayersLive, 6000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshPlayersLive(); });
+
   function toggleInspiration(playerId) {
     const p = players.find(pl => pl.id === playerId);
     p.inspiration = !p.inspiration;
+    sbPatchPlayer(p, d => { d.inspiration = p.inspiration; });
     showToast(p.inspiration ? `${p.name} a un point d'inspiration disponible` : `Inspiration de ${p.name} utilisée / retirée`);
     renderPlayerDetail();
   }
@@ -4894,13 +4931,26 @@
     { name: 'Drakéide', speed: 9 },
   ];
   function getWizardRacesData() {
+    // "Marche 9m (6 cases)", "9 mètres", "6 cases"… -> mètres ; null si rien d'exploitable
     const parseSpeed = (txt) => {
-      const m = (txt || '').match(/(\d+(?:[.,]\d+)?)\s*m/);
-      return m ? parseFloat(m[1].replace(',', '.')) : 9;
+      const t = String(txt || '');
+      let m = t.match(/marche\s*:?\s*(\d+(?:[.,]\d+)?)\s*m/i);
+      if (m) return parseFloat(m[1].replace(',', '.'));
+      m = t.match(/(\d+)\s*cases?/i);
+      if (m) return parseInt(m[1]) * 1.5;
+      m = t.match(/(\d+(?:[.,]\d+)?)\s*m(?:\b|è|e)/i);
+      return m ? parseFloat(m[1].replace(',', '.')) : null;
+    };
+    const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const races = racesDatabase.map(r => ({ name: r.name, speed: parseSpeed(r.vitesse) }));
+    // Sous-race sans vitesse propre : celle de sa race (ex. "Nain des collines" -> "Nain")
+    const parentSpeed = (subName) => {
+      const parent = races.filter(r => r.speed && norm(subName).includes(norm(r.name))).sort((a, b) => b.name.length - a.name.length)[0];
+      return parent ? parent.speed : null;
     };
     const combined = [
-      ...racesDatabase.map(r => ({ name: r.name, speed: parseSpeed(r.vitesse) })),
-      ...sousracesDatabase.map(r => ({ name: r.name, speed: parseSpeed(r.vitesse) || 9 })),
+      ...races.map(r => ({ name: r.name, speed: r.speed || 9 })),
+      ...sousracesDatabase.map(r => ({ name: r.name, speed: parseSpeed(r.vitesse) || parentSpeed(r.name) || 9 })),
     ];
     return combined.length ? combined : racesData;
   }
@@ -4988,7 +5038,8 @@
   let capaciteBlockCount = 0;
 
   function fillSelect(id, options) {
-    document.getElementById(id).innerHTML = '<option value="">—</option>' + options.map(o => `<option value="${o}">${o}</option>`).join('');
+    const sorted = [...new Set(options)].sort((a, b) => String(a).localeCompare(String(b), 'fr', { sensitivity: 'base' }));
+    document.getElementById(id).innerHTML = '<option value="">—</option>' + sorted.map(o => `<option value="${o}">${o}</option>`).join('');
   }
 
   let currentEditingPlayerId = null;
@@ -5326,7 +5377,7 @@
     const dex = computeMod(document.getElementById('wDex').value);
 
     let items = [
-      { label: 'Vitesse', value: race ? `${Math.round(race.speed / 1.5)}c` : '—' },
+      { label: 'Vitesse', value: race ? `${String(race.speed).replace('.', ',')} m (${Math.round(race.speed / 1.5)} cases)` : '—' },
       { label: 'Initiative', value: fmtMod(dex) },
       { label: 'CA (sans armure)', value: 10 + dex },
       { label: 'Dés de vie', value: computeDVFormula() },
@@ -5549,6 +5600,7 @@
       age: document.getElementById('wAge').value, anniversaire: document.getElementById('wAnniv').value,
       classe1: c1, niveau1: parseInt(n1) || 1, classe2: c2 || '', niveau2: c2 ? (parseInt(n2) || 1) : 0,
       abilities, saveThrows, skills, weaponProfs, armorProfs, toolProfs, languages, capacites,
+      speed: (() => { const r = getWizardRacesData().find(x => x.name === document.getElementById('wRace').value); return r ? r.speed : 9; })(),
       origine: document.getElementById('wOrigine').value, avantAventure: document.getElementById('wAvantAventure').value, ellipse: document.getElementById('wEllipse').value,
       maxHp: parseInt(pv) || 1, currentHp: isEditing ? existingPlayer.currentHp : (parseInt(pv) || 1),
       knownSpellNames: isEditing ? (existingPlayer.knownSpellNames || []) : [],
