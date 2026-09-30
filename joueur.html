@@ -4360,7 +4360,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 30/09 (6)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 30/09 (8)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -6997,7 +6997,10 @@
     try {
       items.length = 0; if (saved.items) items.push(...saved.items); window.AppData.items = items;
       items.forEach(it => {
-        if (typeof it.weight === 'string') { const m = it.weight.replace(',', '.').match(/(\d+(?:\.\d+)?)/); it.weight = m ? parseFloat(m[1]) : 0; }
+        if (typeof it.weight === 'string') {
+          const m = it.weight.replace(',', '.').match(/(\d+(?:\.\d+)?)\s*(kg|g)?\b/i);
+          it.weight = m ? (m[2] && m[2].toLowerCase() === 'g' ? parseFloat(m[1]) / 1000 : parseFloat(m[1])) : 0;
+        }
       });
       coins.pp = 0; coins.po = 0; coins.pe = 0; coins.pa = 0; coins.pc = 0;
       if (saved.coins) Object.assign(coins, saved.coins);
