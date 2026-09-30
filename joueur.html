@@ -6679,12 +6679,14 @@
   function applyPlayerState(saved) {
     if (!saved) return;
     try {
-      if (saved.items) { items.length = 0; items.push(...saved.items); window.AppData.items = items; }
+      items.length = 0; if (saved.items) items.push(...saved.items); window.AppData.items = items;
+      coins.pp = 0; coins.po = 0; coins.pe = 0; coins.pa = 0; coins.pc = 0;
       if (saved.coins) Object.assign(coins, saved.coins);
       if (saved.currentHp != null) currentHp = saved.currentHp;
       if (saved.maxHp != null) maxHp = saved.maxHp;
+      Object.keys(usedSlots).forEach(k => usedSlots[k] = 0);
       if (saved.usedSlots) Object.assign(usedSlots, saved.usedSlots);
-      if (saved.knownSpellNames) { knownSpellNames.length = 0; knownSpellNames.push(...saved.knownSpellNames); }
+      knownSpellNames.length = 0; if (saved.knownSpellNames) knownSpellNames.push(...saved.knownSpellNames);
       if (saved.appData) Object.assign(window.AppData, saved.appData);
       renderCategories(); renderItemList(); renderWeight(); renderWallet(); updateComputedCA();
       if (typeof renderAll === 'function') renderAll();
@@ -6792,7 +6794,9 @@
       const speedByRace = { 'Nain des montagnes': 7.5, 'Nain des collines': 7.5, 'Halfelin': 7.5, 'Gnome': 7.5 };
       const speed = speedByRace[p.race] || 9;
       const speedCard = document.getElementById('speedTopCard');
-      if (speedCard) speedCard.querySelector('.top-value').textContent = speed + 'm';
+      if (speedCard) speedCard.querySelector('.top-value').textContent = Math.round(speed / 1.5) + ' cases';
+      const levelTooltip = document.querySelector('#levelCard .tooltip-pop');
+      if (levelTooltip) levelTooltip.textContent = `Niveau — ${p.xp || 0} XP`;
 
       if (p.abilities) {
         const initCard = document.querySelector('.top-row .top-card:first-child .top-value');
@@ -6853,9 +6857,9 @@
       fillProfList('profArmes', p.weaponProfs);
       fillProfList('profArmures', p.armorProfs);
 
-      // Remises à zéro qui ne dépendent pas de l'état sauvegardé : épuisement, tableau de chasse, compagnon, concentration, messages
-      exhaustionLevel = 0;
-      window.AppData.exhaustionLevel = 0;
+      // Remises à zéro : tableau de chasse, compagnon, concentration, messages.
+      // (l'épuisement N'EST PAS remis à zéro ici : le MJ peut légitimement le modifier
+      // depuis sa console, et cette valeur doit alors persister d'une connexion à l'autre.)
       if (typeof updateExhaustionWarnings === 'function') updateExhaustionWarnings();
       document.querySelectorAll('.hunt-num').forEach(el => el.textContent = '0');
       window.AppData.companionInCombat = false;
@@ -6865,6 +6869,8 @@
       hasUnreadMjMessage = false;
       const badge = document.getElementById('msgNotifBadge');
       if (badge) badge.classList.remove('visible');
+      const compBtn = document.getElementById('companionBtn');
+      if (compBtn) compBtn.style.display = 'none';
 
       // Bandeau incantation : un second si multiclasse et que la seconde classe est aussi lanceuse de sorts
       const cardAtkEl = document.getElementById('cardAtk');
@@ -6875,6 +6881,7 @@
         const mod2 = abilityMod(p.abilities[SPELL_ABILITY_BY_CLASS[p.classe2]]);
         const secondRow = cardAtkEl.closest('.top-row').cloneNode(true);
         secondRow.id = 'topRowCasterC2';
+        secondRow.style.marginTop = '10px';
         const [ic2, dd2, atk2] = secondRow.children;
         ic2.removeAttribute('id'); dd2.removeAttribute('id'); atk2.removeAttribute('id');
         ic2.querySelector('.tooltip-pop').textContent = `Caractéristique d'incantation (${p.classe2})`;
@@ -6910,8 +6917,8 @@
     if (error) { console.error('Échec chargement de ta fiche', error); return; }
     if (data && data.data && Object.keys(data.data).length) {
       window._fullPlayerData = data.data;
-      applyIdentity(data.data);
       applyPlayerState(data.data);
+      applyIdentity(data.data);
     } else {
       // Première connexion : on part d'une ardoise vierge, pas des données de démo d'Elowen.
       items.length = 0; window.AppData.items = items;

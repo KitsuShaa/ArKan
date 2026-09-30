@@ -5267,7 +5267,8 @@
 
     const weaponProfs = [];
     weaponCategories.forEach(cat => {
-      if (document.getElementById('wcat_' + cat.key).checked) weaponProfs.push(cat.label);
+      const wholeCategory = document.getElementById('wcat_' + cat.key).checked;
+      if (wholeCategory) { weaponProfs.push(cat.label); return; } // toute la catégorie : inutile de lister chaque arme
       cat.items.forEach((it, i) => { const el = document.getElementById(`witem_${cat.key}_${i}`); if (el && el.checked) weaponProfs.push(it); });
     });
     const armorProfs = armorCategories.filter((a, i) => document.getElementById('warmor_' + i).checked);
