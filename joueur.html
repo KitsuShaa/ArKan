@@ -3350,6 +3350,9 @@
     width: 190px !important;
     max-width: calc(100vw - 24px) !important;
   }
+
+  /* Le message flottant ne doit jamais bloquer un bouton situé dessous */
+  .toast, #toast { pointer-events: none !important; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -4355,7 +4358,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 30/09 (4)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -6907,7 +6910,19 @@
     coins.pa = Math.floor(rest / 10); rest -= coins.pa * 10;
     coins.pc = rest;
   }
+  // Soins envoyés par le MJ (ex. PV gagnés au passage de niveau)
+  function absorbPendingHeal(d) {
+    let changed = false;
+    ((d && d.pendingHeal) || []).forEach(e => {
+      if (!e || !e.pid || consumedPending.has(e.pid)) return;
+      consumedPending.add(e.pid);
+      currentHp = Math.min(maxHp, currentHp + (parseInt(e.amount) || 0));
+      changed = true;
+    });
+    if (changed) { updateHpDisplay(); schedulePlayerStateSave(); }
+  }
   function absorbPendingCoins(d) {
+    absorbPendingHeal(d);
     let changed = false;
     ((d && d.pendingCoins) || []).forEach(e => {
       if (!e || !e.pid || consumedPending.has(e.pid)) return;
@@ -7305,6 +7320,7 @@
       if (d.appData) { delete d.appData.exhaustionLevel; delete d.appData.capacities; }
       if (Array.isArray(d.pendingItems)) d.pendingItems = d.pendingItems.filter(e => e && !consumedPending.has(e.pid));
       if (Array.isArray(d.pendingCoins)) d.pendingCoins = d.pendingCoins.filter(e => e && !consumedPending.has(e.pid));
+      if (Array.isArray(d.pendingHeal)) d.pendingHeal = d.pendingHeal.filter(e => e && !consumedPending.has(e.pid));
       const { error: err2 } = await sb.from('joueurs').update({ data: d }).eq('id', window._gatePlayerId);
       if (err2) { console.error('Supabase joueurs update (état):', err2); return; }
       window._fullPlayerData = d;
