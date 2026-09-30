@@ -4360,7 +4360,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 30/09 (5)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 30/09 (6)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -6324,10 +6324,29 @@
   }
 
   /* ===================== ITEM LIST ===================== */
-  const dexModifier = 3; // modificateur de Dextérité d'Elowen (jusqu'à branchement réel avec l'onglet Personnage)
+  let dexModifier = 0; // remplacé par le vrai modificateur de Dextérité au chargement de la fiche
+  // Même lecteur de formule que la console MJ (armures déjà dans l'inventaire comprises)
+  function parseArmorFormula(txt, categorie) {
+    const t = String(txt || '').replace(/^CA\s*/i, '').trim();
+    if (!t) return {};
+    const isShield = /bouclier/i.test(categorie || '') || /^\+\s*\d+/.test(t);
+    const first = t.match(/(\d+)/);
+    if (!first) return {};
+    if (isShield) return { caBonus: parseInt(first[1]) };
+    const tag = t.match(/\{\s*mod\.?\s*dex\s*(?::\s*(\d+))?\s*\}/i);
+    const hasDex = !!tag || /dex/i.test(t);
+    let max = tag && tag[1] != null ? parseInt(tag[1]) : null;
+    if (max == null) { const mm = t.match(/max\.?\s*:?\s*\+?(\d+)/i); if (mm) max = parseInt(mm[1]); }
+    return { armureCA: parseInt(first[1]), armureDexMax: hasDex ? max : 0 };
+  }
+  function ensureArmorStats(it) {
+    if (it.category !== 'armure' || it.armureCA != null || it.caBonus != null) return;
+    Object.assign(it, parseArmorFormula(it.caFormula || it.desc, /bouclier/i.test(it.name) ? 'bouclier' : ''));
+  }
 
   function updateComputedCA() {
     window.AppData = window.AppData || {};
+    items.forEach(ensureArmorStats);
     const armor = items.find(it => it.category === 'armure' && it.equipped && it.armureCA != null);
     let ca;
     if (armor) {
@@ -6977,6 +6996,9 @@
     if (!saved) return;
     try {
       items.length = 0; if (saved.items) items.push(...saved.items); window.AppData.items = items;
+      items.forEach(it => {
+        if (typeof it.weight === 'string') { const m = it.weight.replace(',', '.').match(/(\d+(?:\.\d+)?)/); it.weight = m ? parseFloat(m[1]) : 0; }
+      });
       coins.pp = 0; coins.po = 0; coins.pe = 0; coins.pa = 0; coins.pc = 0;
       if (saved.coins) Object.assign(coins, saved.coins);
       if (saved.maxHp != null) maxHp = saved.maxHp;
@@ -7224,6 +7246,7 @@
       renderHitDice();
 
       window.AppData.totalCharacterLevel = p.level || 1;
+      if (p.abilities && p.abilities.dex != null) dexModifier = Math.floor(((parseInt(p.abilities.dex) || 10) - 10) / 2);
       Object.assign(maxSlots, computeSpellSlots(p));
       { const ps = computePactSlots(p); pactSlots.lvl = ps.lvl; pactSlots.max = ps.max; pactSlots.used = Math.min(pactSlots.used, ps.max); }
       for (let l = 1; l <= 9; l++) usedSlots[l] = Math.min(usedSlots[l] || 0, maxSlots[l]);

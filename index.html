@@ -1596,6 +1596,22 @@
 
   /* Le message flottant ne doit jamais bloquer un bouton situé dessous */
   .toast, #toast { pointer-events: none !important; }
+  /* Formulaire objet : interrupteurs, unité, aide */
+  .of-toggles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 16px 0 4px; }
+  .of-toggle { display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: var(--card); border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; color: var(--ink-dim); user-select: none; transition: border-color .15s, color .15s; }
+  .of-toggle input { position: absolute; opacity: 0; pointer-events: none; }
+  .of-switch { flex-shrink: 0; width: 32px; height: 18px; border-radius: 10px; background: var(--card-border); position: relative; transition: background .15s; }
+  .of-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--ink-faint); transition: transform .15s, background .15s; }
+  .of-toggle input:checked + .of-switch { background: var(--gold-soft); }
+  .of-toggle input:checked + .of-switch::after { transform: translateX(14px); background: var(--gold); }
+  .of-toggle:has(input:checked) { border-color: var(--gold); color: var(--ink); }
+  .of-toggle input:focus-visible + .of-switch { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .of-unit-wrap { position: relative; }
+  .of-unit-wrap input { padding-right: 40px; }
+  .of-unit { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-faint); font-size: 13px; pointer-events: none; }
+  .of-hint { font-size: 11.5px; color: var(--ink-faint); margin-top: 6px; line-height: 1.45; }
+  .of-hint b { color: var(--ink-dim); font-weight: 600; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1603,7 +1619,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 30/09 (5)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 30/09 (6)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3202,22 +3218,24 @@
     }
     const jobs = [
       { table: 'armes', target: armesDatabase, map: r => ({
-          id: r.id, name: r.nom, degats: r.degats, poids: r.poids, prix: r.prix, proprietes: r.proprietes,
+          id: r.id, name: r.nom, prix: r.prix, proprietes: r.proprietes, poids: parseKg(r.poids),
+          ...(r.degats_type ? { degats: r.degats, degats_type: r.degats_type }
+                            : (d => ({ degats: d.des, degats_type: d.type }))(splitDegats(r.degats))),
           categorie: r.categorie, melee_distance: r.melee_distance,
           emplacement_equipement: r.emplacement_equipement, magique: r.magique, consommable: r.consommable,
           munition_utilisee: r.munition_utilisee, cache_aux_joueurs: r.cache_aux_joueurs,
         }) },
       { table: 'armures', target: armuresDatabase, map: r => ({
           id: r.id, name: r.nom, ca_formule: r.ca_formule, force_min: r.force_min,
-          desavantage_discretion: r.desavantage_discretion, poids: r.poids, prix: r.prix, categorie: r.categorie,
+          desavantage_discretion: r.desavantage_discretion, poids: parseKg(r.poids), prix: r.prix, categorie: r.categorie,
           emplacement_equipement: r.emplacement_equipement, magique: r.magique, cache_aux_joueurs: r.cache_aux_joueurs,
         }) },
       { table: 'equipement_aventurier', target: equipementDatabase, map: r => ({
-          id: r.id, name: r.nom, poids: r.poids, prix: r.prix, equipable: r.equipable, magique: r.magique,
+          id: r.id, name: r.nom, poids: parseKg(r.poids), prix: r.prix, equipable: r.equipable, magique: r.magique,
           consommable: r.consommable, emplacement: r.emplacement,
         }) },
       { table: 'outils', target: outilsDatabase, map: r => ({
-          id: r.id, name: r.nom, prix: r.prix, poids: r.poids, categorie: r.categorie,
+          id: r.id, name: r.nom, prix: r.prix, poids: parseKg(r.poids), categorie: r.categorie,
         }) },
       { table: 'objets_magiques', target: objetsMagiquesDatabase, map: r => ({
           id: r.id, name: r.nom, categorie: r.categorie, rarete: r.rarete, necessite_lien: r.necessite_lien,
@@ -5053,9 +5071,15 @@
     document.getElementById('wPhotoRecadrerBtn').style.display = 'none';
     document.getElementById('wPhotoInput').value = '';
     fillSelect('wRace', getWizardRacesData().map(r => r.name));
-    fillSelect('wHistorique', backgroundsData);
+    fillSelect('wHistorique', historiquesDatabase.length ? historiquesDatabase.map(h => h.name) : backgroundsData);
     fillSelect('wAlignement', alignmentsData);
-    fillSelect('wDieu', deitiesData);
+    fillSelect('wDieu', dieuxDatabase.length ? dieuxDatabase.map(d => d.name) : deitiesData);
+    // Classes ajoutées dans le lore : proposées aussi (dé de vie lu dans le lore, le reste à compléter à la main)
+    classesLoreDatabase.forEach(lc => {
+      if (!lc.name || classesData.some(c => c.name === lc.name)) return;
+      const dv = parseInt(String(lc.de_vie || '').replace(/^.*?[dD]/, '')) || 8;
+      classesData.push({ name: lc.name, hitDie: dv, saves: [], casting: 'none' });
+    });
     fillSelect('wClasse1', classesData.map(c => c.name));
     fillSelect('wClasse2', []);
     document.getElementById('wNom').value = '';
@@ -5692,14 +5716,43 @@
   const objetsMagiquesDatabase = [];
   const armesMagiquesDatabase = [];
 
+  // "1,5 kg" / "2kg" / 3 -> 1.5 / 2 / 3 (null si vide ou "—")
+  function parseKg(v) {
+    if (v == null || v === '') return null;
+    if (typeof v === 'number') return v;
+    const m = String(v).replace(',', '.').match(/(\d+(?:\.\d+)?)/);
+    return m ? parseFloat(m[1]) : null;
+  }
+  // "1D6 perforant" -> { des: "1D6", type: "perforant" } ; "1 perforant" -> { des: "1", ... }
+  function splitDegats(txt) {
+    const m = String(txt || '').trim().match(/^(\d+(?:\s*[dD]\s*\d+)?(?:\s*[+-]\s*\d+)?)\s+(.+)$/);
+    return m ? { des: m[1].replace(/\s+/g, '').toUpperCase(), type: m[2].trim() } : { des: String(txt || '').trim(), type: '' };
+  }
+  // Formule de CA d'une armure. Formats acceptés :
+  //   "11+{MOD.DEX}"  "12+{MOD.DEX:2}" (bonus Dex plafonné à 2)  "16"  "+2" (bouclier)
+  //   et l'écriture libre : "11 + Mod.Dex", "12 + Mod.Dex (max 2)", "14 + modificateur de Dex (max. 2)"
+  function parseArmorFormula(txt, categorie) {
+    const t = String(txt || '').trim();
+    if (!t) return {};
+    const isShield = /bouclier/i.test(categorie || '') || /^\+\s*\d+/.test(t);
+    const first = t.match(/(\d+)/);
+    if (!first) return {};
+    if (isShield) return { caBonus: parseInt(first[1]) };
+    const tag = t.match(/\{\s*mod\.?\s*dex\s*(?::\s*(\d+))?\s*\}/i);
+    const hasDex = !!tag || /dex/i.test(t);
+    let max = tag && tag[1] != null ? parseInt(tag[1]) : null;
+    if (max == null) { const mm = t.match(/max\.?\s*:?\s*\+?(\d+)/i); if (mm) max = parseInt(mm[1]); }
+    return { armureCA: parseInt(first[1]), armureDexMax: hasDex ? max : 0 };
+  }
+
   const objetsCategories = {
     armes: {
       label: 'Armes', db: armesDatabase, table: 'armes', idPrefix: 'arme', icon: 'arme',
       subLabel: o => o.categorie || '',
       fields: [
-        { key: 'degats', label: 'Dégâts (dé)', type: 'text', col: 1 },
-        { key: 'degats_type', label: 'Type de dégâts', type: 'text', col: 1 },
-        { key: 'poids', label: 'Poids (kg)', type: 'number', col: 1 },
+        { key: 'degats', label: 'Dégâts (dé)', type: 'text', col: 1, placeholder: 'ex. 1D8' },
+        { key: 'degats_type', label: 'Type de dégâts', type: 'text', col: 1, placeholder: 'ex. tranchant' },
+        { key: 'poids', label: 'Poids', type: 'kg', col: 1 },
         { key: 'prix', label: 'Prix', type: 'text', col: 1 },
         { key: 'proprietes', label: 'Propriétés', type: 'text' },
         { key: 'categorie', label: 'Catégorie de maîtrise', type: 'select', options: categorieMaitriseList, col: 1 },
@@ -5715,10 +5768,10 @@
       label: 'Armures', db: armuresDatabase, table: 'armures', idPrefix: 'armure', icon: 'armure',
       subLabel: o => o.categorie || '',
       fields: [
-        { key: 'ca_formule', label: 'CA (formule)', type: 'text', col: 1 },
+        { key: 'ca_formule', label: 'CA (formule)', type: 'caFormula', col: 1 },
         { key: 'force_min', label: 'Force minimum', type: 'text', col: 1 },
         { key: 'desavantage_discretion', label: 'Désavantage Discrétion', type: 'checkbox' },
-        { key: 'poids', label: 'Poids (kg)', type: 'number', col: 1 },
+        { key: 'poids', label: 'Poids', type: 'kg', col: 1 },
         { key: 'prix', label: 'Prix', type: 'text', col: 1 },
         { key: 'categorie', label: 'Catégorie', type: 'select', options: armureCategorieList },
         { key: 'emplacement_equipement', label: 'Emplacement équipement', type: 'text' },
@@ -5730,7 +5783,7 @@
       label: 'Équipement aventurier', db: equipementDatabase, table: 'equipement_aventurier', idPrefix: 'equip', icon: 'objet',
       subLabel: o => '',
       fields: [
-        { key: 'poids', label: 'Poids (kg)', type: 'number', col: 1 },
+        { key: 'poids', label: 'Poids', type: 'kg', col: 1 },
         { key: 'prix', label: 'Prix', type: 'text', col: 1 },
         { key: 'equipable', label: 'Équipable', type: 'checkbox' },
         { key: 'magique', label: 'Magique', type: 'checkbox' },
@@ -5743,7 +5796,7 @@
       subLabel: o => o.categorie || '',
       fields: [
         { key: 'prix', label: 'Prix', type: 'text', col: 1 },
-        { key: 'poids', label: 'Poids (kg)', type: 'number', col: 1 },
+        { key: 'poids', label: 'Poids', type: 'kg', col: 1 },
         { key: 'categorie', label: 'Catégorie', type: 'text' },
       ],
     },
@@ -5865,7 +5918,33 @@
     if (f.type === 'textarea') {
       return `<div class="form-field"><label>${f.label}</label><textarea id="${id}" style="min-height:90px;">${val || ''}</textarea></div>`;
     }
-    return `<div class="form-field"><label>${f.label}</label><input type="${f.type}" id="${id}" value="${val != null ? val : ''}"></div>`;
+    if (f.type === 'kg') {
+      return `<div class="form-field"><label>${f.label}</label><div class="of-unit-wrap"><input type="number" step="0.01" min="0" id="${id}" value="${val != null ? val : ''}" placeholder="0"><span class="of-unit">kg</span></div></div>`;
+    }
+    if (f.type === 'caFormula') {
+      const v = val != null ? String(val).replace(/"/g, '&quot;') : '';
+      return `<div class="form-field"><label>${f.label}</label><input type="text" id="${id}" value="${v}" placeholder="ex. 11+{MOD.DEX}" oninput="updateCaPreview()">
+        <div class="of-hint">Écris <b>{MOD.DEX}</b> pour le modificateur de Dextérité, <b>{MOD.DEX:2}</b> pour le plafonner à 2. Ex. : 11+{MOD.DEX} (légère), 12+{MOD.DEX:2} (intermédiaire), 16 (lourde), +2 (bouclier).</div>
+        <div class="of-hint" id="ofCaPreview"></div></div>`;
+    }
+    const ph = f.placeholder ? ` placeholder="${f.placeholder}"` : '';
+    return `<div class="form-field"><label>${f.label}</label><input type="${f.type}" id="${id}" value="${val != null ? String(val).replace(/"/g, '&quot;') : ''}"${ph}></div>`;
+  }
+  function objetToggleHtml(f, val) {
+    return `<label class="of-toggle"><input type="checkbox" id="of_${f.key}" ${val ? 'checked' : ''}><span class="of-switch"></span><span>${f.label}</span></label>`;
+  }
+  // Aperçu de la formule de CA (avec Dex +3, pour exemple)
+  function updateCaPreview() {
+    const el = document.getElementById('of_ca_formule'), out = document.getElementById('ofCaPreview');
+    if (!el || !out) return;
+    const catEl = document.getElementById('of_categorie');
+    const r = parseArmorFormula(el.value, catEl ? catEl.value : '');
+    if (r.caBonus != null) out.innerHTML = `Lu comme : <b>+${r.caBonus} à la CA</b> (bouclier)`;
+    else if (r.armureCA != null) {
+      const dex = r.armureDexMax === 0 ? 'sans Dextérité' : r.armureDexMax != null ? `+ Dex (max ${r.armureDexMax})` : '+ Dex (sans limite)';
+      const ex = r.armureCA + (r.armureDexMax === 0 ? 0 : Math.min(3, r.armureDexMax != null ? r.armureDexMax : 3));
+      out.innerHTML = `Lu comme : <b>${r.armureCA} ${dex}</b> — avec Dex +3, CA = ${ex}`;
+    } else out.textContent = el.value ? 'Formule non reconnue' : '';
   }
 
   function openObjetForm(cat, id) {
@@ -5878,7 +5957,12 @@
     document.getElementById('ofDeleteBtn').style.display = o ? 'block' : 'none';
 
     const body = document.getElementById('ofFieldsBody');
-    body.innerHTML = schema.fields.map(f => objetFieldInputHtml(cat, f, o ? o[f.key] : null)).join('');
+    const toggles = schema.fields.filter(f => f.type === 'checkbox');
+    body.innerHTML = schema.fields.filter(f => f.type !== 'checkbox').map(f => objetFieldInputHtml(cat, f, o ? o[f.key] : null)).join('')
+      + (toggles.length ? `<div class="of-toggles">${toggles.map(f => objetToggleHtml(f, o ? o[f.key] : null)).join('')}</div>` : '');
+    updateCaPreview();
+    const catSel = document.getElementById('of_categorie');
+    if (catSel) catSel.addEventListener('change', updateCaPreview);
     openModal('modalObjectForm');
   }
 
@@ -5892,7 +5976,7 @@
       const el = document.getElementById('of_' + f.key);
       if (!el) return;
       if (f.type === 'checkbox') data[f.key] = el.checked;
-      else if (f.type === 'number') data[f.key] = el.value === '' ? null : Number(el.value);
+      else if (f.type === 'number' || f.type === 'kg') data[f.key] = el.value === '' ? null : Number(el.value);
       else data[f.key] = el.value.trim ? el.value.trim() : el.value;
     });
 
@@ -5917,6 +6001,14 @@
     const payload = { id: entry.id, nom: entry.name };
     schema.fields.forEach(f => { payload[f.key] = entry[f.key]; });
     sb.from(schema.table).upsert(payload).then(({ error }) => {
+      if (error && /degats_type/.test(error.message || '') && cat === 'armes') {
+        const p2 = { ...payload, degats: [payload.degats, payload.degats_type].filter(Boolean).join(' ') };
+        delete p2.degats_type;
+        return sb.from(schema.table).upsert(p2).then(({ error: e2 }) => {
+          if (e2) showToast('⚠️ Non sauvegardé en ligne (' + e2.message + ')');
+          else showToast('Enregistré — ajoute la colonne degats_type à la table armes pour séparer le type');
+        });
+      }
       if (error) { console.error(`Supabase ${schema.table} upsert:`, error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); }
     });
   }
@@ -32477,10 +32569,12 @@
 
   function objetToPlayerItem(cat, o) {
     const base = { id: (o.id || ('obj' + Date.now())), name: o.name, equipped: false, inCombat: false };
-    if (cat === 'armes') return { ...base, category: 'arme', weight: o.poids || 0, price: o.prix || '—', equipable: true, magic: !!o.magique, desc: `${o.degats || ''} ${o.proprietes || ''}`.trim() };
-    if (cat === 'armures') return { ...base, category: 'armure', weight: o.poids || 0, price: o.prix || '—', equipable: true, magic: !!o.magique, desc: o.ca_formule || '' };
-    if (cat === 'equipement') return { ...base, category: 'objet', weight: o.poids || 0, price: o.prix || '—', equipable: !!o.equipable, magic: !!o.magique, desc: '' };
-    if (cat === 'outils') return { ...base, category: 'outil', weight: o.poids || 0, price: o.prix || '—', equipable: false, magic: false, desc: o.categorie || '' };
+    if (cat === 'armes') return { ...base, category: 'arme', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: true, magic: !!o.magique,
+      damage: [o.degats, o.degats_type].filter(Boolean).join(' '), desc: [[o.degats, o.degats_type].filter(Boolean).join(' '), o.proprietes].filter(Boolean).join(' — ') };
+    if (cat === 'armures') return { ...base, category: 'armure', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: true, magic: !!o.magique,
+      caFormula: o.ca_formule || '', ...parseArmorFormula(o.ca_formule, o.categorie), desc: o.ca_formule ? `CA ${o.ca_formule}` : '' };
+    if (cat === 'equipement') return { ...base, category: 'objet', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: !!o.equipable, magic: !!o.magique, desc: '' };
+    if (cat === 'outils') return { ...base, category: 'outil', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: false, magic: false, desc: o.categorie || '' };
     if (cat === 'objetsMagiques') return { ...base, category: 'objet_magique', weight: 0, price: '—', equipable: !!o.emplacement_equipement, magic: true, usesMax: o.charges_max || null, usesLeft: o.charges_max || null, recharge: o.recharge_repos_long ? 'repos_long' : (o.recharge_repos_court ? 'repos_court' : null), desc: o.description_complete || '' };
     if (cat === 'armesMagiques') return { ...base, category: 'arme', weight: 0, price: '—', equipable: true, magic: true, usesMax: o.charges_max || null, usesLeft: o.charges_max || null, recharge: o.recharge_repos_long ? 'repos_long' : (o.recharge_repos_court ? 'repos_court' : null), desc: o.description_complete || '' };
     return { ...base, category: 'objet', weight: 0, price: '—', equipable: false, magic: false, desc: '' };
