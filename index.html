@@ -4473,6 +4473,7 @@
       const known = playerData.knownSpellNames || [];
       if (!known.includes(s.name)) known.push(s.name);
       playerData.knownSpellNames = known;
+      p.knownSpellNames = known.slice();
       sb.from('joueurs').update({ data: playerData }).eq('id', p.id).then(({ error: err2 }) => {
         if (err2) { showToast(`⚠️ Non sauvegardé (${err2.message})`); return; }
         showToast(`« ${s.name} » attribué à ${p.name}`);
@@ -5073,14 +5074,15 @@
     const n2 = c2name ? (parseInt(document.getElementById('wNiveau2').value) || 0) : 0;
     const c1 = classesData.find(c => c.name === c1name);
     const c2 = c2name ? classesData.find(c => c.name === c2name) : null;
-    let full = 0, half = 0, pact = null;
-    [ [c1, n1], [c2, n2] ].forEach(([c, n]) => {
-      if (!c) return;
-      if (c.casting === 'full') full += n;
-      else if (c.casting === 'half') half += n;
-      else if (c.casting === 'pact') pact = { level: n, ability: c.castAbility };
+    let effective = 0, pact = null;
+    const slotCasters = [ [c1, n1], [c2, n2] ].filter(([c, n]) => c && n > 0 && (c.casting === 'full' || c.casting === 'half'));
+    slotCasters.forEach(([c, n]) => {
+      if (c.casting === 'full') effective += n;
+      else if (c.name === 'Artificier') effective += Math.ceil(n / 2);
+      else if (slotCasters.length === 1) effective += (n >= 2 ? Math.ceil(n / 2) : 0); // une seule classe lanceuse : sa propre table
+      else effective += Math.floor(n / 2);
     });
-    const effective = full + Math.floor(half / 2);
+    [ [c1, n1], [c2, n2] ].forEach(([c, n]) => { if (c && c.casting === 'pact') pact = { level: n, ability: c.castAbility }; });
     return { effective, pact, casters: [c1, c2].filter(c => c && c.casting !== 'none') };
   }
 
@@ -5348,9 +5350,26 @@
     }
 
     if (sb) {
-      sb.from('joueurs').upsert({ id: newId, nom: nom, code: newCode, data: isEditing ? existingPlayer : newPlayer, actif: isEditing ? existingPlayer.active : true }).then(({ error }) => {
+      const writeRow = (dataToWrite) => sb.from('joueurs').upsert({ id: newId, nom: nom, code: newCode, data: dataToWrite, actif: isEditing ? existingPlayer.active : true }).then(({ error }) => {
         if (error) { console.error('Supabase joueurs upsert:', error); showToast('⚠️ Non sauvegardé en ligne'); }
       });
+      if (!isEditing) {
+        writeRow({ ...newPlayer, mjRev: Date.now() });
+      } else {
+        // On relit la fiche : l'état de jeu (PV actuels, inventaire, pièces, emplacements, sorts connus,
+        // états…) appartient à la partie en cours et ne doit pas être écrasé par la copie en mémoire du MJ.
+        const GAME_STATE_KEYS = ['currentHp', 'items', 'coins', 'knownSpellNames', 'states', 'exhaustion', 'pendingItems',
+          'usedSlots', 'hitDiceUsed', 'tempHp', 'tempHpMax', 'concentrationSpellId', 'deathSaves', 'companion', 'capInCombat', 'combatOrder', 'appData'];
+        sb.from('joueurs').select('data').eq('id', newId).single().then(({ data }) => {
+          const fresh = (data && data.data) || {};
+          const identity = { ...newPlayer };
+          GAME_STATE_KEYS.forEach(k => delete identity[k]);
+          const merged = { ...fresh, ...identity, mjRev: Date.now() };
+          if (merged.currentHp != null && merged.maxHp != null && merged.currentHp > merged.maxHp) merged.currentHp = merged.maxHp;
+          GAME_STATE_KEYS.forEach(k => { if (fresh[k] !== undefined) existingPlayer[k] = fresh[k]; });
+          writeRow(merged);
+        });
+      }
     }
 
     showToast(isEditing ? `« ${nom} » mis à jour` : `« ${nom} » créé — fiche prête`);
@@ -32204,9 +32223,11 @@
     sb.from('joueurs').select('data').eq('id', p.id).single().then(({ data, error }) => {
       if (error) { showToast(`⚠️ Impossible de lire la fiche de ${p.name}`); return; }
       const playerData = (data && data.data) || {};
-      const currentItems = playerData.items || [];
-      currentItems.push(objetToPlayerItem(cat, o));
-      playerData.items = currentItems;
+      // Déposé dans une "boîte de réception" : la fiche joueur l'ajoute à l'inventaire dès qu'elle le voit
+      // (tout de suite si elle est ouverte, sinon à la prochaine connexion).
+      const pending = playerData.pendingItems || [];
+      pending.push({ pid: 'p' + Date.now() + Math.random().toString(36).slice(2, 7), item: objetToPlayerItem(cat, o) });
+      playerData.pendingItems = pending;
       sb.from('joueurs').update({ data: playerData }).eq('id', p.id).then(({ error: err2 }) => {
         if (err2) { showToast(`⚠️ Non sauvegardé (${err2.message})`); return; }
         showToast(`« ${o.name} » attribué à ${p.name}`);

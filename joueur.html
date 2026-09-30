@@ -3778,21 +3778,7 @@
   </div>
 
   <div class="section-title">Sorts</div>
-  <div class="level-block">
-    <div class="level-header">
-      <span class="level-name">Niveau 1</span>
-      <div class="slot-pips" id="pips1"></div>
-    </div>
-    <div id="level1List"></div>
-  </div>
-
-  <div class="level-block">
-    <div class="level-header">
-      <span class="level-name">Niveau 2</span>
-      <div class="slot-pips" id="pips2"></div>
-    </div>
-    <div id="level2List"></div>
-  </div>
+  <div id="spellLevelsWrap"></div>
 
 </div>
 
@@ -5026,7 +5012,7 @@
   }
 
   let currentHp = 31, maxHp = 44;
-  let tempHp = 5, tempHpMax = 5;
+  let tempHp = 0, tempHpMax = 0;
   let hpPopupMode = 'hp'; // 'hp' or 'temp'
 
   function usePotion(potionId) {
@@ -5157,7 +5143,7 @@
   /* ===================== HIT DICE ===================== */
   let hitDiceTotal = 5;
   let hitDiceDie = 10;
-  let hitDiceUsed = 2;
+  let hitDiceUsed = 0;
   const hdContainer = document.getElementById('hitDiceBoxes');
   function renderHitDice() {
     hdContainer.innerHTML = '';
@@ -5165,7 +5151,10 @@
       const box = document.createElement('div');
       box.className = 'hd-box' + (i < hitDiceUsed ? ' used' : '');
       box.textContent = 'D' + hitDiceDie;
-      box.addEventListener('click', () => box.classList.toggle('used'));
+      box.addEventListener('click', () => {
+        box.classList.toggle('used');
+        hitDiceUsed = hdContainer.querySelectorAll('.hd-box.used').length;
+      });
       hdContainer.appendChild(box);
     }
   }
@@ -5189,8 +5178,8 @@
       container.appendChild(dot);
     }
   }
-  buildDots('successDots', 'success', 1);
-  buildDots('failDots', 'fail', 1);
+  buildDots('successDots', 'success', 0);
+  buildDots('failDots', 'fail', 0);
 
   function checkDeathSaveOutcome() {
     const successes = document.querySelectorAll('#successDots .death-dot.filled').length;
@@ -5742,8 +5731,48 @@
     if (typeof renderAll === 'function') renderAll();
   }
 
-  const maxSlots = { 1: 4, 2: 2 };
-  let usedSlots = { 1: 2, 2: 0 };
+  // Emplacements de sorts : calculés depuis les classes/niveaux de la fiche (voir computeSpellSlots)
+  const MULTICLASS_SLOT_TABLE = {
+    1: [2], 2: [3], 3: [4,2], 4: [4,3], 5: [4,3,2], 6: [4,3,3], 7: [4,3,3,1], 8: [4,3,3,2],
+    9: [4,3,3,3,1], 10: [4,3,3,3,2], 11: [4,3,3,3,2,1], 12: [4,3,3,3,2,1], 13: [4,3,3,3,2,1,1],
+    14: [4,3,3,3,2,1,1], 15: [4,3,3,3,2,1,1,1], 16: [4,3,3,3,2,1,1,1], 17: [4,3,3,3,2,1,1,1,1],
+    18: [4,3,3,3,3,1,1,1,1], 19: [4,3,3,3,3,2,1,1,1], 20: [4,3,3,3,3,2,2,1,1],
+  };
+  const PACT_SLOT_TABLE = {
+    1:{n:1,lvl:1}, 2:{n:2,lvl:1}, 3:{n:2,lvl:2}, 4:{n:2,lvl:2}, 5:{n:2,lvl:3}, 6:{n:2,lvl:3},
+    7:{n:2,lvl:4}, 8:{n:2,lvl:4}, 9:{n:2,lvl:5}, 10:{n:2,lvl:5}, 11:{n:3,lvl:5}, 12:{n:3,lvl:5},
+    13:{n:3,lvl:5}, 14:{n:3,lvl:5}, 15:{n:3,lvl:5}, 16:{n:3,lvl:5}, 17:{n:4,lvl:5}, 18:{n:4,lvl:5},
+    19:{n:4,lvl:5}, 20:{n:4,lvl:5},
+  };
+  const CASTING_TYPE = { Barde:'full', Clerc:'full', Druide:'full', Ensorceleur:'full', Magicien:'full', Paladin:'half', Rôdeur:'half', Artificier:'half', Occultiste:'pact' };
+
+  // Niveau de lanceur effectif (règles du multiclassage) :
+  // plein lanceur = niveau entier, demi-lanceur = moitié arrondie à l'inférieur (Artificier : au supérieur).
+  // Avec une seule classe lanceuse, on suit la table de cette classe (Paladin/Rôdeur : rien au niv. 1, puis moitié arrondie au supérieur).
+  function computeSpellSlots(p) {
+    const classes = [[p.classe1, parseInt(p.niveau1) || (p.classe2 ? 0 : (p.level || 1))], [p.classe2, parseInt(p.niveau2) || 0]]
+      .filter(([c, n]) => c && n > 0);
+    const slotCasters = classes.filter(([c]) => CASTING_TYPE[c] === 'full' || CASTING_TYPE[c] === 'half');
+    let effective = 0;
+    slotCasters.forEach(([c, n]) => {
+      const t = CASTING_TYPE[c];
+      if (t === 'full') effective += n;
+      else if (c === 'Artificier') effective += Math.ceil(n / 2);
+      else if (slotCasters.length === 1) effective += (n >= 2 ? Math.ceil(n / 2) : 0);
+      else effective += Math.floor(n / 2);
+    });
+    const out = {};
+    for (let l = 1; l <= 9; l++) out[l] = 0;
+    (MULTICLASS_SLOT_TABLE[Math.min(20, effective)] || []).forEach((n, i) => { out[i + 1] = n; });
+    // Occultiste : emplacements de pacte ajoutés au niveau de pacte
+    const pact = classes.find(([c]) => CASTING_TYPE[c] === 'pact');
+    if (pact) { const ps = PACT_SLOT_TABLE[Math.min(20, pact[1])]; if (ps) out[ps.lvl] += ps.n; }
+    return out;
+  }
+
+  const maxSlots = {};
+  const usedSlots = {};
+  for (let l = 1; l <= 9; l++) { maxSlots[l] = 0; usedSlots[l] = 0; }
 
   const spellSaveDD = 13;
   const spellAtkBonus = 5;
@@ -5790,7 +5819,7 @@
     return schoolIcons[school] || schoolIcons.evocation;
   }
 
-  let concentrationSpellId = 'vol'; // démo : déjà concentré au chargement
+  let concentrationSpellId = null;
   let pendingCast = null; // {spellId, level}
 
   /* ===================== TOP CARDS TOOLTIPS ===================== */
@@ -5819,6 +5848,7 @@
   /* ===================== RENDER SLOT PIPS ===================== */
   function renderPips(level) {
     const container = document.getElementById('pips' + level);
+    if (!container) return;
     container.innerHTML = '';
     for (let i = 0; i < maxSlots[level]; i++) {
       const pip = document.createElement('div');
@@ -5834,7 +5864,7 @@
   /* ===================== RENDER SPELL LISTS ===================== */
   function findSpell(id) {
     for (const lvl of Object.keys(spells)) {
-      const found = spells[lvl].find(s => s.id === id);
+      const found = (spells[lvl] || []).find(s => s.id === id);
       if (found) return { spell: found, level: parseInt(lvl) };
     }
     return null;
@@ -5847,8 +5877,9 @@
 
   function renderSpellList(level) {
     const container = document.getElementById('level' + level + 'List');
+    if (!container) return;
     container.innerHTML = '';
-    const sorted = [...spells[level]].filter(s => knownSpellNames.includes(s.name)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+    const sorted = [...(spells[level] || [])].filter(s => knownSpellNames.includes(s.name)).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
     sorted.forEach(s => {
       const row = document.createElement('div');
       row.className = 'spell-row';
@@ -5867,12 +5898,31 @@
     });
   }
 
+  // Un bloc par niveau de sort qui a des emplacements ou des sorts connus
+  function buildSpellLevelBlocks() {
+    const wrap = document.getElementById('spellLevelsWrap');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    for (let l = 1; l <= 9; l++) {
+      const hasKnown = (spells[l] || []).some(sp => knownSpellNames.includes(sp.name));
+      if (!maxSlots[l] && !hasKnown) continue;
+      const block = document.createElement('div');
+      block.className = 'level-block';
+      block.innerHTML = `
+        <div class="level-header">
+          <span class="level-name">Niveau ${l}</span>
+          <div class="slot-pips" id="pips${l}"></div>
+        </div>
+        <div id="level${l}List"></div>`;
+      wrap.appendChild(block);
+    }
+    if (!wrap.children.length) wrap.innerHTML = '<p style="font-size:12.5px;color:var(--ink-faint);">Aucun emplacement de sort.</p>';
+  }
+
   function renderAll() {
-    renderSpellList(0);
-    renderSpellList(1);
-    renderSpellList(2);
-    renderPips(1);
-    renderPips(2);
+    buildSpellLevelBlocks();
+    for (let l = 0; l <= 9; l++) renderSpellList(l);
+    for (let l = 1; l <= 9; l++) renderPips(l);
     updateConcBadge();
   }
 
@@ -5917,7 +5967,7 @@
       actions.innerHTML = `<button class="cast-btn" onclick="attemptCast('${s.id}', 0, 0)">Lancer</button>`;
     } else {
       const remaining = maxSlots[level] - usedSlots[level];
-      const higherLevels = s.upcastable ? Object.keys(maxSlots).map(Number).filter(l => l > level) : [];
+      const higherLevels = s.upcastable ? Object.keys(maxSlots).map(Number).filter(l => l > level && maxSlots[l] > 0) : [];
       let upcastChips = higherLevels.map(l => {
         const rem = maxSlots[l] - usedSlots[l];
         return `<button class="upcast-chip ${rem <= 0 ? 'disabled' : ''}" ${rem <= 0 ? 'disabled' : ''} onclick="attemptCast('${s.id}', ${level}, ${l})">Nv.${l} (${rem})</button>`;
@@ -5976,6 +6026,7 @@
     if (slotLevel > 0) {
       usedSlots[slotLevel] = Math.min(maxSlots[slotLevel], usedSlots[slotLevel] + 1);
       renderPips(slotLevel);
+      schedulePlayerStateSave();
     }
 
     if (s.concentration) {
@@ -5992,6 +6043,7 @@
     const badge = document.getElementById('concBadge');
     if (concentrationSpellId) {
       const found = findSpell(concentrationSpellId);
+      if (!found) { badge.classList.remove('active'); return; } // sorts pas encore chargés
       badge.classList.add('active');
       document.getElementById('concName').textContent = found.spell.name;
     } else {
@@ -6030,8 +6082,8 @@
 
   function resetAllSpellSlots() {
     Object.keys(usedSlots).forEach(lvl => { usedSlots[lvl] = 0; });
-    renderPips(1);
-    renderPips(2);
+    for (let l = 1; l <= 9; l++) renderPips(l);
+    schedulePlayerStateSave();
   }
 
   window.SortsTab = { resetSlots: resetAllSpellSlots };
@@ -6628,7 +6680,10 @@
     for (let i = 0; i < compHitDiceTotal; i++) {
       const box = document.createElement('div');
       box.className = 'comp-hd-box' + (i < compHitDiceUsed ? ' used' : '');
-      box.addEventListener('click', () => box.classList.toggle('used'));
+      box.addEventListener('click', () => {
+        box.classList.toggle('used');
+        compHitDiceUsed = container.querySelectorAll('.used').length;
+      });
       container.appendChild(box);
     }
   }
@@ -6700,15 +6755,64 @@
   })();
 
   /* ===================== ÉTAT PROPRE AU JOUEUR (sauvegarde individuelle) ===================== */
+  // Ce que le JOUEUR possède et modifie. Le reste de la fiche (identité, sorts connus, PV max…)
+  // appartient à la console MJ et n'est jamais écrasé par la page joueur.
+  const consumedPending = new Set(); // objets envoyés par le MJ déjà ajoutés à l'inventaire
+
+  function countFilled(sel) { return document.querySelectorAll(sel + ' .filled').length; }
+  function setFilled(sel, n) { document.querySelectorAll(sel + ' > *').forEach((d, i) => d.classList.toggle('filled', i < n)); }
+
   function collectPlayerState() {
-    return {
-      items: items, coins: coins, currentHp: currentHp, maxHp: maxHp, usedSlots: usedSlots,
-      knownSpellNames: knownSpellNames,
+    // copie indépendante : jamais de référence vers les tableaux vivants (items, pièces, emplacements)
+    return JSON.parse(JSON.stringify({
+      items: items, coins: coins, currentHp: currentHp, tempHp: tempHp, tempHpMax: tempHpMax,
+      usedSlots: usedSlots, hitDiceUsed: hitDiceUsed, concentrationSpellId: concentrationSpellId,
+      deathSaves: { success: countFilled('#successDots'), fail: countFilled('#failDots') },
+      companion: {
+        hp: compCurrentHp, hitDiceUsed: compHitDiceUsed,
+        deathSaves: { success: countFilled('#compSuccessDots'), fail: countFilled('#compFailDots') },
+      },
+      capInCombat: capacities.filter(c => c.inCombat).map(c => c.name),
+      combatOrder: combatItems.map(c => c.id),
       appData: {
-        capacities: window.AppData.capacities,
         companionInCombat: window.AppData.companionInCombat, computedCA: window.AppData.computedCA,
       },
-    };
+    }));
+  }
+
+  // Objets envoyés par le MJ (boîte de réception "pendingItems") -> inventaire
+  function absorbPendingItems(d) {
+    const pend = (d && d.pendingItems) || [];
+    let added = 0, lastName = '';
+    pend.forEach(entry => {
+      if (!entry || !entry.pid || !entry.item || consumedPending.has(entry.pid)) return;
+      consumedPending.add(entry.pid);
+      const it = { ...entry.item };
+      if (items.some(x => x.id === it.id)) it.id = it.id + '_' + entry.pid;
+      items.push(it);
+      added++; lastName = it.name;
+    });
+    if (added) {
+      renderCategories(); renderItemList(); renderWeight(); updateComputedCA();
+      combatItems = buildCombatItems(); renderCombatList();
+      showToast(added > 1 ? `${added} objets reçus du MJ` : `Objet reçu : ${lastName}`);
+      schedulePlayerStateSave();
+    }
+  }
+
+  // Données tenues par le MJ : sorts connus, PV max, états, épuisement
+  function applyMjOwned(d) {
+    if (!d) return;
+    const newKnown = d.knownSpellNames || [];
+    if (JSON.stringify(newKnown) !== JSON.stringify(knownSpellNames)) {
+      knownSpellNames.length = 0; knownSpellNames.push(...newKnown);
+      renderAll();
+    }
+    if (d.maxHp != null && d.maxHp !== maxHp) {
+      maxHp = d.maxHp; if (currentHp > maxHp) currentHp = maxHp;
+      updateHpDisplay();
+    }
+    if (!exhaustionDirty) applyConditionsFromData(d);
   }
 
   function applyPlayerState(saved) {
@@ -6717,20 +6821,38 @@
       items.length = 0; if (saved.items) items.push(...saved.items); window.AppData.items = items;
       coins.pp = 0; coins.po = 0; coins.pe = 0; coins.pa = 0; coins.pc = 0;
       if (saved.coins) Object.assign(coins, saved.coins);
-      if (saved.currentHp != null) currentHp = saved.currentHp;
       if (saved.maxHp != null) maxHp = saved.maxHp;
+      if (saved.currentHp != null) currentHp = Math.min(saved.currentHp, maxHp);
+      tempHp = saved.tempHp || 0; tempHpMax = saved.tempHpMax || 0;
       Object.keys(usedSlots).forEach(k => usedSlots[k] = 0);
-      if (saved.usedSlots) Object.assign(usedSlots, saved.usedSlots);
+      if (saved.usedSlots) Object.keys(saved.usedSlots).forEach(k => { usedSlots[k] = Math.min(saved.usedSlots[k] || 0, maxSlots[k] || 0); });
       knownSpellNames.length = 0; if (saved.knownSpellNames) knownSpellNames.push(...saved.knownSpellNames);
       if (saved.appData) {
-        const { exhaustionLevel: _oldExh, ...rest } = saved.appData; // ancienne valeur (démo) ignorée
+        const { exhaustionLevel: _oldExh, capacities: _oldCaps, ...rest } = saved.appData; // anciennes valeurs ignorées
         Object.assign(window.AppData, rest);
+      }
+      window.AppData.capacities = capacities;
+      if (Array.isArray(saved.capInCombat)) capacities.forEach(c => { c.inCombat = saved.capInCombat.includes(c.name); });
+      hitDiceUsed = Math.min(saved.hitDiceUsed || 0, hitDiceTotal);
+      renderHitDice();
+      concentrationSpellId = saved.concentrationSpellId || null;
+      if (saved.deathSaves) { setFilled('#successDots', saved.deathSaves.success || 0); setFilled('#failDots', saved.deathSaves.fail || 0); }
+      if (saved.companion) {
+        if (saved.companion.hp != null) compCurrentHp = saved.companion.hp;
+        compHitDiceUsed = saved.companion.hitDiceUsed || 0;
+        if (saved.companion.deathSaves) { setFilled('#compSuccessDots', saved.companion.deathSaves.success || 0); setFilled('#compFailDots', saved.companion.deathSaves.fail || 0); }
       }
       applyConditionsFromData(saved);
       renderCategories(); renderItemList(); renderWeight(); renderWallet(); updateComputedCA();
-      if (typeof renderAll === 'function') renderAll();
+      combatItems = (saved.combatOrder || []).map(id => ({ id }));
+      combatItems = buildCombatItems();
+      renderCombatList();
+      renderAll();
       if (typeof renderCapacities === 'function') renderCapacities();
-      if (typeof updateHpDisplay === 'function') updateHpDisplay();
+      updateHpDisplay();
+      updateConcBadge();
+      const compBtn = document.getElementById('companionBtn');
+      if (compBtn && window.AppData.companionInCombat) compBtn.style.display = '';
     } catch (e) {
       console.error('Erreur application état joueur', e);
     }
@@ -6932,6 +7054,10 @@
       hitDiceUsed = 0;
       renderHitDice();
 
+      Object.assign(maxSlots, computeSpellSlots(p));
+      for (let l = 1; l <= 9; l++) usedSlots[l] = Math.min(usedSlots[l] || 0, maxSlots[l]);
+      if (typeof renderAll === 'function') renderAll();
+
       if (p.abilities && p.abilities.for != null) {
         strengthScore = Number(p.abilities.for) || 10;
         maxCarryWeight = strengthScore * 7.5;
@@ -6974,7 +7100,9 @@
       // (l'épuisement N'EST PAS remis à zéro ici : le MJ peut légitimement le modifier
       // depuis sa console, et cette valeur doit alors persister d'une connexion à l'autre.)
       if (typeof updateExhaustionWarnings === 'function') updateExhaustionWarnings();
-      document.querySelectorAll('.hunt-num').forEach(el => el.textContent = '0');
+      const huntEls = document.querySelectorAll('.hunt-num');
+      if (huntEls[0]) huntEls[0].textContent = (p.huntBoard || []).length;
+      if (huntEls[1]) huntEls[1].textContent = '0';
       window.AppData.companionInCombat = false;
       concentrationSpellId = null;
       if (typeof updateConcBadge === 'function') updateConcBadge();
@@ -6993,41 +7121,81 @@
   window._fullPlayerData = window._fullPlayerData || {};
 
   let playerStateSaveTimer = null;
-  function schedulePlayerStateSave() {
-    if (!sb || !window._gatePlayerId) return;
-    clearTimeout(playerStateSaveTimer);
-    playerStateSaveTimer = setTimeout(async () => {
-      // On relit la fiche juste avant d'écrire : les états et l'épuisement modifiés par le MJ
-      // entre-temps sont repris (et affichés) au lieu d'être écrasés.
-      const { data: fresh } = await sb.from('joueurs').select('data').eq('id', window._gatePlayerId).single();
-      if (fresh && fresh.data) {
-        window._fullPlayerData = fresh.data;
-        if (!exhaustionDirty) applyConditionsFromData(fresh.data);
-      }
-      Object.assign(window._fullPlayerData, collectPlayerState());
-      window._fullPlayerData.states = states;
-      window._fullPlayerData.exhaustion = exhaustionLevel;
-      if (window._fullPlayerData.appData) delete window._fullPlayerData.appData.exhaustionLevel;
+  let playerLoaded = false;          // rien n'est enregistré avant d'avoir chargé la vraie fiche
+  let lastSavedJson = '';
+  let saving = false, saveAgain = false;
+  let lastMjRev = null;
+
+  async function savePlayerStateNow() {
+    if (!sb || !window._gatePlayerId || !playerLoaded) return;
+    if (saving) { saveAgain = true; return; }
+    saving = true;
+    try {
+      // On relit la fiche juste avant d'écrire, pour garder tout ce que le MJ a changé entre-temps.
+      const { data: fresh, error } = await sb.from('joueurs').select('data').eq('id', window._gatePlayerId).single();
+      if (error || !fresh) { console.error('Relecture fiche impossible, sauvegarde reportée', error); return; }
+      const d = fresh.data || {};
+      absorbPendingItems(d);
+      applyMjOwned(d);
+      const mine = collectPlayerState();
+      Object.assign(d, mine);
+      d.states = states;
+      d.exhaustion = exhaustionLevel;
+      if (d.appData) { delete d.appData.exhaustionLevel; delete d.appData.capacities; }
+      if (Array.isArray(d.pendingItems)) d.pendingItems = d.pendingItems.filter(e => e && !consumedPending.has(e.pid));
+      const { error: err2 } = await sb.from('joueurs').update({ data: d }).eq('id', window._gatePlayerId);
+      if (err2) { console.error('Supabase joueurs update (état):', err2); return; }
+      window._fullPlayerData = d;
+      lastSavedJson = JSON.stringify(mine);
       exhaustionDirty = false;
-      sb.from('joueurs').update({ data: window._fullPlayerData }).eq('id', window._gatePlayerId).then(({ error }) => {
-        if (error) console.error('Supabase joueurs update (état):', error);
-      });
-    }, 1500);
+    } catch (e) {
+      console.error('Sauvegarde joueur', e);
+    } finally {
+      saving = false;
+      if (saveAgain) { saveAgain = false; savePlayerStateNow(); }
+    }
   }
+
+  function schedulePlayerStateSave() {
+    if (!playerLoaded) return;
+    clearTimeout(playerStateSaveTimer);
+    playerStateSaveTimer = setTimeout(savePlayerStateNow, 1200);
+  }
+
+  // Filet de sécurité : toute modification (PV, emplacements, objets, pièces…) est détectée et enregistrée
+  setInterval(() => {
+    if (!playerLoaded) return;
+    try { if (JSON.stringify(collectPlayerState()) !== lastSavedJson) schedulePlayerStateSave(); } catch (e) {}
+  }, 3000);
+
+  // En quittant ou en changeant d'appli : enregistrement immédiat
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') { clearTimeout(playerStateSaveTimer); savePlayerStateNow(); }
+    else if (playerLoaded) pollFromMj(); // retour sur l'appli : on récupère tout de suite les changements du MJ
+  });
+  window.addEventListener('pagehide', () => { clearTimeout(playerStateSaveTimer); savePlayerStateNow(); });
 
   // Le joueur a lui-même changé son épuisement (repos long, poids dépassé…) : à enregistrer tel quel.
   let exhaustionDirty = false;
   function persistExhaustion() { exhaustionDirty = true; schedulePlayerStateSave(); }
 
-  // Récupère régulièrement les états / l'épuisement posés par le MJ
-  async function pollConditions() {
-    if (!sb || !window._gatePlayerId || exhaustionDirty) return;
+  // Récupère régulièrement ce que le MJ a modifié (états, épuisement, sorts, objets, fiche)
+  async function pollFromMj() {
+    if (!sb || !window._gatePlayerId || !playerLoaded || saving) return;
     const { data } = await sb.from('joueurs').select('data').eq('id', window._gatePlayerId).single();
-    if (data && data.data && !exhaustionDirty) {
-      window._fullPlayerData.states = data.data.states || [];
-      window._fullPlayerData.exhaustion = data.data.exhaustion || 0;
-      applyConditionsFromData(data.data);
+    if (!data || !data.data) return;
+    const d = data.data;
+    if (d.mjRev && d.mjRev !== lastMjRev) {
+      // Fiche modifiée par le MJ (niveau, caractéristiques…) : on réapplique l'identité sans perdre l'état en cours
+      lastMjRev = d.mjRev;
+      const snapshot = collectPlayerState();
+      applyIdentity(d);
+      applyPlayerState({ ...snapshot, knownSpellNames: d.knownSpellNames, maxHp: d.maxHp,
+        states: exhaustionDirty ? states : d.states, exhaustion: exhaustionDirty ? exhaustionLevel : d.exhaustion });
+    } else {
+      applyMjOwned(d);
     }
+    absorbPendingItems(d);
   }
 
   (async function loadOwnPlayerState() {
@@ -7036,8 +7204,12 @@
     if (error) { console.error('Échec chargement de ta fiche', error); return; }
     if (data && data.data && Object.keys(data.data).length) {
       window._fullPlayerData = data.data;
-      applyPlayerState(data.data);
+      lastMjRev = data.data.mjRev || null;
       applyIdentity(data.data);
+      applyPlayerState(data.data);
+      playerLoaded = true;
+      lastSavedJson = JSON.stringify(collectPlayerState());
+      absorbPendingItems(data.data);
     } else {
       // Première connexion : on part d'une ardoise vierge, pas des données de démo d'Elowen.
       items.length = 0; window.AppData.items = items;
@@ -7046,14 +7218,16 @@
       concentrationSpellId = null;
       window.AppData.companionInCombat = false;
       applyConditionsFromData({ states: [], exhaustion: 0 });
+      tempHp = 0; tempHpMax = 0; hitDiceUsed = 0;
+      Object.keys(usedSlots).forEach(k => usedSlots[k] = 0);
+      playerLoaded = true;
       renderCategories(); renderItemList(); renderWeight(); renderWallet(); updateComputedCA();
       if (typeof renderAll === 'function') renderAll();
       if (typeof updateConcBadge === 'function') updateConcBadge();
       schedulePlayerStateSave(); // on enregistre cette ardoise vierge comme point de départ
     }
     // Sauvegarde automatique périodique, en plus des sauvegardes déclenchées par les actions.
-    setInterval(schedulePlayerStateSave, 20000);
-    setInterval(pollConditions, 8000);
+    setInterval(pollFromMj, 8000);
   })();
 
 </script>
