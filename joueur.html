@@ -2331,6 +2331,7 @@
 #page-sorts .upcast-levels.open { display: flex; }
 #page-sorts .upcast-chip {
     flex: 1;
+    line-height: 1.3;
     min-width: 70px;
     text-align: center;
     background: var(--card);
@@ -4735,6 +4736,17 @@
 
   const capGroups = [];
 
+  // Repos : recharge des capacités à utilisations limitées
+  function rechargeCapacities(kind) {
+    capacities.forEach(c => {
+      if (!c.usesMax) return;
+      const ok = kind === 'long' ? c.recharge !== 'aucun'
+        : (c.recharge === 'repos_court' || c.recharge === 'repos_court_ou_long');
+      if (ok) c.usesLeft = c.usesMax;
+    });
+    if (typeof buildCombatItems === 'function') { combatItems = buildCombatItems(); renderCombatList(); }
+  }
+
   function renderCapacities() {
     window.AppData = window.AppData || {};
     window.AppData.capacities = capacities;
@@ -4757,7 +4769,7 @@
         el.className = 'cap-item';
         el.innerHTML = `
           <h3>${cap.name}</h3>
-          <div class="cap-source">${cap.group}</div>
+          <div class="cap-source">${cap.group}${cap.usesMax ? ` — ${cap.usesMax} utilisation${cap.usesMax > 1 ? 's' : ''}, ${({repos_court:'recharge au repos court', repos_long:'recharge au repos long', repos_court_ou_long:'recharge au repos court ou long'})[cap.recharge] || ''}` : ''}</div>
           <p>${cap.desc}</p>
           <div class="cap-toggle-row">
             <span class="ctr-label">Afficher en combat</span>
@@ -4921,13 +4933,15 @@
   // ---- Toast ----
   
   function triggerShortRest() {
-    const pact = window.SortsTab && window.SortsTab.resetPact && window.SortsTab.resetPact();
-    showToast(pact ? 'Repos court effectué — emplacements de pacte récupérés' : 'Repos court effectué');
+    if (window.SortsTab && window.SortsTab.resetPact) window.SortsTab.resetPact();
+    if (typeof rechargeCapacities === 'function') rechargeCapacities('court');
+    showToast('Repos court effectué');
   }
 
   function triggerLongRest() {
     if (window.CombatTab && window.CombatTab.longRest) window.CombatTab.longRest();
     if (window.SortsTab && window.SortsTab.resetSlots) window.SortsTab.resetSlots();
+    if (typeof rechargeCapacities === 'function') rechargeCapacities('long');
     showToast('Repos long effectué');
   }
 
@@ -4966,7 +4980,7 @@
     }
 
     setTimeout(() => overlay.remove(), 1000);
-    showToast('Niveau 6 atteint !');
+    showToast(`Niveau ${(window.AppData && window.AppData.totalCharacterLevel) || ''} atteint !`);
   }
 
   /* ============ COMBAT SCRIPT ============ */
@@ -5419,7 +5433,8 @@
     const appCaps = (window.AppData && window.AppData.capacities) || [];
     appCaps.forEach(cap => {
       if (cap.inCombat) {
-        list.push({ id: 'cap-' + cap.id, type: 'capacite', name: cap.name, sub: cap.combatSub || cap.desc });
+        list.push({ id: 'cap-' + cap.id, type: 'capacite', name: cap.name, sub: cap.combatSub || '',
+          usesMax: cap.usesMax || null, usesLeft: cap.usesMax ? (cap.usesLeft != null ? cap.usesLeft : cap.usesMax) : null });
       }
     });
     if (window.AppData && window.AppData.companionInCombat) {
@@ -5521,13 +5536,13 @@
         </button>`;
       }
 
-      const subText = item.type === 'compagnon' ? 'Voir la fiche' : item.sub;
+      const subText = item.type === 'compagnon' ? 'Voir la fiche' : (item.type === 'capacite' ? (item.sub || '') : '');
 
       row.innerHTML = `
         <div class="combat-icon ${item.type}">${icons[item.type]}</div>
         <div class="combat-body">
           <div class="c-name">${item.name}</div>
-          <div class="c-sub">${subText}</div>
+          ${subText ? `<div class="c-sub">${subText}</div>` : ''}
           ${usesHtml}
         </div>
         ${ammoHtml}
@@ -5555,10 +5570,15 @@
           const idx2 = parseInt(box.dataset.idx);
           const usedCount = item.usesMax - item.usesLeft;
           if (idx2 < usedCount) { item.usesLeft++; } else { item.usesLeft--; }
-          const realId = item.id.startsWith('item-') ? item.id.slice(5) : item.id;
-          const realItems = (window.AppData && window.AppData.items) || [];
-          const realItem = realItems.find(i => i.id === realId);
-          if (realItem) realItem.usesLeft = item.usesLeft;
+          if (item.type === 'capacite') {
+            const cap = capacities.find(c => 'cap-' + c.id === item.id);
+            if (cap) cap.usesLeft = item.usesLeft;
+          } else {
+            const realId = String(item.id).replace(/^item-/, '');
+            const realItems = (window.AppData && window.AppData.items) || [];
+            const realItem = realItems.find(i => String(i.id) === realId);
+            if (realItem) realItem.usesLeft = item.usesLeft;
+          }
           renderCombatList();
         });
       });
@@ -5792,8 +5812,18 @@
   const pactSlots = { lvl: 0, max: 0, used: 0 };
   for (let l = 1; l <= 9; l++) { maxSlots[l] = 0; usedSlots[l] = 0; }
 
-  const spellSaveDD = 13;
-  const spellAtkBonus = 5;
+  // Valeurs d'incantation par classe lanceuse, remplies par renderCasterRows
+  let casterStats = [];
+  const normTxt = t => (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  // Classe utilisée pour un sort : celle du personnage qui a ce sort dans sa liste ;
+  // si les deux l'ont, la plus avantageuse ; si aucune ne correspond, la première classe lanceuse.
+  function casterForSpell(spell) {
+    if (!casterStats.length) return null;
+    const sc = ((spell && spell.classes) || []).map(normTxt);
+    const matches = casterStats.filter(c => sc.includes(normTxt(c.cls)));
+    const pool = matches.length ? matches : casterStats;
+    return pool.reduce((best, c) => (c.dd > best.dd ? c : best), pool[0]);
+  }
 
   function currentCantripDice(s) {
     if (!s.scaling) return '';
@@ -5811,10 +5841,14 @@
 
   function withDD(text, spell) {
     if (!text) return text;
-    let out = text
-      .replace(/\{DD\}/g, spellSaveDD)
-      .replace(/\{ATK\}/g, '+' + spellAtkBonus)
-      .replace(/\{MOD\}/g, (window.AppData && window.AppData.spellcastingAbilityMod != null) ? ('+' + window.AppData.spellcastingAbilityMod) : '{MOD}');
+    const c = casterForSpell(spell);
+    let out = String(text);
+    if (c) {
+      out = out
+        .replace(/\{DD\}/g, c.dd)
+        .replace(/\{ATK\}/g, fmtSignedMod(c.atk))
+        .replace(/\{MOD\}/g, fmtSignedMod(c.mod));
+    }
     if (spell && spell.scaling) {
       out = out.replace(/\{DICE\}/g, currentCantripDice(spell));
     }
@@ -5901,7 +5935,7 @@
   /* ===================== RENDER SPELL LISTS ===================== */
   function findSpell(id) {
     for (const lvl of Object.keys(spells)) {
-      const found = (spells[lvl] || []).find(s => s.id === id);
+      const found = (spells[lvl] || []).find(s => String(s.id) === String(id));
       if (found) return { spell: found, level: parseInt(lvl) };
     }
     return null;
@@ -5965,9 +5999,11 @@
 
   /* ===================== SPELL DETAIL PAGE ===================== */
   function openSpellPage(id, level) {
-    const s = spells[level].find(sp => sp.id === id);
+    const s = spells[level].find(sp => String(sp.id) === String(id));
+    if (!s) return;
     document.getElementById('spDetailName').textContent = s.name;
-    document.getElementById('spDetailLevel').textContent = level === 0 ? 'Sort mineur' : `Niveau ${level}`;
+    const castCls = casterStats.length > 1 ? casterForSpell(s) : null;
+    document.getElementById('spDetailLevel').textContent = (level === 0 ? 'Sort mineur' : `Niveau ${level}`) + (castCls ? ` — ${castCls.cls}` : '');
 
     let tagsHtml = `<span class="tag action">${s.action}</span>`;
     if (s.concentration) tagsHtml += ` <span class="tag concentration">Concentration</span>`;
@@ -6000,31 +6036,46 @@
     `;
 
     const actions = document.getElementById('spDetailActions');
+    actions.innerHTML = '';
+    const mkBtn = (cls, label, disabled, onClick) => {
+      const b = document.createElement('button');
+      b.className = cls; b.textContent = label; b.disabled = !!disabled;
+      if (!disabled) b.addEventListener('click', onClick);
+      actions.appendChild(b);
+      return b;
+    };
     if (level === 0) {
-      actions.innerHTML = `<button class="cast-btn" onclick="attemptCast('${s.id}', 0, 0)">Lancer</button>`;
+      mkBtn('cast-btn', 'Lancer', false, () => attemptCast(s.id, 0, 0));
     } else {
       const remaining = maxSlots[level] - usedSlots[level];
+      // Niveaux supérieurs : seulement ceux pour lesquels le personnage a des emplacements
       const higherLevels = s.upcastable ? Object.keys(maxSlots).map(Number).filter(l => l > level && maxSlots[l] > 0) : [];
-      let upcastChips = higherLevels.map(l => {
-        const rem = maxSlots[l] - usedSlots[l];
-        return `<button class="upcast-chip ${rem <= 0 ? 'disabled' : ''}" ${rem <= 0 ? 'disabled' : ''} onclick="attemptCast('${s.id}', ${level}, ${l})">Nv.${l} (${rem})</button>`;
-      }).join('');
-
       const pactUsable = pactSlots.max > 0 && level <= pactSlots.lvl;
       const pactRem = pactSlots.max - pactSlots.used;
       const showGeneral = maxSlots[level] > 0 || higherLevels.length > 0 || !pactUsable;
-      actions.innerHTML = `
-        ${showGeneral ? `<button class="cast-btn" ${remaining <= 0 ? 'disabled' : ''} onclick="attemptCast('${s.id}', ${level}, ${level})">
-          Lancer ${remaining <= 0 ? '(aucun emplacement)' : `(Nv.${level})`}
-        </button>` : ''}
-        ${pactUsable ? `<button class="${showGeneral ? 'cast-btn-secondary' : 'cast-btn'}" ${pactRem <= 0 ? 'disabled' : ''} onclick="attemptCast('${s.id}', ${level}, ${pactSlots.lvl}, true)">
-          ${pactRem <= 0 ? 'Aucun emplacement de pacte' : `Lancer avec un emplacement de pacte (Nv.${pactSlots.lvl}, ${pactRem} restant${pactRem > 1 ? 's' : ''})`}
-        </button>` : ''}
-        ${higherLevels.length > 0 ? `
-          <button class="cast-btn-secondary" onclick="toggleUpcast(this)">Lancer avec un emplacement supérieur</button>
-          <div class="upcast-levels">${upcastChips}</div>
-        ` : ''}
-      `;
+      if (showGeneral) mkBtn('cast-btn', remaining <= 0 ? 'Lancer (aucun emplacement)' : `Lancer (Nv.${level})`, remaining <= 0, () => attemptCast(s.id, level, level));
+      if (pactUsable) mkBtn(showGeneral ? 'cast-btn-secondary' : 'cast-btn',
+        pactRem <= 0 ? 'Aucun emplacement de pacte' : `Lancer avec un emplacement de pacte (Nv.${pactSlots.lvl})`,
+        pactRem <= 0, () => attemptCast(s.id, level, pactSlots.lvl, true));
+      if (higherLevels.length) {
+        if (pactUsable) actions.lastElementChild.style.marginBottom = '8px';
+        const chips = document.createElement('div');
+        chips.className = 'upcast-levels';
+        higherLevels.forEach(l => {
+          const rem = maxSlots[l] - usedSlots[l];
+          const c = document.createElement('button');
+          c.className = 'upcast-chip' + (rem <= 0 ? ' disabled' : '');
+          c.disabled = rem <= 0;
+          c.innerHTML = `Nv.${l}<br><span style="font-size:10.5px;opacity:.75;">${rem}/${maxSlots[l]}</span>`;
+          if (rem > 0) c.addEventListener('click', () => attemptCast(s.id, level, l));
+          chips.appendChild(c);
+        });
+        const toggle = mkBtn('cast-btn-secondary', 'Lancer avec un emplacement supérieur', false, () => {
+          const open = chips.classList.toggle('open');
+          toggle.textContent = open ? 'Choisis le niveau de l\'emplacement' : 'Lancer avec un emplacement supérieur';
+        });
+        actions.appendChild(chips);
+      }
     }
 
     document.getElementById('spellPage').classList.add('open');
@@ -6040,7 +6091,8 @@
 
   /* ===================== CASTING LOGIC ===================== */
   function attemptCast(spellId, baseLevel, slotLevel, usePact) {
-    const s = spells[baseLevel].find(sp => sp.id === spellId);
+    const s = spells[baseLevel].find(sp => String(sp.id) === String(spellId));
+    if (!s) return;
 
     // Vérifie la concentration
     if (s.concentration && concentrationSpellId && concentrationSpellId !== spellId) {
@@ -6064,7 +6116,8 @@
   }
 
   function finalizeCast(spellId, baseLevel, slotLevel, usePact) {
-    const s = spells[baseLevel].find(sp => sp.id === spellId);
+    const s = spells[baseLevel].find(sp => String(sp.id) === String(spellId));
+    if (!s) return;
 
     if (usePact) {
       pactSlots.used = Math.min(pactSlots.max, pactSlots.used + 1);
@@ -6186,7 +6239,7 @@
   let equippedMagicLimit = 5;
 
   function fmt(n) {
-    return n.toFixed(2).replace(/\.?0+$/, '').replace('.', ',') || '0';
+    return (Number(n) || 0).toFixed(2).replace(/\.?0+$/, '').replace('.', ',') || '0';
   }
 
   /* ===================== ICON HELPERS ===================== */
@@ -6341,7 +6394,8 @@
 
   /* ===================== ITEM DETAIL ===================== */
   function openItemDetail(id) {
-    const it = items.find(i => i.id === id);
+    const it = items.find(i => String(i.id) === String(id));
+    if (!it) return;
     document.getElementById('itemDetailName').textContent = it.name;
     document.getElementById('itemDetailCat').textContent = catLabel(it.category);
 
@@ -6829,6 +6883,8 @@
         deathSaves: { success: countFilled('#compSuccessDots'), fail: countFilled('#compFailDots') },
       },
       capInCombat: capacities.filter(c => c.inCombat).map(c => c.name),
+      capKnown: capacities.map(c => c.name),
+      capUsesLeft: Object.fromEntries(capacities.filter(c => c.usesMax).map(c => [c.name, c.usesLeft])),
       combatOrder: combatItems.map(c => c.id),
       appData: {
         companionInCombat: window.AppData.companionInCombat, computedCA: window.AppData.computedCA,
@@ -6918,7 +6974,11 @@
         Object.assign(window.AppData, rest);
       }
       window.AppData.capacities = capacities;
-      if (Array.isArray(saved.capInCombat)) capacities.forEach(c => { c.inCombat = saved.capInCombat.includes(c.name); });
+      // capacités déjà connues : on garde le choix du joueur ; nouvelles : réglage par défaut
+      if (Array.isArray(saved.capInCombat)) capacities.forEach(c => {
+        if (!Array.isArray(saved.capKnown) || saved.capKnown.includes(c.name)) c.inCombat = saved.capInCombat.includes(c.name);
+      });
+      if (saved.capUsesLeft) capacities.forEach(c => { if (c.usesMax && saved.capUsesLeft[c.name] != null) c.usesLeft = Math.min(saved.capUsesLeft[c.name], c.usesMax); });
       hitDiceUsed = Math.min(saved.hitDiceUsed || 0, hitDiceTotal);
       renderHitDice();
       concentrationSpellId = saved.concentrationSpellId || null;
@@ -6991,9 +7051,13 @@
     document.querySelectorAll('.caster-label').forEach(el => el.remove());
     const casters = [p.classe1, p.classe2].filter(c => c && SPELL_ABILITY_BY_CLASS[c]);
     const cards = [...firstRow.children];
-    if (!casters.length) { firstRow.style.display = 'none'; return; }
+    if (!casters.length) { casterStats = []; firstRow.style.display = 'none'; return; }
     firstRow.style.display = '';
     cards.forEach(c => c.style.display = '');
+    casterStats = casters.map(cls => {
+      const mod = abilityMod(p.abilities[SPELL_ABILITY_BY_CLASS[cls]]);
+      return { cls, mod, dd: 8 + profBonus + mod, atk: profBonus + mod };
+    });
     const fillRow = (row, cls) => {
       const ab = SPELL_ABILITY_BY_CLASS[cls];
       const mod = abilityMod(p.abilities[ab]);
@@ -7094,7 +7158,9 @@
         capacities.length = 0;
         (p.capacites || []).forEach((c, i) => {
           const groupLabel = c.source === 'Race' ? `Race — ${p.race || ''}` : c.source === 'Classe' ? `Classe — ${p.classe1 || ''}` : c.source === 'Historique' ? `Historique — ${p.historique || ''}` : (c.source || 'Autre');
-          capacities.push({ id: 'cap' + i, name: c.title || 'Capacité', group: groupLabel, desc: c.text || '', inCombat: false });
+          const usesMax = (c.recharge && c.recharge !== 'aucun' && parseInt(c.uses) > 0) ? parseInt(c.uses) : null;
+          capacities.push({ id: 'cap' + i, name: c.title || 'Capacité', group: groupLabel, desc: c.text || '', inCombat: !!usesMax,
+            usesMax, usesLeft: usesMax, recharge: c.recharge || 'aucun' });
         });
         capGroups.length = 0;
         capGroups.push(
@@ -7140,6 +7206,7 @@
       hitDiceUsed = 0;
       renderHitDice();
 
+      window.AppData.totalCharacterLevel = p.level || 1;
       Object.assign(maxSlots, computeSpellSlots(p));
       { const ps = computePactSlots(p); pactSlots.lvl = ps.lvl; pactSlots.max = ps.max; pactSlots.used = Math.min(pactSlots.used, ps.max); }
       for (let l = 1; l <= 9; l++) usedSlots[l] = Math.min(usedSlots[l] || 0, maxSlots[l]);
@@ -7283,10 +7350,12 @@
     if (d.mjRev && d.mjRev !== lastMjRev) {
       // Fiche modifiée par le MJ (niveau, caractéristiques…) : on réapplique l'identité sans perdre l'état en cours
       lastMjRev = d.mjRev;
+      const leveledUp = (d.level || 1) > (window.AppData.totalCharacterLevel || 1);
       const snapshot = collectPlayerState();
       applyIdentity(d);
       applyPlayerState({ ...snapshot, knownSpellNames: d.knownSpellNames, maxHp: d.maxHp,
         states: exhaustionDirty ? states : d.states, exhaustion: exhaustionDirty ? exhaustionLevel : d.exhaustion });
+      if (leveledUp && typeof triggerLevelUp === 'function') triggerLevelUp();
     } else {
       applyMjOwned(d);
     }

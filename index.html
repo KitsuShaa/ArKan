@@ -3947,40 +3947,109 @@
   }
 
   /* ===================== MODAL: ARGENT ===================== */
+  // Lecture puis écriture de la fiche Supabase d'un joueur (jamais d'écrasement à l'aveugle)
+  function sbPatchPlayer(p, mutate, okMsg, touchIdentity) {
+    if (!sb) { showToast('Hors ligne : modification non enregistrée'); return Promise.resolve(false); }
+    return sb.from('joueurs').select('data').eq('id', p.id).single().then(({ data, error }) => {
+      if (error) { showToast(`⚠️ Impossible de lire la fiche de ${p.name}`); return false; }
+      const playerData = (data && data.data) || {};
+      if (mutate(playerData) === false) return false;
+      if (touchIdentity) playerData.mjRev = Date.now(); // la fiche joueur réapplique l'identité
+      return sb.from('joueurs').update({ data: playerData }).eq('id', p.id).then(({ error: err2 }) => {
+        if (err2) { showToast(`⚠️ Non sauvegardé (${err2.message})`); return false; }
+        if (okMsg) showToast(typeof okMsg === 'function' ? okMsg(playerData) : okMsg);
+        return true;
+      });
+    });
+  }
+
+  /* ===================== MODAL: ARGENT ===================== */
+  const COIN_KEYS = ['pp', 'po', 'pe', 'pa', 'pc'];
+  function fmtCoins(c) {
+    const parts = COIN_KEYS.filter(k => (parseInt(c[k]) || 0) > 0).map(k => `${c[k]} ${k.toUpperCase()}`);
+    return parts.join(', ') || 'bourse vide';
+  }
+  function walletAfterPending(d) {
+    const c = { ...(d.coins || {}) };
+    let pc = COIN_KEYS.reduce((n, k) => n + (parseInt(c[k]) || 0) * COIN_VALUE_PC[k], 0);
+    (d.pendingCoins || []).forEach(e => {
+      if (e.costPc) pc -= e.costPc;
+      if (e.add) COIN_KEYS.forEach(k => { pc += (parseInt(e.add[k]) || 0) * COIN_VALUE_PC[k]; });
+    });
+    return pc;
+  }
   function openArgentModal(playerId) {
     currentActionTargetId = playerId;
     const p = players.find(pl => pl.id === playerId);
     document.getElementById('argentTargetName').textContent = 'Pour ' + p.name;
     ['coinPP','coinPO','coinPE','coinPA','coinPC'].forEach(id => document.getElementById(id).value = 0);
     openModal('modalArgent');
+    if (sb) sb.from('joueurs').select('data').eq('id', p.id).single().then(({ data }) => {
+      const d = (data && data.data) || {};
+      document.getElementById('argentTargetName').textContent = `Pour ${p.name} — bourse actuelle : ${fmtCoins(d.coins || {})}`;
+    });
   }
   function applyCoinChange(sign) {
     const p = players.find(pl => pl.id === currentActionTargetId);
-    const vals = ['PP','PO','PE','PA','PC'].map(k => parseInt(document.getElementById('coin'+k).value || 0));
-    const parts = ['PP','PO','PE','PA','PC'].map((k,i) => vals[i] > 0 ? `${vals[i]} ${k}` : null).filter(Boolean);
-    showToast(`${sign > 0 ? 'Ajouté' : 'Retiré'} à ${p.name} : ${parts.join(', ') || 'rien'}`);
-    closeModal('modalArgent');
+    const vals = {};
+    COIN_KEYS.forEach(k => { vals[k] = Math.max(0, parseInt(document.getElementById('coin' + k.toUpperCase()).value || 0) || 0); });
+    const totalPc = COIN_KEYS.reduce((n, k) => n + vals[k] * COIN_VALUE_PC[k], 0);
+    if (!totalPc) { showToast('Indique un montant'); return; }
+    const label = fmtCoins(vals);
+    sbPatchPlayer(p, d => {
+      if (sign < 0 && walletAfterPending(d) < totalPc) { showToast(`${p.name} n'a pas assez d'argent (${fmtCoins(d.coins || {})})`); return false; }
+      const pid = 'p' + Date.now() + Math.random().toString(36).slice(2, 7);
+      // Ajout : ces pièces exactes. Retrait : la valeur, le joueur fait la monnaie si besoin.
+      d.pendingCoins = [...(d.pendingCoins || []), sign > 0 ? { pid, add: vals } : { pid, costPc: totalPc }];
+    }, `${sign > 0 ? 'Ajouté à' : 'Retiré à'} ${p.name} : ${label}`).then(ok => { if (ok) closeModal('modalArgent'); });
   }
 
   /* ===================== MODAL: XP ===================== */
+  // Seuils d'XP D&D 5e : XP_TABLE[n] = XP nécessaire pour atteindre le niveau n
+  const XP_TABLE = [0, 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000];
+  function levelForXp(xp) { let l = 1; for (let n = 2; n <= 20; n++) if (xp >= XP_TABLE[n]) l = n; return l; }
+  function xpLine(p) {
+    const lvl = p.level || 1;
+    const next = lvl < 20 ? XP_TABLE[lvl + 1] : null;
+    return `XP actuel : ${p.xp || 0}${next ? ' / ' + next : ''} (niveau ${lvl})`;
+  }
+  function renderXpLevelUpHint(p) {
+    let hint = document.getElementById('xpLevelUpHint');
+    if (!hint) {
+      hint = document.createElement('div');
+      hint.id = 'xpLevelUpHint';
+      hint.style.cssText = 'margin-top:12px;';
+      document.querySelector('#modalXP .xp-row').after(hint);
+    }
+    const target = levelForXp(p.xp || 0);
+    if (target > (p.level || 1)) {
+      hint.innerHTML = `<p style="font-size:13px;color:var(--gold);margin-bottom:8px;">${p.name} a assez d'XP pour le niveau ${target}.</p>
+        <button class="modal-confirm-btn" onclick="closeModal('modalXP'); openCharWizard('${p.id}')">Passer au niveau ${target} (modifier la fiche)</button>`;
+    } else hint.innerHTML = '';
+  }
   function openXPModal(playerId) {
     currentActionTargetId = playerId;
     const p = players.find(pl => pl.id === playerId);
     document.getElementById('xpTargetName').textContent = 'Pour ' + p.name;
-    document.getElementById('xpCurrentLine').textContent = `XP actuel : ${p.xp} / ${p.xpNext} (niveau ${p.level})`;
+    document.getElementById('xpCurrentLine').textContent = xpLine(p);
     document.getElementById('xpInput').value = '';
+    renderXpLevelUpHint(p);
     openModal('modalXP');
   }
   function applyXP() {
     const p = players.find(pl => pl.id === currentActionTargetId);
     const val = parseInt(document.getElementById('xpInput').value || 0);
-    if (val <= 0) return;
-    p.xp += val;
-    let leveledUp = false;
-    if (p.xp >= p.xpNext) { leveledUp = true; p.level += 1; }
-    showToast(`+${val} XP pour ${p.name}` + (leveledUp ? ` — passe niveau ${p.level} ! (animation déclenchée chez lui)` : ''));
-    document.getElementById('xpCurrentLine').textContent = `XP actuel : ${p.xp} / ${p.xpNext} (niveau ${p.level})`;
-    document.getElementById('xpInput').value = '';
+    if (!val) return;
+    sbPatchPlayer(p, d => {
+      d.xp = Math.max(0, (parseInt(d.xp) || 0) + val);
+      p.xp = d.xp;
+    }, `${val > 0 ? '+' : ''}${val} XP pour ${p.name}`, true).then(ok => {
+      if (!ok) return;
+      document.getElementById('xpCurrentLine').textContent = xpLine(p);
+      document.getElementById('xpInput').value = '';
+      renderXpLevelUpHint(p);
+      renderPlayerDetail();
+    });
   }
 
   /* ===================== MODAL: CAPACITÉ ===================== */
@@ -3991,15 +4060,22 @@
     document.getElementById('capNom').value = '';
     document.getElementById('capDesc').value = '';
     document.getElementById('capUses').value = 1;
+    document.getElementById('capRecharge').value = 'aucun';
     openModal('modalCapacite');
   }
   function applyCapacite() {
     const p = players.find(pl => pl.id === currentActionTargetId);
     const nom = document.getElementById('capNom').value.trim();
-    const uses = parseInt(document.getElementById('capUses').value || 1);
+    const recharge = document.getElementById('capRecharge').value;
+    const uses = Math.max(1, parseInt(document.getElementById('capUses').value || 1) || 1);
     if (!nom) { showToast('Donne au moins un nom à la capacité'); return; }
-    showToast(`Capacité « ${nom} » ajoutée à ${p.name} (${uses} utilisation${uses > 1 ? 's' : ''})`);
-    closeModal('modalCapacite');
+    const cap = { source: document.getElementById('capSource').value, title: nom, text: document.getElementById('capDesc').value.trim(), recharge };
+    if (recharge !== 'aucun') cap.uses = uses;
+    sbPatchPlayer(p, d => {
+      d.capacites = [...(d.capacites || []), cap];
+      p.capacites = d.capacites;
+    }, `Capacité « ${nom} » ajoutée à ${p.name}` + (recharge !== 'aucun' ? ` (${uses} utilisation${uses > 1 ? 's' : ''})` : ''), true)
+      .then(ok => { if (ok) closeModal('modalCapacite'); });
   }
 
   /* ===================== MODULE PARAMETRES ===================== */
@@ -5005,6 +5081,8 @@
         lastBlock.querySelector('.cb-source').value = c.source || 'Autre';
         lastBlock.querySelector('.cb-title').value = c.title || '';
         lastBlock.querySelector('.cb-text').value = c.text || '';
+        if (c.recharge) lastBlock.dataset.recharge = c.recharge;
+        if (c.uses) lastBlock.dataset.uses = c.uses;
       });
     }
     if (p.photo) {
@@ -5427,9 +5505,12 @@
     generalToolItems.forEach((it, i) => { const el = document.getElementById('wtoolgen_' + i); if (el && el.checked) toolProfs.push(it); });
     const languages = languagesData.filter((l, i) => { const el = document.getElementById('wlang_' + i); return el && el.checked; });
 
-    const capacites = Array.from(document.querySelectorAll('#wCapacitesList .capacite-block')).map(div => ({
-      source: div.querySelector('.cb-source').value, title: div.querySelector('.cb-title').value, text: div.querySelector('.cb-text').value,
-    }));
+    const capacites = Array.from(document.querySelectorAll('#wCapacitesList .capacite-block')).map(div => {
+      const c = { source: div.querySelector('.cb-source').value, title: div.querySelector('.cb-title').value, text: div.querySelector('.cb-text').value };
+      if (div.dataset.recharge) c.recharge = div.dataset.recharge;
+      if (div.dataset.uses) c.uses = parseInt(div.dataset.uses);
+      return c;
+    });
 
     const isEditing = !!currentEditingPlayerId;
     const existingPlayer = isEditing ? players.find(pl => pl.id === currentEditingPlayerId) : null;
@@ -5438,7 +5519,7 @@
     const newPlayer = {
       id: newId, name: nom, race: race, classes: classesLabel,
       pv: `${pv}/${pv}`, ca: 10 + dex,
-      xp: parseInt(document.getElementById('wXP').value) || 0, xpNext: 999999, level: parseInt(document.getElementById('wNiveauTotal').textContent) || 1,
+      xp: parseInt(document.getElementById('wXP').value) || 0, xpNext: (() => { const l = parseInt(document.getElementById('wNiveauTotal').textContent) || 1; return l < 20 ? XP_TABLE[l + 1] : XP_TABLE[20]; })(), level: parseInt(document.getElementById('wNiveauTotal').textContent) || 1,
       code: newCode, link: isEditing ? existingPlayer.link : (window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + `joueur.html?j=${newId}`),
       states: isEditing ? existingPlayer.states : [], exhaustion: isEditing ? existingPlayer.exhaustion : 0,
       historique: document.getElementById('wHistorique').value,
