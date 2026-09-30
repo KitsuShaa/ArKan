@@ -5154,7 +5154,8 @@
   }
 
   /* ===================== HIT DICE ===================== */
-  const hitDiceTotal = 5;
+  let hitDiceTotal = 5;
+  let hitDiceDie = 10;
   let hitDiceUsed = 2;
   const hdContainer = document.getElementById('hitDiceBoxes');
   function renderHitDice() {
@@ -5162,7 +5163,7 @@
     for (let i = 0; i < hitDiceTotal; i++) {
       const box = document.createElement('div');
       box.className = 'hd-box' + (i < hitDiceUsed ? ' used' : '');
-      box.textContent = 'D10';
+      box.textContent = 'D' + hitDiceDie;
       box.addEventListener('click', () => box.classList.toggle('used'));
       hdContainer.appendChild(box);
     }
@@ -6778,7 +6779,53 @@
         if (typeof renderCapacities === 'function') renderCapacities();
       }
 
-      if (p.maxHp != null) { maxHp = p.maxHp; currentHp = p.currentHp != null ? p.currentHp : p.maxHp; updateHpDisplay(); }
+      if (p.maxHp != null) { maxHp = p.maxHp; currentHp = p.currentHp != null ? p.currentHp : p.maxHp; }
+      tempHp = 0; tempHpMax = 0;
+      updateHpDisplay();
+      resetDeathSaves();
+      document.querySelectorAll('.active-state, .state-tag, .active-tag').forEach(el => el.remove());
+
+      document.title = p.name ? `${p.name} — Fiche de personnage` : document.title;
+
+      const profBonus = profBonusForLevel(p.level || 1);
+      const speedByRace = { 'Nain des montagnes': 7.5, 'Nain des collines': 7.5, 'Halfelin': 7.5, 'Gnome': 7.5 };
+      const speed = speedByRace[p.race] || 9;
+      const speedCard = document.getElementById('speedTopCard');
+      if (speedCard) speedCard.querySelector('.top-value').textContent = speed + 'm';
+
+      if (p.abilities) {
+        const initCard = document.querySelector('.top-row .top-card:first-child .top-value');
+        if (initCard) initCard.textContent = fmtSignedMod(abilityMod(p.abilities.dex));
+        const perceptionSkill = (p.skills || []).find(s => s.name === 'Perception');
+        let passivePerception = 10 + abilityMod(p.abilities.sag);
+        if (perceptionSkill) { if (perceptionSkill.expert) passivePerception += profBonus * 2; else if (perceptionSkill.trained) passivePerception += profBonus; }
+        const percEl = document.querySelector('.perception-number');
+        if (percEl) percEl.textContent = passivePerception;
+
+        const SPELL_ABILITY_BY_CLASS = { Magicien: 'int', Occultiste: 'cha', Ensorceleur: 'cha', Barde: 'cha', Paladin: 'cha', Clerc: 'sag', Druide: 'sag', Rôdeur: 'sag' };
+        const spellAb = SPELL_ABILITY_BY_CLASS[p.classe1];
+        const cardIncant = document.getElementById('cardIncant'), cardDD = document.getElementById('cardDD'), cardAtk = document.getElementById('cardAtk');
+        if (spellAb) {
+          const mod = abilityMod(p.abilities[spellAb]);
+          if (cardIncant) { cardIncant.style.display = ''; cardIncant.querySelector('.top-value').textContent = fmtSignedMod(mod); }
+          if (cardDD) { cardDD.style.display = ''; cardDD.querySelector('.top-value').textContent = 8 + profBonus + mod; }
+          if (cardAtk) { cardAtk.style.display = ''; cardAtk.querySelector('.top-value').textContent = fmtSignedMod(profBonus + mod); }
+        } else {
+          [cardIncant, cardDD, cardAtk].forEach(c => { if (c) c.style.display = 'none'; });
+        }
+      }
+
+      const HIT_DIE_BY_CLASS = { Barbare: 12, Guerrier: 10, Paladin: 10, Rôdeur: 10, Barde: 8, Clerc: 8, Druide: 8, Moine: 8, Roublard: 8, Occultiste: 8, Magicien: 6, Ensorceleur: 6, Artificier: 8 };
+      hitDiceTotal = p.level || 1;
+      hitDiceDie = HIT_DIE_BY_CLASS[p.classe1] || 8;
+      hitDiceUsed = 0;
+      renderHitDice();
+
+      const histTexts = [p.origine, p.avantAventure, p.ellipse];
+      ['hist1', 'hist2', 'hist3'].forEach((id, i) => {
+        const el = document.querySelector('#' + id + ' .history-body p');
+        if (el) el.textContent = histTexts[i] || '(non renseigné)';
+      });
     } catch (e) {
       console.error('Erreur application identité joueur', e);
     }
