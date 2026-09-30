@@ -3700,6 +3700,8 @@
     currentActionTargetId = playerId;
     renderStateGrid();
     openModal('modalEtat');
+    const pRef = players.find(pl => pl.id === playerId);
+    if (pRef) sbRefreshConditions(pRef, () => { renderStateGrid(); renderPlayerDetail(); });
   }
   function renderStateGrid() {
     const p = players.find(pl => pl.id === currentActionTargetId);
@@ -3721,11 +3723,38 @@
         }
         renderStateGrid();
         renderPlayerDetail();
+        sbSaveConditions(p);
       });
       grid.appendChild(btn);
     });
   }
 
+
+  // Enregistre états + épuisement dans la fiche Supabase (relue juste avant pour ne rien écraser côté joueur)
+  function sbSaveConditions(p) {
+    if (!sb) { showToast('Hors ligne : modification non enregistrée'); return; }
+    sb.from('joueurs').select('data').eq('id', p.id).single().then(({ data, error }) => {
+      if (error) { showToast(`⚠️ Impossible de lire la fiche de ${p.name}`); return; }
+      const playerData = (data && data.data) || {};
+      playerData.states = p.states.slice();
+      playerData.exhaustion = p.exhaustion;
+      if (playerData.appData) delete playerData.appData.exhaustionLevel; // ancienne valeur bloquée
+      sb.from('joueurs').update({ data: playerData }).eq('id', p.id).then(({ error: err2 }) => {
+        if (err2) showToast(`⚠️ Non sauvegardé (${err2.message})`);
+      });
+    });
+  }
+  // Relit états + épuisement actuels (le joueur a pu changer son épuisement de son côté)
+  function sbRefreshConditions(p, then) {
+    if (!sb) { then && then(); return; }
+    sb.from('joueurs').select('data').eq('id', p.id).single().then(({ data }) => {
+      if (data && data.data) {
+        p.states = Array.isArray(data.data.states) ? data.data.states : [];
+        p.exhaustion = parseInt(data.data.exhaustion, 10) || 0;
+      }
+      then && then();
+    });
+  }
 
   /* ===================== MODAL: ÉPUISEMENT ===================== */
   function openEpuisementModal(playerId) {
@@ -3734,6 +3763,11 @@
     document.getElementById('epuisementTargetName').textContent = `${p.name} — niveau actuel : ${p.exhaustion}`;
     document.getElementById('epuisementCurrentValue').textContent = p.exhaustion;
     openModal('modalEpuisement');
+    sbRefreshConditions(p, () => {
+      document.getElementById('epuisementTargetName').textContent = `${p.name} — niveau actuel : ${p.exhaustion}`;
+      document.getElementById('epuisementCurrentValue').textContent = p.exhaustion;
+      renderPlayerDetail();
+    });
   }
   function adjustEpuisement(delta) {
     const p = players.find(pl => pl.id === currentActionTargetId);
@@ -3742,6 +3776,8 @@
     document.getElementById('epuisementTargetName').textContent = `${p.name} — niveau actuel : ${p.exhaustion}`;
     showToast(`Épuisement de ${p.name} : niveau ${p.exhaustion}`);
     renderPlayerDetail();
+    clearTimeout(adjustEpuisement._t);
+    adjustEpuisement._t = setTimeout(() => sbSaveConditions(p), 600);
   }
 
   /* ===================== MODAL: SORT ===================== */
@@ -5268,7 +5304,8 @@
     const weaponProfs = [];
     weaponCategories.forEach(cat => {
       const wholeCategory = document.getElementById('wcat_' + cat.key).checked;
-      if (wholeCategory) { weaponProfs.push(cat.label); return; } // toute la catégorie : inutile de lister chaque arme
+      const allItemsChecked = cat.items.every((it, i) => { const el = document.getElementById(`witem_${cat.key}_${i}`); return el && el.checked; });
+      if (wholeCategory || allItemsChecked) { weaponProfs.push(cat.label); return; } // toute la catégorie : inutile de lister chaque arme
       cat.items.forEach((it, i) => { const el = document.getElementById(`witem_${cat.key}_${i}`); if (el && el.checked) weaponProfs.push(it); });
     });
     const armorProfs = armorCategories.filter((a, i) => document.getElementById('warmor_' + i).checked);

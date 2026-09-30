@@ -2060,6 +2060,7 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
+#page-sorts .caster-label { font-size: 12.5px; color: var(--ink-dim, var(--ink)); margin: 0 0 6px 2px; letter-spacing: .02em; }
 #page-sorts .top-card .top-icon-inline { width: 24px; height: 24px; color: var(--ink); margin-bottom: 6px; }
 #page-sorts .top-card .top-value { font-family: var(--font-display); font-size: 20px; color: var(--ink); }
 #page-sorts .top-card .tooltip-pop {
@@ -5230,15 +5231,32 @@
       if (typeof renderCombatList === 'function') renderCombatList();
     }
     if (typeof updateExhaustionWarnings === 'function') updateExhaustionWarnings();
+    if (typeof persistExhaustion === 'function') persistExhaustion();
     if (window.InventaireTab && window.InventaireTab.companionLongRest) window.InventaireTab.companionLongRest();
     if (window.InventaireTab && window.InventaireTab.resetItemUsesOnLongRest) window.InventaireTab.resetItemUsesOnLongRest();
     showToast('Repos long effectué');
   }
 
   /* ===================== ACTIVE STATES (+ ÉPUISEMENT) ===================== */
-  const states = [
-    {name: "Entravé", effect: "Vitesse réduite à 0, désavantage aux jets d'attaque, les attaques contre vous ont l'avantage."},
-  ];
+  // Effets des états (pour l'infobulle). La liste des états actifs vient de la fiche (champ "states", géré par le MJ).
+  const STATE_EFFECTS = {
+    "Aveuglé": "Échec automatique aux jets nécessitant la vue. Désavantage à vos attaques, avantage aux attaques contre vous.",
+    "Charmé": "Vous ne pouvez pas attaquer le charmeur. Il a l'avantage à ses jets sociaux contre vous.",
+    "Assourdi": "Échec automatique aux jets nécessitant l'ouïe.",
+    "Effrayé": "Désavantage aux jets de caractéristique et d'attaque tant que la source est visible. Vous ne pouvez pas vous en approcher.",
+    "Agrippé": "Vitesse réduite à 0.",
+    "Entravé": "Vitesse réduite à 0, désavantage aux jets d'attaque et de sauvegarde de Dextérité, les attaques contre vous ont l'avantage.",
+    "Entravé (zone)": "Vitesse réduite à 0 dans la zone, désavantage aux jets d'attaque, les attaques contre vous ont l'avantage.",
+    "Incapable d'agir": "Aucune action ni réaction possible.",
+    "Neutralisé": "Aucune action ni réaction possible.",
+    "Invisible": "Avantage à vos attaques, désavantage aux attaques contre vous.",
+    "Paralysé": "Incapable d'agir, ni bouger ni parler. Échec auto aux JS de Force et Dextérité. Toute attaque à 1,50 m est un critique.",
+    "Pétrifié": "Transformé en pierre : incapable d'agir, résistance à tous les dégâts, immunisé au poison et aux maladies.",
+    "Empoisonné": "Désavantage aux jets d'attaque et de caractéristique.",
+    "À terre": "Déplacement en rampant. Désavantage à vos attaques. Avantage aux attaques à 1,50 m contre vous, désavantage au-delà.",
+    "Assommé": "Incapable d'agir, ne peut pas bouger, parle difficilement. Échec auto aux JS de Force et Dextérité.",
+  };
+  let states = [];
 
   const exhaustionEffects = [
     "Désavantage aux jets de caractéristique",
@@ -5249,7 +5267,7 @@
     "Mort",
   ];
 
-  let exhaustionLevel = 2; // valeur de démo
+  let exhaustionLevel = 0;
   window.AppData = window.AppData || {};
   window.AppData.exhaustionLevel = exhaustionLevel;
 
@@ -5263,7 +5281,7 @@
   function renderStates() {
     statesRow.innerHTML = '';
 
-    const allStates = [...states];
+    const allStates = states.map(n => ({ name: n, effect: STATE_EFFECTS[n] || '' }));
     if (exhaustionLevel > 0) {
       allStates.push({
         name: `Épuisement : ${exhaustionLevel}`,
@@ -5306,6 +5324,22 @@
 
   renderStates();
 
+  // Applique les états / l'épuisement venant de la fiche (source unique : data.states et data.exhaustion)
+  function applyConditionsFromData(d) {
+    if (!d) return;
+    const newStates = Array.isArray(d.states) ? d.states.slice() : [];
+    const newExh = Math.max(0, Math.min(6, parseInt(d.exhaustion, 10) || 0));
+    const changed = newExh !== exhaustionLevel || JSON.stringify(newStates) !== JSON.stringify(states);
+    states = newStates;
+    exhaustionLevel = newExh;
+    window.AppData.exhaustionLevel = exhaustionLevel;
+    if (!changed) return;
+    renderStates();
+    if (typeof buildCombatItems === 'function') combatItems = buildCombatItems();
+    if (typeof renderCombatList === 'function') renderCombatList();
+    if (typeof updateExhaustionWarnings === 'function') updateExhaustionWarnings();
+  }
+
   function changeExhaustion(delta) {
     exhaustionLevel = Math.max(0, Math.min(6, exhaustionLevel + delta));
     window.AppData.exhaustionLevel = exhaustionLevel;
@@ -5313,6 +5347,7 @@
     if (typeof buildCombatItems === 'function') combatItems = buildCombatItems();
     renderCombatList();
     if (typeof updateExhaustionWarnings === 'function') updateExhaustionWarnings();
+    if (typeof persistExhaustion === 'function') persistExhaustion();
   }
 
   function makeWarnBadge(text) {
@@ -6003,8 +6038,8 @@
 
   /* ============ INVENTAIRE SCRIPT ============ */
 /* ===================== DATA ===================== */
-  const strengthScore = 12;
-  const maxCarryWeight = strengthScore * 7.5; // kg
+  let strengthScore = 10; // remplacé par la Force réelle du personnage au chargement
+  let maxCarryWeight = strengthScore * 7.5; // kg (Force x 7,5)
 
   let coins = { pp: 2, po: 34, pe: 0, pa: 15, pc: 40 };
 
@@ -6670,7 +6705,7 @@
       items: items, coins: coins, currentHp: currentHp, maxHp: maxHp, usedSlots: usedSlots,
       knownSpellNames: knownSpellNames,
       appData: {
-        exhaustionLevel: window.AppData.exhaustionLevel, capacities: window.AppData.capacities,
+        capacities: window.AppData.capacities,
         companionInCombat: window.AppData.companionInCombat, computedCA: window.AppData.computedCA,
       },
     };
@@ -6687,7 +6722,11 @@
       Object.keys(usedSlots).forEach(k => usedSlots[k] = 0);
       if (saved.usedSlots) Object.assign(usedSlots, saved.usedSlots);
       knownSpellNames.length = 0; if (saved.knownSpellNames) knownSpellNames.push(...saved.knownSpellNames);
-      if (saved.appData) Object.assign(window.AppData, saved.appData);
+      if (saved.appData) {
+        const { exhaustionLevel: _oldExh, ...rest } = saved.appData; // ancienne valeur (démo) ignorée
+        Object.assign(window.AppData, rest);
+      }
+      applyConditionsFromData(saved);
       renderCategories(); renderItemList(); renderWeight(); renderWallet(); updateComputedCA();
       if (typeof renderAll === 'function') renderAll();
       if (typeof renderCapacities === 'function') renderCapacities();
@@ -6707,6 +6746,83 @@
   function abilityMod(score) { return Math.floor((score - 10) / 2); }
   function fmtSignedMod(n) { return (n >= 0 ? '+' : '') + n; }
   function profBonusForLevel(level) { return Math.ceil(level / 4) + 1; }
+
+  // Catégories d'armes (identiques à la console MJ) : si une catégorie est maîtrisée,
+  // on n'affiche que son nom, pas chacune des armes qu'elle contient.
+  const WEAPON_CATEGORIES = [
+    { label: 'Armes courantes (mêlée)', items: ['Bâton', 'Dague', 'Gourdin', 'Hachette', 'Javeline', 'Lance', 'Marteau léger', "Masse d'armes", 'Massue', 'Serpe'] },
+    { label: 'Armes courantes (distance)', items: ['Arbalète légère', 'Arc court', 'Fléchette', 'Fronde'] },
+    { label: 'Armes de guerre (mêlée)', items: ['Cimeterre', 'Épée courte', 'Épée longue', 'Épée à deux mains', "Fléau d'armes", 'Coutille', 'Hache à deux mains', "Hache d'armes", 'Hallebarde', "Lance d'arçon", 'Maillet', 'Morgenstern', 'Pic de guerre', 'Pique', 'Rapière', 'Trident', 'Fouet', 'Marteau de guerre'] },
+    { label: 'Armes de guerre (distance)', items: ['Arbalète de poing', 'Arbalète lourde', 'Arc long', 'Filet', 'Sarbacane'] },
+  ];
+  function collapseWeaponProfs(list) {
+    if (!list || !list.length) return list;
+    const set = new Set(list);
+    // Toutes les armes d'une catégorie cochées une par une = la catégorie entière
+    WEAPON_CATEGORIES.forEach(c => { if (c.items.every(it => set.has(it))) set.add(c.label); });
+    const hidden = new Set();
+    WEAPON_CATEGORIES.forEach(c => { if (set.has(c.label)) c.items.forEach(it => hidden.add(it)); });
+    let out = [...set].filter(x => !hidden.has(x));
+    // Mêlée + distance d'une même famille -> un seul libellé
+    [['Armes courantes', 0, 1], ['Armes de guerre', 2, 3]].forEach(([name, a, b]) => {
+      const la = WEAPON_CATEGORIES[a].label, lb = WEAPON_CATEGORIES[b].label;
+      if (out.includes(la) && out.includes(lb)) {
+        const idx = out.indexOf(la);
+        out = out.filter(x => x !== la && x !== lb);
+        out.splice(idx, 0, name);
+      }
+    });
+    return out;
+  }
+
+  const ABILITY_FULL = { for: 'Force', dex: 'Dextérité', con: 'Constitution', int: 'Intelligence', sag: 'Sagesse', cha: 'Charisme' };
+  function renderCasterRows(p, profBonus) {
+    const firstRow = document.getElementById('cardAtk')?.closest('.top-row');
+    if (!firstRow) return;
+    document.getElementById('topRowCasterC2')?.remove();
+    document.querySelectorAll('.caster-label').forEach(el => el.remove());
+    const casters = [p.classe1, p.classe2].filter(c => c && SPELL_ABILITY_BY_CLASS[c]);
+    const cards = [...firstRow.children];
+    if (!casters.length) { firstRow.style.display = 'none'; return; }
+    firstRow.style.display = '';
+    cards.forEach(c => c.style.display = '');
+    const fillRow = (row, cls) => {
+      const ab = SPELL_ABILITY_BY_CLASS[cls];
+      const mod = abilityMod(p.abilities[ab]);
+      const [ic, dd, atk] = row.children;
+      ic.querySelector('.top-value').textContent = fmtSignedMod(mod);
+      ic.querySelector('.tooltip-pop').textContent = `Caractéristique d'incantation ${cls} (${ABILITY_FULL[ab]})`;
+      dd.querySelector('.top-value').textContent = 8 + profBonus + mod;
+      dd.querySelector('.tooltip-pop').textContent = `DD de sauvegarde des sorts (${cls})`;
+      atk.querySelector('.top-value').textContent = fmtSignedMod(profBonus + mod);
+      atk.querySelector('.tooltip-pop').textContent = `Bonus d'attaque des sorts (${cls})`;
+    };
+    const makeLabel = (cls) => {
+      const l = document.createElement('div');
+      l.className = 'caster-label';
+      l.textContent = `${cls} (${ABILITY_FULL[SPELL_ABILITY_BY_CLASS[cls]]})`;
+      return l;
+    };
+    fillRow(firstRow, casters[0]);
+    if (casters.length > 1) {
+      firstRow.before(makeLabel(casters[0]));
+      const second = firstRow.cloneNode(true);
+      second.id = 'topRowCasterC2';
+      [...second.children].forEach(c => c.removeAttribute('id'));
+      fillRow(second, casters[1]);
+      const lab2 = makeLabel(casters[1]);
+      lab2.style.marginTop = '14px';
+      firstRow.after(lab2);
+      lab2.after(second);
+      // les infobulles du clone doivent réagir au clic comme l'original
+      [...second.children].forEach(card => card.addEventListener('click', e => {
+        e.stopPropagation();
+        const open = card.classList.contains('show-tip');
+        document.querySelectorAll('#page-sorts .top-card').forEach(c => c.classList.remove('show-tip'));
+        if (!open) card.classList.add('show-tip');
+      }));
+    }
+  }
 
   function applyIdentity(p) {
     if (!p) return;
@@ -6807,16 +6923,7 @@
         const percEl = document.querySelector('.perception-number');
         if (percEl) percEl.textContent = passivePerception;
 
-        const spellAb = SPELL_ABILITY_BY_CLASS[p.classe1];
-        const cardIncant = document.getElementById('cardIncant'), cardDD = document.getElementById('cardDD'), cardAtk = document.getElementById('cardAtk');
-        if (spellAb) {
-          const mod = abilityMod(p.abilities[spellAb]);
-          if (cardIncant) { cardIncant.style.display = ''; cardIncant.querySelector('.top-value').textContent = fmtSignedMod(mod); }
-          if (cardDD) { cardDD.style.display = ''; cardDD.querySelector('.top-value').textContent = 8 + profBonus + mod; }
-          if (cardAtk) { cardAtk.style.display = ''; cardAtk.querySelector('.top-value').textContent = fmtSignedMod(profBonus + mod); }
-        } else {
-          [cardIncant, cardDD, cardAtk].forEach(c => { if (c) c.style.display = 'none'; });
-        }
+        if (typeof renderCasterRows === 'function') renderCasterRows(p, profBonus);
       }
 
       const HIT_DIE_BY_CLASS = { Barbare: 12, Guerrier: 10, Paladin: 10, Rôdeur: 10, Barde: 8, Clerc: 8, Druide: 8, Moine: 8, Roublard: 8, Occultiste: 8, Magicien: 6, Ensorceleur: 6, Artificier: 8 };
@@ -6824,6 +6931,12 @@
       hitDiceDie = HIT_DIE_BY_CLASS[p.classe1] || 8;
       hitDiceUsed = 0;
       renderHitDice();
+
+      if (p.abilities && p.abilities.for != null) {
+        strengthScore = Number(p.abilities.for) || 10;
+        maxCarryWeight = strengthScore * 7.5;
+        if (typeof renderWeight === 'function') renderWeight();
+      }
 
       const histTexts = [p.origine, p.avantAventure, p.ellipse];
       ['hist1', 'hist2', 'hist3'].forEach((id, i) => {
@@ -6854,7 +6967,7 @@
       };
       fillProfList('profLangues', p.languages);
       fillProfList('profOutils', p.toolProfs);
-      fillProfList('profArmes', p.weaponProfs);
+      fillProfList('profArmes', collapseWeaponProfs(p.weaponProfs));
       fillProfList('profArmures', p.armorProfs);
 
       // Remises à zéro : tableau de chasse, compagnon, concentration, messages.
@@ -6872,24 +6985,6 @@
       const compBtn = document.getElementById('companionBtn');
       if (compBtn) compBtn.style.display = 'none';
 
-      // Bandeau incantation : un second si multiclasse et que la seconde classe est aussi lanceuse de sorts
-      const cardAtkEl = document.getElementById('cardAtk');
-      const existingSecond = document.getElementById('topRowCasterC2');
-      if (existingSecond) existingSecond.remove();
-      if (p.classe2 && p.abilities && SPELL_ABILITY_BY_CLASS[p.classe2] && cardAtkEl) {
-        const profBonus2 = profBonusForLevel(p.level || 1);
-        const mod2 = abilityMod(p.abilities[SPELL_ABILITY_BY_CLASS[p.classe2]]);
-        const secondRow = cardAtkEl.closest('.top-row').cloneNode(true);
-        secondRow.id = 'topRowCasterC2';
-        secondRow.style.marginTop = '10px';
-        const [ic2, dd2, atk2] = secondRow.children;
-        ic2.removeAttribute('id'); dd2.removeAttribute('id'); atk2.removeAttribute('id');
-        ic2.querySelector('.tooltip-pop').textContent = `Caractéristique d'incantation (${p.classe2})`;
-        ic2.querySelector('.top-value').textContent = fmtSignedMod(mod2);
-        dd2.querySelector('.top-value').textContent = 8 + profBonus2 + mod2;
-        atk2.querySelector('.top-value').textContent = fmtSignedMod(profBonus2 + mod2);
-        cardAtkEl.closest('.top-row').after(secondRow);
-      }
     } catch (e) {
       console.error('Erreur application identité joueur', e);
     }
@@ -6901,14 +6996,38 @@
   function schedulePlayerStateSave() {
     if (!sb || !window._gatePlayerId) return;
     clearTimeout(playerStateSaveTimer);
-    playerStateSaveTimer = setTimeout(() => {
-      // On fusionne l'état courant DANS les données complètes déjà connues (identité comprise),
-      // jamais un remplacement total — sinon on écrase l'identité enregistrée par la console MJ.
+    playerStateSaveTimer = setTimeout(async () => {
+      // On relit la fiche juste avant d'écrire : les états et l'épuisement modifiés par le MJ
+      // entre-temps sont repris (et affichés) au lieu d'être écrasés.
+      const { data: fresh } = await sb.from('joueurs').select('data').eq('id', window._gatePlayerId).single();
+      if (fresh && fresh.data) {
+        window._fullPlayerData = fresh.data;
+        if (!exhaustionDirty) applyConditionsFromData(fresh.data);
+      }
       Object.assign(window._fullPlayerData, collectPlayerState());
+      window._fullPlayerData.states = states;
+      window._fullPlayerData.exhaustion = exhaustionLevel;
+      if (window._fullPlayerData.appData) delete window._fullPlayerData.appData.exhaustionLevel;
+      exhaustionDirty = false;
       sb.from('joueurs').update({ data: window._fullPlayerData }).eq('id', window._gatePlayerId).then(({ error }) => {
         if (error) console.error('Supabase joueurs update (état):', error);
       });
     }, 1500);
+  }
+
+  // Le joueur a lui-même changé son épuisement (repos long, poids dépassé…) : à enregistrer tel quel.
+  let exhaustionDirty = false;
+  function persistExhaustion() { exhaustionDirty = true; schedulePlayerStateSave(); }
+
+  // Récupère régulièrement les états / l'épuisement posés par le MJ
+  async function pollConditions() {
+    if (!sb || !window._gatePlayerId || exhaustionDirty) return;
+    const { data } = await sb.from('joueurs').select('data').eq('id', window._gatePlayerId).single();
+    if (data && data.data && !exhaustionDirty) {
+      window._fullPlayerData.states = data.data.states || [];
+      window._fullPlayerData.exhaustion = data.data.exhaustion || 0;
+      applyConditionsFromData(data.data);
+    }
   }
 
   (async function loadOwnPlayerState() {
@@ -6926,6 +7045,7 @@
       knownSpellNames.length = 0;
       concentrationSpellId = null;
       window.AppData.companionInCombat = false;
+      applyConditionsFromData({ states: [], exhaustion: 0 });
       renderCategories(); renderItemList(); renderWeight(); renderWallet(); updateComputedCA();
       if (typeof renderAll === 'function') renderAll();
       if (typeof updateConcBadge === 'function') updateConcBadge();
@@ -6933,6 +7053,7 @@
     }
     // Sauvegarde automatique périodique, en plus des sauvegardes déclenchées par les actions.
     setInterval(schedulePlayerStateSave, 20000);
+    setInterval(pollConditions, 8000);
   })();
 
 </script>
