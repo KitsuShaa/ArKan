@@ -3583,7 +3583,7 @@
       <div class="player-banner">
         <h2>${p.name}${p.active === false ? ' <span style="font-size:11px; color:var(--ink-faint); font-family:var(--font-sans); text-transform:uppercase;">— désactivé</span>' : ''}</h2>
         <div class="banner-link-group">
-          <div class="banner-item">Lien : <strong>${p.link}</strong><button class="copy-btn" onclick="copyText('${p.link}')">Copier</button><a class="copy-btn" href="${p.link}" target="_blank" rel="noopener" style="text-decoration:none; display:inline-block;">Ouvrir la fiche ↗</a></div>
+          <div class="banner-item">Lien : <strong>${p.link}</strong><button class="copy-btn" onclick="copyText('${p.link}')">Copier</button></div>
           <div class="banner-item">Code : <strong>${p.code}</strong><button class="copy-btn" onclick="copyText('${p.code}')">Copier</button></div>
           <button class="copy-btn" style="${p.active === false ? 'color:var(--success); border-color:var(--success);' : 'color:var(--garnet); border-color:var(--garnet);'}" onclick="toggleCharacterActive('${p.id}')">${p.active === false ? '↩️ Réactiver' : '🚫 Désactiver'}</button>
           <button class="copy-btn" style="color:var(--garnet); border-color:var(--garnet);" onclick="deletePlayerCharacter('${p.id}')">🗑️ Supprimer définitivement</button>
@@ -3626,11 +3626,11 @@
           </div>
 
           <div class="quad-actions">
-            <div class="quad-btn" onclick="showToast('Ouvre le sélecteur de thème pour ${p.name}')">
+            <div class="quad-btn" onclick="openPlayerThemeModal('${p.id}')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
               Thème
             </div>
-            <div class="quad-btn" onclick="showToast('Ouvre la fiche de ${p.name} en lecture, comme si tu étais lui')">
+            <div class="quad-btn" onclick="openPlayerSheet('${p.id}')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
               Voir
             </div>
@@ -3681,6 +3681,67 @@
         </div>
       </div>
     `;
+  }
+
+  /* ===================== THÈME D'UN JOUEUR ===================== */
+  function sbSetPlayerTheme(p, hex) {
+    p.themeColor = hex;
+    if (!sb) { showToast('Hors ligne : thème non enregistré'); return; }
+    sb.from('joueurs').select('data').eq('id', p.id).single().then(({ data, error }) => {
+      if (error) { showToast(`⚠️ Impossible de lire la fiche de ${p.name}`); return; }
+      const playerData = (data && data.data) || {};
+      playerData.themeColor = hex;
+      sb.from('joueurs').update({ data: playerData }).eq('id', p.id).then(({ error: err2 }) => {
+        if (err2) { showToast(`⚠️ Non sauvegardé (${err2.message})`); return; }
+        const c = themeColors.find(t => t.hex === hex);
+        showToast(`Thème de ${p.name} : ${c ? c.name : hex}`);
+      });
+    });
+  }
+  function openPlayerThemeModal(playerId) {
+    const p = players.find(pl => pl.id === playerId);
+    if (!p) return;
+    let modal = document.getElementById('modalPlayerTheme');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.className = 'modal-backdrop';
+      modal.id = 'modalPlayerTheme';
+      modal.innerHTML = `<div class="modal-box">
+        <h3>Thème de la fiche</h3>
+        <div class="modal-sub" id="playerThemeTarget"></div>
+        <div class="theme-grid" id="playerThemeGrid"></div>
+        <button class="modal-cancel-btn" onclick="closeModal('modalPlayerTheme')">Fermer</button>
+      </div>`;
+      modal.addEventListener('click', e => { if (e.target === modal) closeModal('modalPlayerTheme'); });
+      document.body.appendChild(modal);
+    }
+    document.getElementById('playerThemeTarget').textContent = 'Couleur d\'accent de la fiche de ' + p.name;
+    const grid = document.getElementById('playerThemeGrid');
+    const draw = () => {
+      grid.innerHTML = '';
+      themeColors.forEach(c => {
+        const sw = document.createElement('div');
+        sw.className = 'theme-swatch' + (p.themeColor === c.hex ? ' selected' : '');
+        sw.style.background = c.hex;
+        sw.title = c.name;
+        sw.addEventListener('click', () => { sbSetPlayerTheme(p, c.hex); draw(); });
+        grid.appendChild(sw);
+      });
+    };
+    draw();
+    openModal('modalPlayerTheme');
+  }
+
+  /* ===================== VOIR LA FICHE DU JOUEUR ===================== */
+  function playerSheetUrl(p) {
+    return window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + `joueur.html?j=${encodeURIComponent(p.id)}`;
+  }
+  function openPlayerSheet(playerId) {
+    const p = players.find(pl => pl.id === playerId);
+    if (!p) return;
+    // Même site que la console : on évite au MJ de retaper le code du joueur
+    try { localStorage.setItem('playerAuthenticated_' + p.id, 'yes'); } catch (e) {}
+    window.open(playerSheetUrl(p) + '&vue=mj', '_blank', 'noopener');
   }
 
   function toggleInspiration(playerId) {
@@ -3790,20 +3851,35 @@
     openModal('modalSort');
   }
   function renderSpellResults() {
-    const q = document.getElementById('sortSearchInput').value.toLowerCase();
+    const norm = t => (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm(document.getElementById('sortSearchInput').value.trim());
     const list = document.getElementById('sortResults');
-    if (!q) { list.innerHTML = '<div style="padding:12px;color:var(--ink-faint);font-size:12.5px;">Tape le nom d\'un sort.</div>'; return; }
-    const results = spellsDb.filter(s => s.name.toLowerCase().includes(q));
-    list.innerHTML = results.map(s => `
-      <div class="modal-list-row">
-        <span>${s.name} <span style="color:var(--ink-faint);">(niv. ${s.level})</span></span>
-        <button class="modal-add-btn" onclick="confirmAddSpell('${s.name}')">+</button>
-      </div>
-    `).join('') || '<div style="padding:12px;color:var(--ink-faint);font-size:12.5px;">Aucun résultat.</div>';
-  }
-  function confirmAddSpell(name) {
     const p = players.find(pl => pl.id === currentActionTargetId);
-    showToast(`« ${name} » ajouté aux sorts de ${p.name}`);
+    const known = (p && p.knownSpellNames) || [];
+    if (!q) { list.innerHTML = `<div style="padding:12px;color:var(--ink-faint);font-size:12.5px;">Tape le nom d'un sort (${spellsDatabase.length} dans le module Sorts).</div>`; return; }
+    const results = spellsDatabase
+      .filter(s => norm(s.name).includes(q))
+      .sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name, 'fr'))
+      .slice(0, 60);
+    list.innerHTML = results.map(s => {
+      const has = known.includes(s.name);
+      const lvl = s.level === 0 ? 'mineur' : `niv. ${s.level}`;
+      const cls = (s.classes || []).join(', ');
+      return `
+      <div class="modal-list-row">
+        <span>${s.name} <span style="color:var(--ink-faint);">(${lvl}${cls ? ' — ' + cls : ''})</span></span>
+        ${has ? '<span style="color:var(--ink-faint);font-size:11.5px;">Déjà connu</span>'
+              : `<button class="modal-add-btn" onclick="confirmAddSpell('${s.id}')">+</button>`}
+      </div>`;
+    }).join('') || '<div style="padding:12px;color:var(--ink-faint);font-size:12.5px;">Aucun sort de ce nom dans le module Sorts.</div>';
+  }
+  function confirmAddSpell(spellId) {
+    const p = players.find(pl => pl.id === currentActionTargetId);
+    const s = spellsDatabase.find(sp => sp.id === spellId);
+    if (!p || !s) return;
+    p.knownSpellNames = [...new Set([...(p.knownSpellNames || []), s.name])]; // affichage immédiat
+    sbAttribuerSort(p, s);
+    renderSpellResults();
   }
 
   /* ===================== MODAL: OBJET ===================== */
@@ -3815,24 +3891,59 @@
     renderItemResults();
     openModal('modalObjet');
   }
-  function renderItemResults() {
-    const q = document.getElementById('objetSearchInput').value.toLowerCase();
-    const list = document.getElementById('objetResults');
-    if (!q) { list.innerHTML = '<div style="padding:12px;color:var(--ink-faint);font-size:12.5px;">Tape le nom d\'un objet.</div>'; return; }
-    const results = itemsDb.filter(it => it.name.toLowerCase().includes(q));
-    list.innerHTML = results.map(it => `
-      <div class="modal-list-row">
-        <span>${it.name} <span style="color:var(--ink-faint);">(${it.price})</span></span>
-        <div style="display:flex; gap:6px;">
-          <button class="modal-add-btn" style="width:auto;padding:0 10px;border-radius:14px;font-size:10.5px;" onclick="confirmAddItem('${it.name}', false)">Butin</button>
-          <button class="modal-add-btn" style="width:auto;padding:0 10px;border-radius:14px;font-size:10.5px;" onclick="confirmAddItem('${it.name}', true)">Achat</button>
-        </div>
-      </div>
-    `).join('') || '<div style="padding:12px;color:var(--ink-faint);font-size:12.5px;">Aucun résultat.</div>';
+  // Prix "15 po" -> valeur en pièces de cuivre
+  const COIN_VALUE_PC = { pc: 1, pa: 10, pe: 50, po: 100, pp: 1000 };
+  function priceToPc(prix) {
+    const m = String(prix || '').replace(',', '.').match(/(\d+(?:\.\d+)?)\s*(pp|po|pe|pa|pc)/i);
+    return m ? Math.round(parseFloat(m[1]) * COIN_VALUE_PC[m[2].toLowerCase()]) : null;
   }
-  function confirmAddItem(name, isPurchase) {
+  function renderItemResults() {
+    const norm = t => (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm(document.getElementById('objetSearchInput').value.trim());
+    const list = document.getElementById('objetResults');
+    const total = Object.values(objetsCategories).reduce((n, c) => n + c.db.length, 0);
+    if (!q) { list.innerHTML = `<div style="padding:12px;color:var(--ink-faint);font-size:12.5px;">Tape le nom d'un objet (${total} dans le module Objets).</div>`; return; }
+    const results = [];
+    Object.entries(objetsCategories).forEach(([cat, c]) => c.db.forEach(o => { if (norm(o.name).includes(q)) results.push({ cat, o, label: c.label }); }));
+    results.sort((a, b) => a.o.name.localeCompare(b.o.name, 'fr'));
+    list.innerHTML = results.slice(0, 60).map(({ cat, o, label }) => {
+      const canBuy = priceToPc(o.prix) != null;
+      return `
+      <div class="modal-list-row">
+        <span>${o.name} <span style="color:var(--ink-faint);">(${label}${o.prix ? ' — ' + o.prix : ''})</span></span>
+        <div style="display:flex; gap:6px;">
+          <button class="modal-add-btn" style="width:auto;padding:0 10px;border-radius:14px;font-size:10.5px;" onclick="confirmAddItem('${cat}', '${o.id}', false)">Butin</button>
+          ${canBuy ? `<button class="modal-add-btn" style="width:auto;padding:0 10px;border-radius:14px;font-size:10.5px;" onclick="confirmAddItem('${cat}', '${o.id}', true)">Achat</button>` : ''}
+        </div>
+      </div>`;
+    }).join('') || '<div style="padding:12px;color:var(--ink-faint);font-size:12.5px;">Aucun objet de ce nom dans le module Objets.</div>';
+  }
+  function confirmAddItem(cat, objetId, isPurchase) {
     const p = players.find(pl => pl.id === currentActionTargetId);
-    showToast(isPurchase ? `« ${name} » acheté pour ${p.name} (déduit de son portefeuille)` : `« ${name} » ajouté en butin à ${p.name}`);
+    const o = objetsCategories[cat] && objetsCategories[cat].db.find(ob => String(ob.id) === String(objetId));
+    if (!p || !o) return;
+    if (!isPurchase) { sbAttribuerObjet(p, cat, o); return; }
+    sbAcheterObjet(p, cat, o);
+  }
+  // Achat : on vérifie la bourse actuelle du joueur, puis objet + paiement partent ensemble dans sa boîte de réception
+  function sbAcheterObjet(p, cat, o) {
+    const cost = priceToPc(o.prix);
+    if (!sb) { showToast('Hors ligne : achat impossible'); return; }
+    sb.from('joueurs').select('data').eq('id', p.id).single().then(({ data, error }) => {
+      if (error) { showToast(`⚠️ Impossible de lire la fiche de ${p.name}`); return; }
+      const playerData = (data && data.data) || {};
+      const coins = playerData.coins || {};
+      const pendingCost = (playerData.pendingCoins || []).reduce((n, e) => n + (e.costPc || 0), 0);
+      const wallet = Object.keys(COIN_VALUE_PC).reduce((n, k) => n + (parseInt(coins[k]) || 0) * COIN_VALUE_PC[k], 0) - pendingCost;
+      if (wallet < cost) { showToast(`${p.name} n'a pas assez d'argent pour « ${o.name} » (${o.prix})`); return; }
+      const pid = 'p' + Date.now() + Math.random().toString(36).slice(2, 7);
+      playerData.pendingItems = [...(playerData.pendingItems || []), { pid, item: objetToPlayerItem(cat, o) }];
+      playerData.pendingCoins = [...(playerData.pendingCoins || []), { pid: pid + 'c', costPc: cost, label: o.name }];
+      sb.from('joueurs').update({ data: playerData }).eq('id', p.id).then(({ error: err2 }) => {
+        if (err2) { showToast(`⚠️ Non sauvegardé (${err2.message})`); return; }
+        showToast(`« ${o.name} » acheté pour ${p.name} (${o.prix} déduits)`);
+      });
+    });
   }
 
   /* ===================== MODAL: ARGENT ===================== */
@@ -4020,7 +4131,7 @@
         sw.className = 'theme-swatch' + (p.themeColor === c.hex ? ' selected' : '');
         sw.style.background = c.hex;
         sw.title = c.name;
-        sw.addEventListener('click', () => { p.themeColor = c.hex; renderParamPlayerThemes(); });
+        sw.addEventListener('click', () => { sbSetPlayerTheme(p, c.hex); renderParamPlayerThemes(); });
         grid.appendChild(sw);
       });
     });

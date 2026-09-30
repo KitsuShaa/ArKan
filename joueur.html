@@ -3469,7 +3469,7 @@
   </div>
 
   <div class="rest-row">
-    <button class="rest-btn short" onclick="showToast('Repos court effectué')">Repos court</button>
+    <button class="rest-btn short" onclick="triggerShortRest()">Repos court</button>
     <button class="rest-btn long" onclick="triggerLongRest()">Repos long</button>
   </div>
 
@@ -4447,10 +4447,23 @@
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  function applyTheme(hex) {
+  // Ouverte depuis la console MJ (bouton Voir) : lecture seule, rien n'est enregistré
+  const MJ_VIEW = new URLSearchParams(window.location.search).get('vue') === 'mj';
+  let lastThemeFromData = null;
+
+  function applyTheme(hex, fromData) {
     document.documentElement.style.setProperty('--gold', hex);
     document.documentElement.style.setProperty('--gold-soft', hexToRgba(hex, 0.18));
     try { localStorage.setItem('themeAccent', hex); } catch (e) {}
+    // Choix fait par le joueur : enregistré sur sa fiche (visible et modifiable par le MJ)
+    if (!fromData && sb && window._gatePlayerId && !MJ_VIEW) {
+      lastThemeFromData = hex;
+      sb.from('joueurs').select('data').eq('id', window._gatePlayerId).single().then(({ data }) => {
+        if (!data) return;
+        const d = data.data || {}; d.themeColor = hex;
+        sb.from('joueurs').update({ data: d }).eq('id', window._gatePlayerId);
+      });
+    }
   }
 
   function renderThemeGrid() {
@@ -4482,7 +4495,7 @@
   (function restoreTheme() {
     try {
       const saved = localStorage.getItem('themeAccent');
-      if (saved) applyTheme(saved);
+      if (saved) applyTheme(saved, true);
     } catch (e) {}
   })();
 
@@ -4718,19 +4731,9 @@
   renderClassChip();
 
   // ---- Capacités (avec toggle "Afficher en combat") ----
-  const capacities = [
-    { id: 'vision-nocturne', name: 'Vision dans le noir', group: 'Race — Elfe des bois', desc: "Vous voyez dans la pénombre jusqu'à 18 mètres comme s'il s'agissait de lumière vive, et dans l'obscurité comme s'il s'agissait de pénombre.", inCombat: false },
-    { id: 'pas-legers', name: 'Pas légers', group: 'Race — Elfe des bois', desc: "Vous pouvez tenter de vous cacher même lorsque vous n'êtes que légèrement masqué par du feuillage, de fortes précipitations, de la neige, du brouillard ou d'autres phénomènes naturels.", inCombat: false },
-    { id: 'ennemi-jure', name: 'Ennemi juré', group: 'Classe — Rôdeur', desc: "Vous avez un avantage significatif contre les mort-vivants : avantage aux jets de Survie pour les pister et aux jets d'Intelligence pour vous souvenir d'informations à leur sujet.", inCombat: true, combatSub: 'Avantage aux jets contre les morts-vivants' },
-    { id: 'style-archerie', name: 'Style de combat : Archerie', group: 'Classe — Rôdeur', desc: "Vous obtenez un bonus de +2 aux jets d'attaque effectués avec les armes à distance.", inCombat: false },
-    { id: 'grade-militaire', name: 'Grade militaire', group: "Historique — Soldat", desc: "Vous avez un grade reconnu dans une organisation militaire. Les soldats fidèles à cette organisation reconnaissent votre autorité et votre statut, et vous accordent une aide simple si nécessaire.", inCombat: false },
-  ];
+  const capacities = []; // remplies depuis la fiche du personnage
 
-  const capGroups = [
-    { title: 'Capacités de race — Elfe des bois', match: g => g.startsWith('Race') },
-    { title: 'Capacités de classe — Rôdeur', match: g => g.startsWith('Classe') },
-    { title: "Capacités d'historique — Soldat", match: g => g.startsWith('Historique') },
-  ];
+  const capGroups = [];
 
   function renderCapacities() {
     window.AppData = window.AppData || {};
@@ -4738,6 +4741,10 @@
 
     const container = document.getElementById('capacitiesContainer');
     container.innerHTML = '';
+    if (!capacities.length) {
+      container.innerHTML = '<p style="font-size:13px;color:var(--ink-faint);padding:8px 2px;">Aucune capacité renseignée sur la fiche.</p>';
+      return;
+    }
     capGroups.forEach(grp => {
       const items = capacities.filter(c => grp.match(c.group));
       if (items.length === 0) return;
@@ -4913,6 +4920,11 @@
 
   // ---- Toast ----
   
+  function triggerShortRest() {
+    const pact = window.SortsTab && window.SortsTab.resetPact && window.SortsTab.resetPact();
+    showToast(pact ? 'Repos court effectué — emplacements de pacte récupérés' : 'Repos court effectué');
+  }
+
   function triggerLongRest() {
     if (window.CombatTab && window.CombatTab.longRest) window.CombatTab.longRest();
     if (window.SortsTab && window.SortsTab.resetSlots) window.SortsTab.resetSlots();
@@ -5764,14 +5776,20 @@
     const out = {};
     for (let l = 1; l <= 9; l++) out[l] = 0;
     (MULTICLASS_SLOT_TABLE[Math.min(20, effective)] || []).forEach((n, i) => { out[i + 1] = n; });
-    // Occultiste : emplacements de pacte ajoutés au niveau de pacte
-    const pact = classes.find(([c]) => CASTING_TYPE[c] === 'pact');
-    if (pact) { const ps = PACT_SLOT_TABLE[Math.min(20, pact[1])]; if (ps) out[ps.lvl] += ps.n; }
     return out;
+  }
+  // Occultiste : emplacements de pacte, réserve à part (récupérée au repos court ET au repos long)
+  function computePactSlots(p) {
+    const classes = [[p.classe1, parseInt(p.niveau1) || (p.classe2 ? 0 : (p.level || 1))], [p.classe2, parseInt(p.niveau2) || 0]];
+    const pact = classes.find(([c, n]) => c && n > 0 && CASTING_TYPE[c] === 'pact');
+    if (!pact) return { lvl: 0, max: 0 };
+    const ps = PACT_SLOT_TABLE[Math.min(20, pact[1])];
+    return { lvl: ps.lvl, max: ps.n };
   }
 
   const maxSlots = {};
   const usedSlots = {};
+  const pactSlots = { lvl: 0, max: 0, used: 0 };
   for (let l = 1; l <= 9; l++) { maxSlots[l] = 0; usedSlots[l] = 0; }
 
   const spellSaveDD = 13;
@@ -5855,10 +5873,29 @@
       pip.className = 'pip' + (i < usedSlots[level] ? ' filled' : '');
       container.appendChild(pip);
     }
-    const maxLabel = document.createElement('span');
-    maxLabel.className = 'slot-max';
-    maxLabel.textContent = (maxSlots[level] - usedSlots[level]) + '/' + maxSlots[level];
-    container.appendChild(maxLabel);
+    if (maxSlots[level] > 0 || pactSlots.lvl !== level) {
+      const maxLabel = document.createElement('span');
+      maxLabel.className = 'slot-max';
+      maxLabel.textContent = (maxSlots[level] - usedSlots[level]) + '/' + maxSlots[level];
+      container.appendChild(maxLabel);
+    }
+    if (pactSlots.max > 0 && pactSlots.lvl === level) {
+      const tag = document.createElement('span');
+      tag.className = 'slot-max';
+      tag.style.marginLeft = maxSlots[level] > 0 ? '10px' : '0';
+      tag.textContent = 'Pacte';
+      container.appendChild(tag);
+      for (let i = 0; i < pactSlots.max; i++) {
+        const pip = document.createElement('div');
+        pip.className = 'pip' + (i < pactSlots.used ? ' filled' : '');
+        pip.style.borderRadius = '2px';
+        container.appendChild(pip);
+      }
+      const pl = document.createElement('span');
+      pl.className = 'slot-max';
+      pl.textContent = (pactSlots.max - pactSlots.used) + '/' + pactSlots.max;
+      container.appendChild(pl);
+    }
   }
 
   /* ===================== RENDER SPELL LISTS ===================== */
@@ -5905,7 +5942,7 @@
     wrap.innerHTML = '';
     for (let l = 1; l <= 9; l++) {
       const hasKnown = (spells[l] || []).some(sp => knownSpellNames.includes(sp.name));
-      if (!maxSlots[l] && !hasKnown) continue;
+      if (!maxSlots[l] && !hasKnown && pactSlots.lvl !== l) continue;
       const block = document.createElement('div');
       block.className = 'level-block';
       block.innerHTML = `
@@ -5973,10 +6010,16 @@
         return `<button class="upcast-chip ${rem <= 0 ? 'disabled' : ''}" ${rem <= 0 ? 'disabled' : ''} onclick="attemptCast('${s.id}', ${level}, ${l})">Nv.${l} (${rem})</button>`;
       }).join('');
 
+      const pactUsable = pactSlots.max > 0 && level <= pactSlots.lvl;
+      const pactRem = pactSlots.max - pactSlots.used;
+      const showGeneral = maxSlots[level] > 0 || higherLevels.length > 0 || !pactUsable;
       actions.innerHTML = `
-        <button class="cast-btn" ${remaining <= 0 ? 'disabled' : ''} onclick="attemptCast('${s.id}', ${level}, ${level})">
+        ${showGeneral ? `<button class="cast-btn" ${remaining <= 0 ? 'disabled' : ''} onclick="attemptCast('${s.id}', ${level}, ${level})">
           Lancer ${remaining <= 0 ? '(aucun emplacement)' : `(Nv.${level})`}
-        </button>
+        </button>` : ''}
+        ${pactUsable ? `<button class="${showGeneral ? 'cast-btn-secondary' : 'cast-btn'}" ${pactRem <= 0 ? 'disabled' : ''} onclick="attemptCast('${s.id}', ${level}, ${pactSlots.lvl}, true)">
+          ${pactRem <= 0 ? 'Aucun emplacement de pacte' : `Lancer avec un emplacement de pacte (Nv.${pactSlots.lvl}, ${pactRem} restant${pactRem > 1 ? 's' : ''})`}
+        </button>` : ''}
         ${higherLevels.length > 0 ? `
           <button class="cast-btn-secondary" onclick="toggleUpcast(this)">Lancer avec un emplacement supérieur</button>
           <div class="upcast-levels">${upcastChips}</div>
@@ -5996,7 +6039,7 @@
   }
 
   /* ===================== CASTING LOGIC ===================== */
-  function attemptCast(spellId, baseLevel, slotLevel) {
+  function attemptCast(spellId, baseLevel, slotLevel, usePact) {
     const s = spells[baseLevel].find(sp => sp.id === spellId);
 
     // Vérifie la concentration
@@ -6004,26 +6047,30 @@
       const oldSpell = findSpell(concentrationSpellId).spell;
       document.getElementById('concModalOldSpell').textContent = oldSpell.name;
       document.getElementById('concModalNewSpell').textContent = s.name;
-      pendingCast = { spellId, baseLevel, slotLevel };
+      pendingCast = { spellId, baseLevel, slotLevel, usePact };
       openModal('concModal');
       return;
     }
 
-    finalizeCast(spellId, baseLevel, slotLevel);
+    finalizeCast(spellId, baseLevel, slotLevel, usePact);
   }
 
   function confirmConcentrationSwitch() {
     closeModal('concModal');
     if (pendingCast) {
-      finalizeCast(pendingCast.spellId, pendingCast.baseLevel, pendingCast.slotLevel);
+      finalizeCast(pendingCast.spellId, pendingCast.baseLevel, pendingCast.slotLevel, pendingCast.usePact);
       pendingCast = null;
     }
   }
 
-  function finalizeCast(spellId, baseLevel, slotLevel) {
+  function finalizeCast(spellId, baseLevel, slotLevel, usePact) {
     const s = spells[baseLevel].find(sp => sp.id === spellId);
 
-    if (slotLevel > 0) {
+    if (usePact) {
+      pactSlots.used = Math.min(pactSlots.max, pactSlots.used + 1);
+      renderPips(pactSlots.lvl);
+      schedulePlayerStateSave();
+    } else if (slotLevel > 0) {
       usedSlots[slotLevel] = Math.min(maxSlots[slotLevel], usedSlots[slotLevel] + 1);
       renderPips(slotLevel);
       schedulePlayerStateSave();
@@ -6082,11 +6129,20 @@
 
   function resetAllSpellSlots() {
     Object.keys(usedSlots).forEach(lvl => { usedSlots[lvl] = 0; });
+    pactSlots.used = 0;
     for (let l = 1; l <= 9; l++) renderPips(l);
     schedulePlayerStateSave();
   }
+  // Repos court : seuls les emplacements de pacte reviennent
+  function resetPactSlots() {
+    if (!pactSlots.max) return false;
+    pactSlots.used = 0;
+    renderPips(pactSlots.lvl);
+    schedulePlayerStateSave();
+    return true;
+  }
 
-  window.SortsTab = { resetSlots: resetAllSpellSlots };
+  window.SortsTab = { resetSlots: resetAllSpellSlots, resetPact: resetPactSlots };
 
   /* ============ INVENTAIRE SCRIPT ============ */
 /* ===================== DATA ===================== */
@@ -6766,7 +6822,7 @@
     // copie indépendante : jamais de référence vers les tableaux vivants (items, pièces, emplacements)
     return JSON.parse(JSON.stringify({
       items: items, coins: coins, currentHp: currentHp, tempHp: tempHp, tempHpMax: tempHpMax,
-      usedSlots: usedSlots, hitDiceUsed: hitDiceUsed, concentrationSpellId: concentrationSpellId,
+      usedSlots: usedSlots, pactUsed: pactSlots.used, hitDiceUsed: hitDiceUsed, concentrationSpellId: concentrationSpellId,
       deathSaves: { success: countFilled('#successDots'), fail: countFilled('#failDots') },
       companion: {
         hp: compCurrentHp, hitDiceUsed: compHitDiceUsed,
@@ -6780,8 +6836,36 @@
     }));
   }
 
+  const COIN_PC = { pc: 1, pa: 10, pe: 50, po: 100, pp: 1000 };
+  function walletPc() { return Object.keys(COIN_PC).reduce((n, k) => n + (coins[k] || 0) * COIN_PC[k], 0); }
+  // Paie une somme (en pc) : d'abord avec la plus petite monnaie qui suffit, sinon on fait la monnaie
+  function payPc(cost) {
+    for (const k of ['pc', 'pa', 'pe', 'po', 'pp']) {
+      if (cost % COIN_PC[k] === 0 && (coins[k] || 0) * COIN_PC[k] >= cost) { coins[k] -= cost / COIN_PC[k]; return; }
+    }
+    let rest = Math.max(0, walletPc() - cost);
+    const keepPP = Math.min(coins.pp || 0, Math.floor(rest / 1000));
+    rest -= keepPP * 1000;
+    coins.pp = keepPP; coins.pe = 0;
+    coins.po = Math.floor(rest / 100); rest -= coins.po * 100;
+    coins.pa = Math.floor(rest / 10); rest -= coins.pa * 10;
+    coins.pc = rest;
+  }
+  function absorbPendingCoins(d) {
+    let changed = false;
+    ((d && d.pendingCoins) || []).forEach(e => {
+      if (!e || !e.pid || consumedPending.has(e.pid)) return;
+      consumedPending.add(e.pid);
+      if (e.costPc) payPc(e.costPc);
+      if (e.add) Object.keys(e.add).forEach(k => { if (k in coins) coins[k] = Math.max(0, (coins[k] || 0) + (parseInt(e.add[k]) || 0)); });
+      changed = true;
+    });
+    if (changed) { renderWallet(); schedulePlayerStateSave(); }
+  }
+
   // Objets envoyés par le MJ (boîte de réception "pendingItems") -> inventaire
   function absorbPendingItems(d) {
+    absorbPendingCoins(d);
     const pend = (d && d.pendingItems) || [];
     let added = 0, lastName = '';
     pend.forEach(entry => {
@@ -6803,6 +6887,7 @@
   // Données tenues par le MJ : sorts connus, PV max, états, épuisement
   function applyMjOwned(d) {
     if (!d) return;
+    if (d.themeColor && d.themeColor !== lastThemeFromData) { lastThemeFromData = d.themeColor; applyTheme(d.themeColor, true); }
     const newKnown = d.knownSpellNames || [];
     if (JSON.stringify(newKnown) !== JSON.stringify(knownSpellNames)) {
       knownSpellNames.length = 0; knownSpellNames.push(...newKnown);
@@ -6826,6 +6911,7 @@
       tempHp = saved.tempHp || 0; tempHpMax = saved.tempHpMax || 0;
       Object.keys(usedSlots).forEach(k => usedSlots[k] = 0);
       if (saved.usedSlots) Object.keys(saved.usedSlots).forEach(k => { usedSlots[k] = Math.min(saved.usedSlots[k] || 0, maxSlots[k] || 0); });
+      pactSlots.used = Math.min(saved.pactUsed || 0, pactSlots.max);
       knownSpellNames.length = 0; if (saved.knownSpellNames) knownSpellNames.push(...saved.knownSpellNames);
       if (saved.appData) {
         const { exhaustionLevel: _oldExh, capacities: _oldCaps, ...rest } = saved.appData; // anciennes valeurs ignorées
@@ -7004,9 +7090,9 @@
         }
       }
 
-      if (p.capacites && p.capacites.length) {
+      {
         capacities.length = 0;
-        p.capacites.forEach((c, i) => {
+        (p.capacites || []).forEach((c, i) => {
           const groupLabel = c.source === 'Race' ? `Race — ${p.race || ''}` : c.source === 'Classe' ? `Classe — ${p.classe1 || ''}` : c.source === 'Historique' ? `Historique — ${p.historique || ''}` : (c.source || 'Autre');
           capacities.push({ id: 'cap' + i, name: c.title || 'Capacité', group: groupLabel, desc: c.text || '', inCombat: false });
         });
@@ -7055,6 +7141,7 @@
       renderHitDice();
 
       Object.assign(maxSlots, computeSpellSlots(p));
+      { const ps = computePactSlots(p); pactSlots.lvl = ps.lvl; pactSlots.max = ps.max; pactSlots.used = Math.min(pactSlots.used, ps.max); }
       for (let l = 1; l <= 9; l++) usedSlots[l] = Math.min(usedSlots[l] || 0, maxSlots[l]);
       if (typeof renderAll === 'function') renderAll();
 
@@ -7120,6 +7207,13 @@
 
   window._fullPlayerData = window._fullPlayerData || {};
 
+  if (MJ_VIEW) {
+    const bar = document.createElement('div');
+    bar.textContent = 'Vue MJ — lecture seule, tes actions ici ne sont pas enregistrées';
+    bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:9999;padding:calc(6px + env(safe-area-inset-top,0px)) 12px 6px;text-align:center;font-size:12px;background:var(--gold);color:#14100a;font-weight:600;';
+    document.body.appendChild(bar);
+  }
+
   let playerStateSaveTimer = null;
   let playerLoaded = false;          // rien n'est enregistré avant d'avoir chargé la vraie fiche
   let lastSavedJson = '';
@@ -7127,7 +7221,7 @@
   let lastMjRev = null;
 
   async function savePlayerStateNow() {
-    if (!sb || !window._gatePlayerId || !playerLoaded) return;
+    if (!sb || !window._gatePlayerId || !playerLoaded || MJ_VIEW) return;
     if (saving) { saveAgain = true; return; }
     saving = true;
     try {
@@ -7143,6 +7237,7 @@
       d.exhaustion = exhaustionLevel;
       if (d.appData) { delete d.appData.exhaustionLevel; delete d.appData.capacities; }
       if (Array.isArray(d.pendingItems)) d.pendingItems = d.pendingItems.filter(e => e && !consumedPending.has(e.pid));
+      if (Array.isArray(d.pendingCoins)) d.pendingCoins = d.pendingCoins.filter(e => e && !consumedPending.has(e.pid));
       const { error: err2 } = await sb.from('joueurs').update({ data: d }).eq('id', window._gatePlayerId);
       if (err2) { console.error('Supabase joueurs update (état):', err2); return; }
       window._fullPlayerData = d;
@@ -7205,6 +7300,7 @@
     if (data && data.data && Object.keys(data.data).length) {
       window._fullPlayerData = data.data;
       lastMjRev = data.data.mjRev || null;
+      if (data.data.themeColor) { lastThemeFromData = data.data.themeColor; applyTheme(data.data.themeColor, true); }
       applyIdentity(data.data);
       applyPlayerState(data.data);
       playerLoaded = true;
