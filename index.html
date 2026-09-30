@@ -1137,7 +1137,7 @@
 
   .combat-monster-row { display: flex; gap: 14px; flex-wrap: nowrap; align-items: flex-start; overflow-x: auto; padding-bottom: 8px; }
   .combat-monster-card {
-    width: 230px; background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md);
+    width: 300px; background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md);
     overflow: hidden; cursor: pointer; flex-shrink: 0;
   }
   .combat-monster-card.dead { opacity: 0.4; }
@@ -1158,6 +1158,9 @@
   .cmc-badges { padding: 0 12px 10px; display: flex; flex-wrap: wrap; gap: 4px; }
   .cmc-badge { font-size: 9px; padding: 2px 7px; border-radius: 10px; background: var(--garnet-soft); color: var(--ink); }
   .cmc-badge.custom { background: var(--violet-soft); color: var(--violet); }
+  .combat-monster-card.full .cmc-badges { padding: 12px 10px 2px; gap: 6px; }
+  .combat-monster-card.full .cmc-badge { font-size: 10.5px; padding: 3px 9px; }
+  .loot-linked { color: var(--success); font-size: 13px; align-self: center; margin: 0 2px; }
 
   /* ---- Combat monster detail view ---- */
   .cmv-photo {
@@ -1619,7 +1622,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 30/09 (8)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 30/09 (9)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2260,7 +2263,7 @@
     <div style="display:flex; gap:10px; margin-top:8px;">
       <button class="modal-cancel-btn" id="mfDuplicateBtn" style="flex:1; color:var(--teal); border:1px solid var(--card-border); border-radius:12px;" onclick="duplicateMonsterForm()">Dupliquer</button>
     </div>
-    <button class="modal-cancel-btn" onclick="closeModal('modalMonsterForm')">Annuler</button>
+    <button class="modal-cancel-btn" onclick="closeModal('modalMonsterForm'); if (monsterFormCombatMode) setMonsterFormCombatMode(false);">Annuler</button>
   </div>
 </div>
 
@@ -32396,9 +32399,10 @@
     openMonsterForm(currentMonsterFormId);
   }
 
-  function openMonsterForm(monsterId) {
+  function openMonsterForm(monsterId, prefill) {
     currentMonsterFormId = monsterId;
-    const m = monsterId ? monstersDatabase.find(mo => mo.id === monsterId) : null;
+    if (!prefill && typeof setMonsterFormCombatMode === 'function' && monsterFormCombatMode) setMonsterFormCombatMode(false);
+    const m = prefill || (monsterId ? monstersDatabase.find(mo => mo.id === monsterId) : null);
 
     document.getElementById('monsterFormTitle').textContent = m ? m.name : 'Nouveau monstre';
     document.getElementById('mfDuplicateBtn').style.display = m ? 'block' : 'none';
@@ -32408,9 +32412,9 @@
     document.getElementById('mfType').value = m ? m.type : monsterTypeList[0];
     document.getElementById('mfSize').value = m ? m.size : 'M';
     document.getElementById('mfCr').value = m ? m.cr : '1';
-    document.getElementById('mfAlignment').value = m ? m.alignment : '';
-    document.getElementById('mfAc').value = m ? m.ac : '';
-    document.getElementById('mfHp').value = m ? m.hp : '';
+    document.getElementById('mfAlignment').value = m ? (m.alignment || '') : '';
+    document.getElementById('mfAc').value = m ? (m.ac ?? '') : '';
+    document.getElementById('mfHp').value = m ? (m.hp || '') : '';
 
     const speeds = (m && m.speeds) || { marche: 9, vol: 0, nage: 0, escalade: 0, fouissement: 0 };
     document.getElementById('mfSpeedMarche').value = speeds.marche || '';
@@ -32427,12 +32431,12 @@
     document.getElementById('mfSag').value = abilities.sag;
     document.getElementById('mfCha').value = abilities.cha;
 
-    document.getElementById('mfLanguages').value = m ? m.languages : '';
+    document.getElementById('mfLanguages').value = m ? (m.languages || '') : '';
     document.getElementById('mfResistances').value = m ? (m.resistances || '') : '';
     document.getElementById('mfImmunities').value = m ? (m.immunities || '') : '';
     document.getElementById('mfVulnerabilities').value = m ? (m.vulnerabilities || '') : '';
     document.getElementById('mfConditionImmunities').value = m ? (m.conditionImmunities || '') : '';
-    document.getElementById('mfSource').value = m ? m.source : '';
+    document.getElementById('mfSource').value = m ? (m.source || '') : '';
     document.getElementById('mfLegendary').checked = m ? m.legendary : false;
 
     document.getElementById('mfTraitsList').innerHTML = '';
@@ -32625,44 +32629,21 @@
   };
 
   /* ===================== MODULE TABLES ===================== */
-  const rollTablesDatabase = [
-    {
-      id: 't1', name: 'Effets aléatoires — Barde (saxo)', die: 20,
-      note: "Les effets s'appliquent à tous ceux ayant entendu le son, pendant 5 min sauf info contraire.",
-      entries: [
-        { min: 1, max: 1, text: "Mélodie réparatrice — Tous les alliés ayant entendu la mélodie récupèrent 2D6." },
-        { min: 2, max: 2, text: "Pas bruyants — Chaque pas produit un son absurde." },
-        { min: 3, max: 3, text: "Hurlements — Tout le monde est incapable de parler autrement qu'en hurlant." },
-        { min: 4, max: 4, text: "Gnome chantant — Un gnome à la peau rose suit le barde en chantant très faux." },
-        { min: 5, max: 5, text: "Aucun effet particulier." },
-        { min: 6, max: 6, text: "Rythme héroïque — Jusqu'à la fin du prochain tour de chaque allié, leur prochaine attaque est effectuée avec avantage." },
-        { min: 7, max: 7, text: "Applaudissements fantômes — Chaque action « un peu remarquable » déclenche des applaudissements invisibles." },
-        { min: 8, max: 8, text: "Accent aléatoire — Tout le monde parle avec un accent ridicule (au choix du MJ)." },
-        { min: 9, max: 9, text: "Gestuelle excessive — Impossible de parler sans gestes amples et inutiles." },
-        { min: 10, max: 10, text: "Aucun effet particulier." },
-        { min: 11, max: 11, text: "Cadence irrésistible — Tous les alliés peuvent immédiatement utiliser leur réaction pour bouger sans provoquer d'attaques d'opportunité." },
-        { min: 12, max: 12, text: "Météo capricieuse — Un nuage noir « pousse » au-dessus d'eux et se met à pleuvoir abondamment." },
-        { min: 13, max: 13, text: "Virtuose déchaîné — Le barde peut immédiatement effectuer une attaque supplémentaire." },
-        { min: 14, max: 14, text: "Regard caméra — Après chaque phrase « importante », le barde regarde au loin façon The Office." },
-        { min: 15, max: 15, text: "Bruitage excessif — Chaque petit geste est accompagné d'un bruitage exagéré (s'asseoir, boire, etc)." },
-        { min: 16, max: 16, text: "Rappel de l'artiste — Le barde récupère 2 niveaux d'emplacements de sorts dépensés." },
-        { min: 17, max: 17, text: "Flashback inadapté — L'un d'eux fixe soudainement le vide et a un souvenir intense… qui n'a rien à voir avec la situation." },
-        { min: 18, max: 18, text: "Aucun effet particulier." },
-        { min: 19, max: 19, text: "Écho dramatique — Chaque phrase prononcée est suivie d'un écho théâtral." },
-        { min: 20, max: 20, text: "Solo sublime — Le barde se met à jouer un solo extrêmement beau, à émouvoir ceux qui l'écoutent." },
-      ],
-    },
-    {
-      id: 't2', name: 'Pics de magie sauvage', die: 100,
-      entries: [
-        { min: 1, max: 5, text: "Vous roulez sur cette table à chaque fois que vous lancez un sort pendant 1 minute." },
-        { min: 6, max: 10, text: "Vous êtes entouré de flammes froides pendant 1 minute, pas de dégâts, illumine 9 m." },
-        { min: 11, max: 20, text: "Vous pouvez voir de l'invisible pendant 1 minute." },
-        { min: 21, max: 30, text: "Une fleur pousse de votre tête pendant 1 heure." },
-        { min: 31, max: 100, text: "Rien ne se produit." },
-      ],
-    },
-  ];
+  // Tables aléatoires : chargées depuis Supabase (table tables_aleatoires), plus rien en dur
+  const rollTablesDatabase = [];
+  function sbSaveRollTable(t) {
+    if (!sb) { showToast('Hors ligne : table non enregistrée'); return; }
+    sb.from('tables_aleatoires').upsert({ id: t.id, nom: t.name, de: t.die, note: t.note || null, entrees: t.entries, updated_at: new Date().toISOString() })
+      .then(({ error }) => { if (error) showToast('⚠️ Table non enregistrée (' + error.message + ')'); });
+  }
+  async function loadRollTablesFromSupabase() {
+    if (!sb) return;
+    const { data, error } = await sb.from('tables_aleatoires').select('*');
+    if (error) { console.error('tables_aleatoires', error); showToast('⚠️ Tables aléatoires introuvables : lance le script tables_et_combats.sql'); return; }
+    rollTablesDatabase.length = 0;
+    (data || []).sort((x, y) => String(x.nom).localeCompare(String(y.nom), 'fr'))
+      .forEach(r => rollTablesDatabase.push({ id: r.id, name: r.nom, die: r.de || 20, note: r.note || '', entries: r.entrees || [] }));
+  }
 
   function renderTablesGrid() {
     document.getElementById('tablesResultCount').textContent = `${rollTablesDatabase.length} table${rollTablesDatabase.length > 1 ? 's' : ''}`;
@@ -32722,9 +32703,12 @@
     if (currentTableFormId) {
       const t = rollTablesDatabase.find(tb => tb.id === currentTableFormId);
       Object.assign(t, { name, die, entries });
+      sbSaveRollTable(t);
       showToast(`Table « ${name} » mise à jour`);
     } else {
-      rollTablesDatabase.push({ id: 't' + Date.now(), name, die, entries });
+      const t = { id: 't' + Date.now(), name, die, entries };
+      rollTablesDatabase.push(t);
+      sbSaveRollTable(t);
       showToast(`Table « ${name} » créée`);
     }
     closeModal('modalTableForm');
@@ -32736,7 +32720,9 @@
     const idx = rollTablesDatabase.findIndex(tb => tb.id === currentTableFormId);
     if (idx > -1) {
       const name = rollTablesDatabase[idx].name;
+      const delId = rollTablesDatabase[idx].id;
       rollTablesDatabase.splice(idx, 1);
+      if (sb) sb.from('tables_aleatoires').delete().eq('id', delId).then(({ error }) => { if (error) showToast('⚠️ Suppression en ligne échouée'); });
       showToast(`Table « ${name} » supprimée`);
     }
     closeModal('modalTableForm');
@@ -40552,16 +40538,63 @@
 
   let pastCombats = [];
 
-  let combatDrafts = [
-    {
-      id: 'cd1', name: 'Embuscade de gobelins', session: '8', playerIds: ['elowen','joueur2','joueur3'],
-      enemies: [ { monsterId: 'm1', count: 3, activeFromStart: true }, { monsterId: 'm2', count: 1, activeFromStart: false } ],
-      loot: [
-        { id: 'l1', type: 'objet', name: 'Potion de soins commune', qty: 2 },
-        { id: 'l2', type: 'argent', pp:0, po:15, pe:0, pa:0, pc:0 },
-      ],
-    },
-  ];
+  let combatDrafts = [];
+
+  // ---- Enregistrement des combats (table Supabase "combats") ----
+  // Un combat a un statut : prepare -> en_cours -> termine. Tout changement est détecté et enregistré.
+  const savedCombatJson = {};   // id -> dernier JSON enregistré
+  let combatsLoaded = false;
+  function combatRowsNow() {
+    const rows = {};
+    combatDrafts.forEach(d => { rows[d.id] = { nom: d.name, statut: 'prepare', data: d }; });
+    if (activeCombat) rows[activeCombat.id] = { nom: activeCombat.name, statut: 'en_cours', data: activeCombat };
+    pastCombats.forEach(pc => { rows[pc.id] = { nom: pc.name, statut: 'termine', data: pc }; });
+    return rows;
+  }
+  let combatSaving = false;
+  async function persistCombats() {
+    if (!sb || !combatsLoaded || combatSaving) return;
+    combatSaving = true;
+    try {
+      const rows = combatRowsNow();
+      const upserts = [];
+      Object.entries(rows).forEach(([id, r]) => {
+        const json = JSON.stringify([r.statut, r.data]);
+        if (savedCombatJson[id] !== json) upserts.push({ id, nom: r.nom, statut: r.statut, data: r.data, updated_at: new Date().toISOString(), _json: json });
+      });
+      const removed = Object.keys(savedCombatJson).filter(id => !rows[id]);
+      if (upserts.length) {
+        const { error } = await sb.from('combats').upsert(upserts.map(({ _json, ...u }) => u));
+        if (error) { console.error('combats upsert', error); showToast('⚠️ Combat non enregistré (' + error.message + ')'); }
+        else upserts.forEach(u => { savedCombatJson[u.id] = u._json; });
+      }
+      if (removed.length) {
+        const { error } = await sb.from('combats').delete().in('id', removed);
+        if (!error) removed.forEach(id => delete savedCombatJson[id]);
+      }
+    } finally { combatSaving = false; }
+  }
+  setInterval(persistCombats, 2000);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) persistCombats(); });
+  window.addEventListener('pagehide', () => persistCombats());
+
+  async function loadCombatsFromSupabase() {
+    if (!sb) return;
+    const { data, error } = await sb.from('combats').select('*');
+    if (error) { console.error('combats', error); showToast('⚠️ Table combats introuvable : lance le script tables_et_combats.sql'); return; }
+    combatDrafts = []; pastCombats = []; activeCombat = null;
+    (data || []).sort((x, y) => String(y.updated_at || '').localeCompare(String(x.updated_at || ''))).forEach(r => {
+      const d = r.data || {};
+      d.id = r.id;
+      let obj = d, statut = r.statut;
+      if (r.statut === 'en_cours' && !activeCombat) activeCombat = d;
+      else if (r.statut === 'termine') pastCombats.push(d);
+      else { obj = { enemies: [], loot: [], playerIds: [], ...d }; statut = 'prepare'; combatDrafts.push(obj); }
+      savedCombatJson[r.id] = JSON.stringify([statut, obj]);
+    });
+    combatDrafts.sort((x, y) => String(x.name || '').localeCompare(String(y.name || ''), 'fr'));
+    combatsLoaded = true;
+  }
 
   let currentDraftFormId = null;
   let draftFormEnemies = [];
@@ -40680,9 +40713,10 @@
   function renderCdfLootList() {
     document.getElementById('cdfLootList').innerHTML = draftFormLoot.map(l => {
       if (l.type === 'objet') {
+        const linked = l.objetId ? `<span class="loot-linked" title="Relié au module Objets">✓</span>` : '';
         return `
           <div class="table-entry-row">
-            <input type="text" class="te-text" style="flex:2;" placeholder="Nom de l'objet" value="${l.name.replace(/"/g,'&quot;')}" data-loot-field="name" data-loot-id="${l.id}">
+            <input type="text" class="te-text" style="flex:2;" list="lootObjetsList" placeholder="Cherche un objet du module Objets…" value="${(l.name || '').replace(/"/g,'&quot;')}" data-loot-field="name" data-loot-id="${l.id}">${linked}
             <input type="number" class="te-min" style="width:60px;" min="1" value="${l.qty}" data-loot-field="qty" data-loot-id="${l.id}">
             <span class="te-remove" data-loot-remove="${l.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
           </div>
@@ -40704,14 +40738,40 @@
         const row = draftFormLoot.find(l => l.id === el.dataset.lootId);
         const field = el.dataset.lootField;
         row[field] = field === 'name' ? el.value : parseInt(el.value) || 0;
+        if (field === 'name') {
+          const hit = findCatalogObjet(el.value);
+          row.cat = hit ? hit.cat : null; row.objetId = hit ? hit.o.id : null;
+          const mark = el.parentElement.querySelector('.loot-linked');
+          if (hit && !mark) el.insertAdjacentHTML('afterend', '<span class="loot-linked" title="Relié au module Objets">✓</span>');
+          if (!hit && mark) mark.remove();
+        }
       });
     });
+    ensureLootDatalist();
     document.querySelectorAll('[data-loot-remove]').forEach(el => {
       el.addEventListener('click', () => {
         draftFormLoot = draftFormLoot.filter(l => l.id !== el.dataset.lootRemove);
         renderCdfLootList();
       });
     });
+  }
+
+  // Liste de suggestions : tous les objets du module Objets
+  function ensureLootDatalist() {
+    let dl = document.getElementById('lootObjetsList');
+    if (!dl) { dl = document.createElement('datalist'); dl.id = 'lootObjetsList'; document.body.appendChild(dl); }
+    const names = [];
+    Object.values(objetsCategories).forEach(c => c.db.forEach(o => names.push(`<option value="${String(o.name).replace(/"/g, '&quot;')}">${c.label}</option>`)));
+    dl.innerHTML = names.join('');
+  }
+  function findCatalogObjet(name) {
+    const n = normalizeText(String(name || '').trim());
+    if (!n) return null;
+    for (const [cat, c] of Object.entries(objetsCategories)) {
+      const o = c.db.find(x => normalizeText(x.name) === n);
+      if (o) return { cat, o };
+    }
+    return null;
   }
 
   function saveCombatDraft() {
@@ -40808,7 +40868,8 @@
       }
     });
 
-    const toPromptPlayers = d.playerIds.map(pid => ({ kind: 'player', refId: pid, label: players.find(p => p.id === pid).name }));
+    const toPromptPlayers = d.playerIds.filter(pid => players.some(p => p.id === pid))
+      .map(pid => ({ kind: 'player', refId: pid, label: players.find(p => p.id === pid).name }));
     const toPromptMonsters = monsterInstances.filter(mi => mi.activeInCombat).map(mi => ({ kind: 'monster', refId: mi.instanceId, label: mi.name }));
 
     openInitiativePrompt('Lancement du combat', 'Entre l\'initiative de chaque participant présent dès le début.', [...toPromptPlayers, ...toPromptMonsters], (results) => {
@@ -40818,7 +40879,9 @@
         playerIds: d.playerIds, loot: JSON.parse(JSON.stringify(d.loot)),
         monsterInstances, combatants,
         currentTurnIndex: 0,
+        draft: JSON.parse(JSON.stringify(d)), // version préparée, gardée au cas où
       };
+      combatDrafts = combatDrafts.filter(x => x.id !== d.id);
       sortCombatants();
       renderCombatModule();
       showToast(`Combat « ${d.name} » lancé !`);
@@ -41268,21 +41331,60 @@
     reader.readAsDataURL(file);
   }
 
+  // Modifier un monstre en combat : même formulaire complet que le bestiaire, deux façons d'enregistrer
+  let monsterFormCombatMode = false;
+  function setMonsterFormCombatMode(on) {
+    monsterFormCombatMode = on;
+    const box = document.querySelector('#modalMonsterForm .modal-box');
+    const normalSave = box.querySelector('.modal-confirm-btn[onclick="saveMonsterForm()"]');
+    const dupRow = document.getElementById('mfDuplicateBtn').parentElement;
+    let combatBtns = document.getElementById('mfCombatBtns');
+    if (!combatBtns) {
+      combatBtns = document.createElement('div');
+      combatBtns.id = 'mfCombatBtns';
+      combatBtns.innerHTML = `
+        <button class="modal-confirm-btn" onclick="saveCombatMonsterLocal()">Enregistrer (cet exemplaire uniquement)</button>
+        <button class="modal-cancel-btn" style="color:var(--garnet); border:1px solid var(--card-border); border-radius:12px; margin-top:8px;" onclick="confirmOverwriteSource()">Enregistrer et écraser la fiche de base</button>`;
+      normalSave.before(combatBtns);
+    }
+    combatBtns.style.display = on ? 'block' : 'none';
+    normalSave.style.display = on ? 'none' : '';
+    dupRow.style.display = on ? 'none' : 'flex';
+    let hpNote = document.getElementById('mfCombatHpNote');
+    if (!hpNote) {
+      hpNote = document.createElement('div');
+      hpNote.id = 'mfCombatHpNote'; hpNote.className = 'wizard-hint'; hpNote.style.marginTop = '-6px';
+      document.getElementById('mfHp').closest('.form-field').after(hpNote);
+    }
+    hpNote.style.display = on ? 'block' : 'none';
+  }
   function editCombatMonster() {
     const mi = activeCombat.monsterInstances.find(m => m.instanceId === currentCombatMonsterInstanceId);
-    document.getElementById('cmeName').value = mi.name;
-    document.getElementById('cmeAc').value = mi.ac;
-    document.getElementById('cmeHpMax').value = mi.hpMax;
+    const base = monstersDatabase.find(m => m.id === mi.baseId) || {};
     closeModal('modalCombatMonsterView');
-    openModal('modalCombatMonsterEdit');
+    // on remplit le formulaire avec l'exemplaire (PV : ses PV max actuels)
+    openMonsterForm(null, { ...base, ...mi, category: base.category, alignment: mi.alignment || base.alignment, source: base.source,
+      legendary: base.legendary, hp: String(mi.hpMax) + (base.hp && /\(/.test(base.hp) ? ' ' + base.hp.slice(base.hp.indexOf('(')) : '') });
+    document.getElementById('monsterFormTitle').textContent = `${mi.name} (en combat)`;
+    setMonsterFormCombatMode(true);
+    document.getElementById('mfCombatHpNote').textContent = `PV actuels : ${mi.hpCur} / ${mi.hpMax}. Changer les PV max ajuste les PV actuels d'autant.`;
+  }
+  function applyMonsterFormToInstance(mi, data) {
+    const newMax = parseHpMax(data.hp);
+    const lost = mi.hpMax - mi.hpCur;
+    Object.assign(mi, {
+      name: data.name || mi.name, type: data.type, size: data.size, cr: data.cr, alignment: data.alignment, ac: data.ac,
+      speeds: data.speeds, abilities: data.abilities, languages: data.languages, resistances: data.resistances,
+      immunities: data.immunities, vulnerabilities: data.vulnerabilities, conditionImmunities: data.conditionImmunities,
+      traits: data.traits, actions: data.actions, legendaryActions: data.legendaryActions,
+    });
+    if (newMax && newMax !== mi.hpMax) { mi.hpMax = newMax; mi.hpCur = Math.max(0, Math.min(newMax, newMax - lost)); }
   }
   function saveCombatMonsterLocal() {
     const mi = activeCombat.monsterInstances.find(m => m.instanceId === currentCombatMonsterInstanceId);
-    mi.name = document.getElementById('cmeName').value.trim() || mi.name;
-    mi.ac = parseInt(document.getElementById('cmeAc').value) || mi.ac;
-    mi.hpMax = parseInt(document.getElementById('cmeHpMax').value) || mi.hpMax;
-    mi.hpCur = Math.min(mi.hpCur, mi.hpMax);
-    closeModal('modalCombatMonsterEdit');
+    applyMonsterFormToInstance(mi, readMonsterForm());
+    closeModal('modalMonsterForm');
+    setMonsterFormCombatMode(false);
     renderCombatMonsterRow();
     renderInitFrieze();
     showToast(`${mi.name} mis à jour (cet exemplaire uniquement)`);
@@ -41291,18 +41393,17 @@
     const mi = activeCombat.monsterInstances.find(m => m.instanceId === currentCombatMonsterInstanceId);
     const base = monstersDatabase.find(m => m.id === mi.baseId);
     if (!base) { showToast('Fiche de base introuvable'); return; }
-    const newName = document.getElementById('cmeName').value.trim();
-    const newAc = parseInt(document.getElementById('cmeAc').value);
-    const newHpMax = parseInt(document.getElementById('cmeHpMax').value);
+    const data = readMonsterForm();
     if (!confirm(`Écraser définitivement la fiche de base « ${base.name} » avec ces changements ?`)) return;
-    if (newName) { base.name = newName; mi.name = newName; }
-    if (newAc) { base.ac = newAc; mi.ac = newAc; }
-    if (newHpMax) { base.hp = base.hp.replace(/^\d+/, newHpMax); mi.hpMax = newHpMax; mi.hpCur = Math.min(mi.hpCur, newHpMax); }
-    closeModal('modalCombatMonsterEdit');
+    Object.assign(base, data);
+    sbSaveMonster(base);
+    applyMonsterFormToInstance(mi, data);
+    closeModal('modalMonsterForm');
+    setMonsterFormCombatMode(false);
     renderCombatMonsterRow();
     renderInitFrieze();
-    renderMonstersGrid();
-    showToast(`Fiche de base « ${base.name} » écrasée`);
+    if (typeof renderMonstersGrid === 'function') renderMonstersGrid();
+    showToast(`Fiche de base « ${base.name} » mise à jour`);
   }
 
   function openFinisherModal(instanceId) {
@@ -41395,9 +41496,12 @@
     const c = activeCombat;
     pastCombats.unshift({
       id: c.id, name: c.name, session: c.session,
-      playerIds: c.playerIds, loot: c.loot, monsterInstances: c.monsterInstances,
+      playerIds: c.playerIds, loot: c.loot, monsterInstances: c.monsterInstances, npcIds: c.npcIds,
+      endedAt: new Date().toISOString(),
     });
+    combatDrafts = combatDrafts.filter(x => x.id !== c.id);
     activeCombat = null;
+    persistCombats();
     closeModal('modalCloseCombat');
     renderCombatModule();
     showToast(`Combat « ${c.name} » terminé et archivé`);
@@ -41464,7 +41568,10 @@
         const p = players.find(pl => pl.id === chip.dataset.lootPlayer);
         remaining--;
         document.getElementById('msRemaining').textContent = remaining;
-        showToast(`${lootRow.name} donné à ${p.name}`);
+        // Objet réellement ajouté à l'inventaire du joueur
+        const hit = (lootRow.cat && objetsCategories[lootRow.cat]) ? { cat: lootRow.cat, o: objetsCategories[lootRow.cat].db.find(o => String(o.id) === String(lootRow.objetId)) } : findCatalogObjet(lootRow.name);
+        if (hit && hit.o) sbAttribuerObjet(p, hit.cat, hit.o);
+        else sbAttribuerObjetLibre(p, lootRow.name);
         if (remaining <= 0) {
           lootRow.done = true;
           closeModal('modalMoneySplit');
@@ -41473,6 +41580,14 @@
       });
     });
     openModal('modalMoneySplit');
+  }
+
+  // Objet de butin hors catalogue : ajouté quand même, comme objet simple
+  function sbAttribuerObjetLibre(p, name) {
+    sbPatchPlayer(p, d => {
+      d.pendingItems = [...(d.pendingItems || []), { pid: 'p' + Date.now() + Math.random().toString(36).slice(2, 7),
+        item: { id: 'obj' + Date.now(), name, category: 'objet', weight: 0, price: '—', equipable: false, equipped: false, inCombat: false, magic: false, desc: '' } }];
+    }, `${name} donné à ${p.name}`);
   }
 
   let msSelectedPlayers = [];
@@ -41505,6 +41620,20 @@
   function confirmMoneySplit() {
     if (!msSelectedPlayers.length) { showToast('Sélectionne au moins un joueur'); return; }
     const names = msSelectedPlayers.map(id => players.find(p=>p.id===id).name).join(', ');
+    // Répartition équitable (en pièces de cuivre), le reste va au premier joueur sélectionné
+    const l = pendingLootMoneyRow;
+    const totalPc = ['pp','po','pe','pa','pc'].reduce((n, k) => n + (parseInt(l[k]) || 0) * COIN_VALUE_PC[k], 0);
+    const share = Math.floor(totalPc / msSelectedPlayers.length);
+    const rest = totalPc - share * msSelectedPlayers.length;
+    const toCoins = pc => { const c = {}; ['pp','po','pa','pc'].forEach(k => { c[k] = Math.floor(pc / COIN_VALUE_PC[k]); pc -= c[k] * COIN_VALUE_PC[k]; }); c.pp = 0; return c; };
+    msSelectedPlayers.forEach((id, i) => {
+      const p = players.find(pl => pl.id === id);
+      const amount = share + (i === 0 ? rest : 0);
+      if (!p || amount <= 0) return;
+      // on garde les PO/PA/PC (pas de conversion en platine)
+      const c = { pp: 0, po: Math.floor(amount / 100), pe: 0, pa: Math.floor((amount % 100) / 10), pc: amount % 10 };
+      sbPatchPlayer(p, d => { d.pendingCoins = [...(d.pendingCoins || []), { pid: 'p' + Date.now() + i + Math.random().toString(36).slice(2, 6), add: c }]; });
+    });
     pendingLootMoneyRow.done = true;
     showToast(`Argent réparti entre : ${names}`);
     closeModal('modalMoneySplit');
@@ -42022,6 +42151,8 @@
       await loadEnnemisFromSupabase();
       await loadMessagesFromSupabase();
       await loadPlayersFromSupabase();
+      await loadRollTablesFromSupabase();
+      await loadCombatsFromSupabase();
       if (typeof renderCharChips === 'function') renderCharChips();
       if (typeof renderNotifBadges === 'function') renderNotifBadges();
       if (failCount > 0) {
