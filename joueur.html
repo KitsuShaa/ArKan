@@ -6784,12 +6784,17 @@
     }
   }
 
+  window._fullPlayerData = window._fullPlayerData || {};
+
   let playerStateSaveTimer = null;
   function schedulePlayerStateSave() {
     if (!sb || !window._gatePlayerId) return;
     clearTimeout(playerStateSaveTimer);
     playerStateSaveTimer = setTimeout(() => {
-      sb.from('joueurs').update({ data: collectPlayerState() }).eq('id', window._gatePlayerId).then(({ error }) => {
+      // On fusionne l'état courant DANS les données complètes déjà connues (identité comprise),
+      // jamais un remplacement total — sinon on écrase l'identité enregistrée par la console MJ.
+      Object.assign(window._fullPlayerData, collectPlayerState());
+      sb.from('joueurs').update({ data: window._fullPlayerData }).eq('id', window._gatePlayerId).then(({ error }) => {
         if (error) console.error('Supabase joueurs update (état):', error);
       });
     }, 1500);
@@ -6800,10 +6805,20 @@
     const { data, error } = await sb.from('joueurs').select('data').eq('id', window._gatePlayerId).single();
     if (error) { console.error('Échec chargement de ta fiche', error); return; }
     if (data && data.data && Object.keys(data.data).length) {
+      window._fullPlayerData = data.data;
       applyIdentity(data.data);
       applyPlayerState(data.data);
     } else {
-      schedulePlayerStateSave(); // première connexion : on enregistre l'état de départ
+      // Première connexion : on part d'une ardoise vierge, pas des données de démo d'Elowen.
+      items.length = 0; window.AppData.items = items;
+      coins.pp = 0; coins.po = 0; coins.pe = 0; coins.pa = 0; coins.pc = 0;
+      knownSpellNames.length = 0;
+      concentrationSpellId = null;
+      window.AppData.companionInCombat = false;
+      renderCategories(); renderItemList(); renderWeight(); renderWallet(); updateComputedCA();
+      if (typeof renderAll === 'function') renderAll();
+      if (typeof updateConcBadge === 'function') updateConcBadge();
+      schedulePlayerStateSave(); // on enregistre cette ardoise vierge comme point de départ
     }
     // Sauvegarde automatique périodique, en plus des sauvegardes déclenchées par les actions.
     setInterval(schedulePlayerStateSave, 20000);

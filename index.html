@@ -2070,6 +2070,7 @@
       <button class="modal-cancel-btn" id="sfDuplicateBtn" style="flex:1; color:var(--teal); border:1px solid var(--card-border); border-radius:12px;" onclick="duplicateSpellForm()">Dupliquer</button>
       <button class="modal-cancel-btn" id="sfAttribuerBtn" style="flex:1; color:var(--gold); border:1px solid var(--card-border); border-radius:12px;" onclick="openAttribuerSort()">Attribuer à un joueur</button>
     </div>
+    <button class="modal-cancel-btn" id="sfDeleteBtn" style="color:var(--garnet); border:1px solid var(--card-border); border-radius:12px;" onclick="deleteSpellForm()">Supprimer</button>
     <button class="modal-cancel-btn" onclick="closeModal('modalSpellForm')">Annuler</button>
   </div>
 </div>
@@ -3595,8 +3596,8 @@
           <div class="quick-photo-row">
             <div class="quick-photo">${p.name.split(' ').map(w => w[0]).join('').slice(0,2)}</div>
             <div class="quick-photo-text">
-              <div class="qi-race">${p.race}</div>
-              <div class="qi-sub">${p.classes}</div>
+              <div class="qi-race">${p.race || '—'}</div>
+              <div class="qi-sub">${p.classes || '—'}</div>
             </div>
           </div>
 
@@ -3633,7 +3634,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
               Voir
             </div>
-            <div class="quad-btn" onclick="showToast('Ouvre le mode édition de ${p.name} — à définir ensemble')">
+            <div class="quad-btn" onclick="openCharWizard('${p.id}')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
               Modifier
             </div>
@@ -4305,6 +4306,7 @@
     const s = spellId ? spellsDatabase.find(sp => sp.id === spellId) : null;
 
     document.getElementById('spellFormTitle').textContent = s ? s.name : 'Nouveau sort';
+    document.getElementById('sfDeleteBtn').style.display = s ? 'block' : 'none';
     document.getElementById('spellFormSub').textContent = s
       ? 'Toute modification se répercute chez les joueurs qui possèdent déjà ce sort.'
       : 'Ce sort sera disponible pour attribution une fois créé.';
@@ -4358,6 +4360,19 @@
       scalingNiv11: document.getElementById('sfScaling11').value.trim(),
       scalingNiv17: document.getElementById('sfScaling17').value.trim(),
     };
+  }
+
+  function deleteSpellForm() {
+    const idx = spellsDatabase.findIndex(sp => sp.id === currentSpellFormId);
+    if (idx > -1) {
+      const name = spellsDatabase[idx].name;
+      const id = spellsDatabase[idx].id;
+      spellsDatabase.splice(idx, 1);
+      showToast(`« ${name} » supprimé`);
+      if (sb) sb.from('sorts').delete().eq('id', id).then(({ error }) => { if (error) showToast('⚠️ Suppression en ligne échouée'); });
+    }
+    closeModal('modalSpellForm');
+    renderSpellsGrid();
   }
 
   function saveSpellForm() {
@@ -4732,7 +4747,10 @@
     document.getElementById(id).innerHTML = '<option value="">—</option>' + options.map(o => `<option value="${o}">${o}</option>`).join('');
   }
 
-  function openCharWizard() {
+  let currentEditingPlayerId = null;
+
+  function openCharWizard(editId) {
+    currentEditingPlayerId = editId || null;
     wizardStep = 1;
     photoData = null;
     document.getElementById('wPhotoPreview').style.backgroundImage = '';
@@ -4770,8 +4788,82 @@
     renderSaveThrows();
     updateAutoCalc();
 
+    if (currentEditingPlayerId) {
+      const p = players.find(pl => pl.id === currentEditingPlayerId);
+      if (p) prefillWizardFromPlayer(p);
+    }
+
     renderWizardStep();
     openModal('charWizardOverlay');
+  }
+
+  function prefillWizardFromPlayer(p) {
+    document.getElementById('wNom').value = p.name || '';
+    if (p.race) document.getElementById('wRace').value = p.race;
+    if (p.historique) document.getElementById('wHistorique').value = p.historique;
+    if (p.alignement) document.getElementById('wAlignement').value = p.alignement;
+    if (p.dieu) document.getElementById('wDieu').value = p.dieu;
+    document.getElementById('wPoids').value = p.poids || '';
+    document.getElementById('wTaille').value = p.taille || '';
+    document.getElementById('wAge').value = p.age || '';
+    document.getElementById('wAnniv').value = p.anniversaire || '';
+    if (p.classe1) document.getElementById('wClasse1').value = p.classe1;
+    document.getElementById('wNiveau1').value = p.niveau1 || 1;
+    onClassChange();
+    if (p.classe2) {
+      document.getElementById('wClasse2').value = p.classe2;
+      document.getElementById('wNiveau2').disabled = false;
+      document.getElementById('wNiveau2').value = p.niveau2 || 1;
+    }
+    document.getElementById('wXP').value = p.xp || 0;
+    if (p.abilities) {
+      const ab = p.abilities;
+      document.getElementById('wFor').value = ab.for; document.getElementById('wDex').value = ab.dex;
+      document.getElementById('wCon').value = ab.con; document.getElementById('wInt').value = ab.int;
+      document.getElementById('wSag').value = ab.sag; document.getElementById('wCha').value = ab.cha;
+    }
+    document.getElementById('wPV').value = p.maxHp || (p.pv ? p.pv.split('/')[1] : '') || '';
+    document.getElementById('wOrigine').value = p.origine || '';
+    document.getElementById('wAvantAventure').value = p.avantAventure || '';
+    document.getElementById('wEllipse').value = p.ellipse || '';
+
+    renderSaveThrows();
+    if (p.saveThrows) {
+      const s1 = document.getElementById('wSave1'), s2 = document.getElementById('wSave2');
+      if (s1) s1.value = p.saveThrows[0]; if (s2) s2.value = p.saveThrows[1];
+    }
+    if (p.skills) {
+      p.skills.forEach((sk, i) => {
+        const tEl = document.getElementById('wSkillT' + i), eEl = document.getElementById('wSkillE' + i);
+        if (tEl) tEl.checked = !!sk.trained; if (eEl) eEl.checked = !!sk.expert;
+      });
+    }
+    if (p.weaponProfs) {
+      weaponCategories.forEach(cat => {
+        if (p.weaponProfs.includes(cat.label)) { const el = document.getElementById('wcat_' + cat.key); if (el) el.checked = true; }
+        cat.items.forEach((it, i) => { if (p.weaponProfs.includes(it)) { const el = document.getElementById(`witem_${cat.key}_${i}`); if (el) el.checked = true; } });
+      });
+    }
+    if (p.armorProfs) armorCategories.forEach((a, i) => { if (p.armorProfs.includes(a)) { const el = document.getElementById('warmor_' + i); if (el) el.checked = true; } });
+    if (p.toolProfs) {
+      toolCategories.forEach(cat => cat.items.forEach((it, i) => { if (p.toolProfs.includes(it)) { const el = document.getElementById(`wtool_${cat.key}_${i}`); if (el) el.checked = true; } }));
+      generalToolItems.forEach((it, i) => { if (p.toolProfs.includes(it)) { const el = document.getElementById('wtoolgen_' + i); if (el) el.checked = true; } });
+    }
+    if (p.languages) languagesData.forEach((l, i) => { if (p.languages.includes(l)) { const el = document.getElementById('wlang_' + i); if (el) el.checked = true; } });
+    if (p.capacites) {
+      p.capacites.forEach(c => {
+        addCapaciteBlock();
+        const lastBlock = document.getElementById('wCapacitesList').lastElementChild;
+        lastBlock.querySelector('.cb-source').value = c.source || 'Autre';
+        lastBlock.querySelector('.cb-title').value = c.title || '';
+        lastBlock.querySelector('.cb-text').value = c.text || '';
+      });
+    }
+    if (p.photo) {
+      document.getElementById('wPhotoPreview').style.backgroundImage = `url(${p.photo})`;
+      document.getElementById('wPhotoPlaceholder').style.display = 'none';
+    }
+    updateAutoCalc();
   }
 
   function onClassChange() {
@@ -5188,14 +5280,16 @@
       source: div.querySelector('.cb-source').value, title: div.querySelector('.cb-title').value, text: div.querySelector('.cb-text').value,
     }));
 
-    const newId = 'joueur_' + Date.now();
-    const newCode = String(Math.floor(1000 + Math.random() * 9000));
+    const isEditing = !!currentEditingPlayerId;
+    const existingPlayer = isEditing ? players.find(pl => pl.id === currentEditingPlayerId) : null;
+    const newId = isEditing ? existingPlayer.id : 'joueur_' + Date.now();
+    const newCode = isEditing ? existingPlayer.code : String(Math.floor(1000 + Math.random() * 9000));
     const newPlayer = {
       id: newId, name: nom, race: race, classes: classesLabel,
       pv: `${pv}/${pv}`, ca: 10 + dex,
       xp: parseInt(document.getElementById('wXP').value) || 0, xpNext: 999999, level: parseInt(document.getElementById('wNiveauTotal').textContent) || 1,
-      code: newCode, link: window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + `joueur.html?j=${newId}`,
-      states: [], exhaustion: 0,
+      code: newCode, link: isEditing ? existingPlayer.link : (window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + `joueur.html?j=${newId}`),
+      states: isEditing ? existingPlayer.states : [], exhaustion: isEditing ? existingPlayer.exhaustion : 0,
       historique: document.getElementById('wHistorique').value,
       alignement: document.getElementById('wAlignement').value,
       dieu: document.getElementById('wDieu').value,
@@ -5204,22 +5298,29 @@
       classe1: c1, niveau1: parseInt(n1) || 1, classe2: c2 || '', niveau2: c2 ? (parseInt(n2) || 1) : 0,
       abilities, saveThrows, skills, weaponProfs, armorProfs, toolProfs, languages, capacites,
       origine: document.getElementById('wOrigine').value, avantAventure: document.getElementById('wAvantAventure').value, ellipse: document.getElementById('wEllipse').value,
-      maxHp: parseInt(pv) || 1, currentHp: parseInt(pv) || 1,
-      knownSpellNames: [],
+      maxHp: parseInt(pv) || 1, currentHp: isEditing ? existingPlayer.currentHp : (parseInt(pv) || 1),
+      knownSpellNames: isEditing ? (existingPlayer.knownSpellNames || []) : [],
+      items: isEditing ? existingPlayer.items : undefined, coins: isEditing ? existingPlayer.coins : undefined,
+      photo: photoData ? photoData.src : (isEditing ? existingPlayer.photo : null),
     };
-    players.push(newPlayer);
+    if (isEditing) {
+      Object.assign(existingPlayer, newPlayer);
+    } else {
+      players.push(newPlayer);
+    }
 
     if (sb) {
-      sb.from('joueurs').upsert({ id: newId, nom: nom, code: newCode, data: newPlayer, actif: true }).then(({ error }) => {
-        if (error) { console.error('Supabase joueurs upsert:', error); showToast('⚠️ Joueur créé localement mais non sauvegardé en ligne'); }
+      sb.from('joueurs').upsert({ id: newId, nom: nom, code: newCode, data: isEditing ? existingPlayer : newPlayer, actif: isEditing ? existingPlayer.active : true }).then(({ error }) => {
+        if (error) { console.error('Supabase joueurs upsert:', error); showToast('⚠️ Non sauvegardé en ligne'); }
       });
     }
 
-    showToast(`« ${nom} » créé — fiche prête`);
+    showToast(isEditing ? `« ${nom} » mis à jour` : `« ${nom} » créé — fiche prête`);
     closeModal('charWizardOverlay');
     renderCharChips();
     selectPlayer(newId);
-    showPlayerAccessInfo(newPlayer);
+    if (!isEditing) showPlayerAccessInfo(newPlayer);
+    currentEditingPlayerId = null;
   }
 
   function showPlayerAccessInfo(p) {
