@@ -1648,7 +1648,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 30/09 (11)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (1)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3274,6 +3274,7 @@
           bonus_ca: r.bonus_ca, bonus_arme: r.bonus_arme, degats_des: r.degats_des,
           avantage_sauvegarde: r.avantage_sauvegarde, avantage_competence: r.avantage_competence,
           description_complete: r.description_complete, source: r.source, cache_aux_joueurs: r.cache_aux_joueurs,
+          poids: parseKg(r.poids),
         }) },
       { table: 'armes_magiques', target: armesMagiquesDatabase, map: r => ({
           id: r.id, name: r.nom, categorie_secondaire: r.categorie_secondaire, rarete: r.rarete,
@@ -3283,7 +3284,7 @@
           bonus_ca: r.bonus_ca, bonus_arme: r.bonus_arme, degats_des: r.degats_des, degats_type: r.degats_type,
           degats_supp_des: r.degats_supp_des, degats_supp_type: r.degats_supp_type,
           avantage_competence: r.avantage_competence, description_complete: r.description_complete,
-          source: r.source, cache_aux_joueurs: r.cache_aux_joueurs,
+          source: r.source, cache_aux_joueurs: r.cache_aux_joueurs, poids: parseKg(r.poids),
         }) },
       { table: 'sorts', target: spellsDatabase, map: r => ({
           id: r.id, name: r.nom, level: r.niveau, school: normalizeText(r.ecole).trim(), castTime: r.temps_incantation,
@@ -5843,6 +5844,7 @@
       fields: [
         { key: 'categorie', label: 'Catégorie', type: 'text', col: 1 },
         { key: 'rarete', label: 'Rareté', type: 'select', options: rarityList, col: 1 },
+        { key: 'poids', label: 'Poids', type: 'kg', col: 1 },
         { key: 'necessite_lien', label: 'Nécessite un lien', type: 'checkbox' },
         { key: 'lien_detail', label: 'Détail du lien', type: 'text' },
         { key: 'emplacement_equipement', label: 'Emplacement équipement', type: 'text' },
@@ -5867,6 +5869,7 @@
       fields: [
         { key: 'categorie_secondaire', label: 'Arme de base liée', type: 'armeSelect', col: 1 },
         { key: 'rarete', label: 'Rareté', type: 'select', options: rarityList, col: 1 },
+        { key: 'poids', label: 'Poids (vide = hérité)', type: 'kg', col: 1 },
         { key: 'necessite_lien', label: 'Nécessite un lien', type: 'checkbox' },
         { key: 'lien_detail', label: 'Détail du lien', type: 'text' },
         { key: 'emplacement_equipement', label: 'Emplacement équipement', type: 'text' },
@@ -6038,6 +6041,13 @@
     const payload = { id: entry.id, nom: entry.name };
     schema.fields.forEach(f => { payload[f.key] = entry[f.key]; });
     sb.from(schema.table).upsert(payload).then(({ error }) => {
+      if (error && /poids/.test(error.message || '') && (cat === 'objetsMagiques' || cat === 'armesMagiques')) {
+        const p2 = { ...payload }; delete p2.poids;
+        return sb.from(schema.table).upsert(p2).then(({ error: e2 }) => {
+          if (e2) showToast('⚠️ Non sauvegardé en ligne (' + e2.message + ')');
+          else showToast(`Enregistré sans le poids — ajoute la colonne poids à la table ${schema.table}`);
+        });
+      }
       if (error && /degats_type/.test(error.message || '') && cat === 'armes') {
         const p2 = { ...payload, degats: [payload.degats, payload.degats_type].filter(Boolean).join(' ') };
         delete p2.degats_type;
@@ -32605,16 +32615,41 @@
     openModal('modalAttribuerObjet');
   }
 
+  // Infos de combat d'une arme, lues par la fiche joueur pour afficher « Pour toucher » / « Dégâts »
+  function weaponCombatInfo(arme, extra) {
+    const a = arme || {};
+    const e = extra || {};
+    return {
+      weaponBase: a.name || e.base || '',
+      weaponCat: a.categorie || '',               // 'Courante' / 'Guerre'
+      weaponRange: a.melee_distance || '',        // 'Corps à corps' / 'Distance'
+      weaponProps: a.proprietes || '',
+      damageDice: e.dice || a.degats || '',
+      damageType: e.type || a.degats_type || '',
+      attackBonus: parseInt(e.bonus) || 0,        // bonus magique (+1, +2…) au toucher ET aux dégâts
+      extraDice: e.extraDice || '', extraType: e.extraType || '',
+    };
+  }
+
   function objetToPlayerItem(cat, o) {
     const base = { id: (o.id || ('obj' + Date.now())), name: o.name, equipped: false, inCombat: false };
+    const recharge = o.recharge_repos_long ? 'repos_long' : (o.recharge_repos_court ? 'repos_court' : null);
     if (cat === 'armes') return { ...base, category: 'arme', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: true, magic: !!o.magique,
+      ...weaponCombatInfo(o),
       damage: [o.degats, o.degats_type].filter(Boolean).join(' '), desc: [[o.degats, o.degats_type].filter(Boolean).join(' '), o.proprietes].filter(Boolean).join(' — ') };
     if (cat === 'armures') return { ...base, category: 'armure', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: true, magic: !!o.magique,
       caFormula: o.ca_formule || '', ...parseArmorFormula(o.ca_formule, o.categorie), desc: o.ca_formule ? `CA ${o.ca_formule}` : '' };
     if (cat === 'equipement') return { ...base, category: 'objet', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: !!o.equipable, magic: !!o.magique, desc: '' };
     if (cat === 'outils') return { ...base, category: 'outil', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: false, magic: false, desc: o.categorie || '' };
-    if (cat === 'objetsMagiques') return { ...base, category: 'objet_magique', weight: 0, price: '—', equipable: !!o.emplacement_equipement, magic: true, usesMax: o.charges_max || null, usesLeft: o.charges_max || null, recharge: o.recharge_repos_long ? 'repos_long' : (o.recharge_repos_court ? 'repos_court' : null), desc: o.description_complete || '' };
-    if (cat === 'armesMagiques') return { ...base, category: 'arme', weight: 0, price: '—', equipable: true, magic: true, usesMax: o.charges_max || null, usesLeft: o.charges_max || null, recharge: o.recharge_repos_long ? 'repos_long' : (o.recharge_repos_court ? 'repos_court' : null), desc: o.description_complete || '' };
+    if (cat === 'objetsMagiques') return { ...base, category: 'objet_magique', weight: parseKg(o.poids) || 0, price: '—', equipable: !!o.emplacement_equipement, magic: true, usesMax: o.charges_max || null, usesLeft: o.charges_max || null, recharge, desc: o.description_complete || '' };
+    if (cat === 'armesMagiques') {
+      const arme = armesDatabase.find(a => a.name === o.categorie_secondaire) || null;
+      const ownW = parseKg(o.poids);
+      const weight = ownW != null ? ownW : ((arme && parseKg(arme.poids)) || 0); // vide = poids de l'arme de base
+      return { ...base, category: 'arme', weight, price: '—', equipable: true, magic: true, usesMax: o.charges_max || null, usesLeft: o.charges_max || null, recharge,
+        ...weaponCombatInfo(arme, { base: o.categorie_secondaire, dice: o.degats_des, type: o.degats_type, bonus: o.bonus_arme, extraDice: o.degats_supp_des, extraType: o.degats_supp_type }),
+        desc: o.description_complete || '' };
+    }
     return { ...base, category: 'objet', weight: 0, price: '—', equipable: false, magic: false, desc: '' };
   }
 

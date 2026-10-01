@@ -1806,6 +1806,12 @@
     color: var(--ink-dim);
     line-height: 1.5;
   }
+#page-combat .combat-body .c-atk { font-size: 12px; color: var(--ink-dim); line-height: 1.5; }
+#page-combat .combat-body .c-atk strong { color: var(--ink); font-weight: 600; }
+#page-inventaire .weapon-atk-box { border: 1px solid var(--line, rgba(128,128,128,0.25)); border-radius: 10px; padding: 10px 12px; margin-bottom: 16px; }
+#page-inventaire .weapon-atk-box .wa-line { font-size: 13.5px; color: var(--ink-dim); line-height: 1.6; }
+#page-inventaire .weapon-atk-box .wa-line strong { color: var(--ink); font-weight: 600; }
+#page-inventaire .weapon-atk-box .wa-detail { font-size: 11px; color: var(--ink-faint); line-height: 1.4; margin-bottom: 4px; }
 #page-combat .combat-uses {
     display: flex;
     flex-wrap: wrap;
@@ -4351,7 +4357,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 30/09 (11)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 01/10 (1)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -5423,6 +5429,7 @@
           sub: it.combatSub || it.desc,
           usesMax: it.usesMax, usesLeft: it.usesLeft,
           usesAmmo: it.usesAmmo,
+          itemId: it.id,
         });
       }
     });
@@ -5532,7 +5539,12 @@
         </button>`;
       }
 
-      const subText = item.type === 'compagnon' ? 'Voir la fiche' : (item.type === 'capacite' ? (item.sub || '') : '');
+      let subText = item.type === 'compagnon' ? 'Voir la fiche' : (item.type === 'capacite' ? (item.sub || '') : '');
+      if (item.type === 'arme') {
+        const src = ((window.AppData && window.AppData.items) || []).find(i => i.id === item.itemId);
+        const atk = src ? computeWeaponAttack(src) : null;
+        if (atk) subText = `<div class="c-atk"><strong>Pour toucher :</strong> ${atk.toHit}</div><div class="c-atk"><strong>Dégâts :</strong> ${atk.damage}</div>`;
+      }
 
       row.innerHTML = `
         <div class="combat-icon ${item.type}">${icons[item.type]}</div>
@@ -6423,6 +6435,13 @@
     if (it.isContainer) facts += `<div class="fact-item"><div class="f-label">Capacité</div><div class="f-value">${fmt(it.containerCapacity)} kg</div></div>`;
 
     let html = `<div class="detail-facts-row">${facts}</div>`;
+    const atk = it.category === 'arme' ? computeWeaponAttack(it) : null;
+    if (atk) html += `<div class="weapon-atk-box">
+        <div class="wa-line"><strong>Pour toucher :</strong> ${atk.toHit}</div>
+        <div class="wa-detail">${atk.toHitDetail}</div>
+        <div class="wa-line"><strong>Dégâts :</strong> ${atk.damage}</div>
+        <div class="wa-detail">${atk.damageDetail}</div>
+      </div>`;
     html += `<div class="detail-desc">${it.desc}</div>`;
 
     if (it.equipable) {
@@ -7092,6 +7111,108 @@
     return out;
   }
 
+  /* ===================== ARMES : POUR TOUCHER / DÉGÂTS ===================== */
+  // Valeurs de secours (règles de base) quand l'objet ne porte pas ses infos (anciens objets attribués avant cette version).
+  // La base Objets du MJ reste prioritaire.
+  const WEAPON_STATS = {
+    'Bâton': ['1D6', 'contondant', 'Polyvalente (1D8)'], 'Dague': ['1D4', 'perforant', 'Finesse, légère, lancer'],
+    'Gourdin': ['1D4', 'contondant', 'Légère'], 'Hachette': ['1D6', 'tranchant', 'Légère, lancer'],
+    'Javeline': ['1D6', 'perforant', 'Lancer'], 'Lance': ['1D6', 'perforant', 'Lancer, polyvalente (1D8)'],
+    'Marteau léger': ['1D4', 'contondant', 'Légère, lancer'], "Masse d'armes": ['1D6', 'contondant', ''],
+    'Massue': ['1D8', 'contondant', 'Deux mains'], 'Serpe': ['1D4', 'tranchant', 'Légère'],
+    'Arbalète légère': ['1D8', 'perforant', 'Munitions, deux mains'], 'Arc court': ['1D6', 'perforant', 'Munitions, deux mains'],
+    'Fléchette': ['1D4', 'perforant', 'Finesse, lancer'], 'Fronde': ['1D4', 'contondant', 'Munitions'],
+    'Cimeterre': ['1D6', 'tranchant', 'Finesse, légère'], 'Épée courte': ['1D6', 'perforant', 'Finesse, légère'],
+    'Épée longue': ['1D8', 'tranchant', 'Polyvalente (1D10)'], 'Épée à deux mains': ['2D6', 'tranchant', 'Lourde, deux mains'],
+    "Fléau d'armes": ['1D8', 'contondant', ''], 'Coutille': ['1D10', 'tranchant', 'Lourde, allonge, deux mains'],
+    'Hache à deux mains': ['1D12', 'tranchant', 'Lourde, deux mains'], "Hache d'armes": ['1D8', 'tranchant', 'Polyvalente (1D10)'],
+    'Hallebarde': ['1D10', 'tranchant', 'Lourde, allonge, deux mains'], "Lance d'arçon": ['1D12', 'perforant', 'Allonge, spécial'],
+    'Maillet': ['2D6', 'contondant', 'Lourde, deux mains'], 'Morgenstern': ['1D8', 'perforant', ''],
+    'Pic de guerre': ['1D8', 'perforant', ''], 'Pique': ['1D10', 'perforant', 'Lourde, allonge, deux mains'],
+    'Rapière': ['1D8', 'perforant', 'Finesse'], 'Trident': ['1D6', 'perforant', 'Lancer, polyvalente (1D8)'],
+    'Fouet': ['1D4', 'tranchant', 'Finesse, allonge'], 'Marteau de guerre': ['1D8', 'contondant', 'Polyvalente (1D10)'],
+    'Arbalète de poing': ['1D6', 'perforant', 'Munitions, légère'], 'Arbalète lourde': ['1D10', 'perforant', 'Munitions, lourde, deux mains'],
+    'Arc long': ['1D8', 'perforant', 'Munitions, lourde, deux mains'], 'Filet': ['', '', 'Lancer, spécial'], 'Sarbacane': ['1', 'perforant', 'Munitions'],
+  };
+  const normW = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’`]/g, "'").replace(/\s+/g, ' ').trim();
+  // Retrouve le nom d'arme de base (« Rapière », « Épée longue »…) à partir d'un nom exact ou contenu (« Épée longue +1 »)
+  function findBaseWeaponName(...names) {
+    const all = WEAPON_CATEGORIES.flatMap(c => c.items);
+    for (const n of names) { const k = normW(n); if (!k) continue; const hit = all.find(w => normW(w) === k); if (hit) return hit; }
+    for (const n of names) {
+      const k = normW(n); if (!k) continue;
+      // le plus long d'abord : « Épée à deux mains » avant « Épée »…, « Arbalète lourde » avant « Arc »
+      const hit = all.slice().sort((a, b) => b.length - a.length).find(w => new RegExp('(^|[^a-z])' + normW(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z])').test(k));
+      if (hit) return hit;
+    }
+    return null;
+  }
+  const fmtBonus = n => n > 0 ? '+' + n : (n < 0 ? String(n) : '');
+  function computeWeaponAttack(it) {
+    const prof = (window.AppData && window.AppData.attackProfile) || null;
+    if (!prof) return null;
+    const baseName = findBaseWeaponName(it.weaponBase, it.name);
+    const fb = (baseName && WEAPON_STATS[baseName]) || [];
+    const catEntry = baseName ? WEAPON_CATEGORIES.find(c => c.items.includes(baseName)) : null;
+
+    // Dés + type : infos de l'objet > ancien champ « damage » > valeurs de secours
+    let dice = it.damageDice || '', type = it.damageType || '';
+    if (!dice && it.damage) {
+      const m = String(it.damage).trim().match(/^(\d+(?:\s*[dD]\s*\d+)?)\s*(.*)$/);
+      if (m) { dice = m[1].replace(/\s+/g, '').toUpperCase(); type = type || m[2].replace(/^dégâts?\s+/i, '').trim(); }
+    }
+    if (!dice) { dice = fb[0] || ''; type = type || fb[1] || ''; }
+    if (!dice) return null; // pas de dé connu (ex. filet) : rien à afficher
+    dice = String(dice).toUpperCase().replace(/\s+/g, '');
+
+    const props = normW(it.weaponProps || [it.category === 'arme' && !it.magic ? it.desc : '', fb[2]].filter(Boolean).join(' '));
+    const rangeTxt = normW(it.weaponRange || (catEntry ? catEntry.label : ''));
+    const isRanged = /distance/.test(rangeTxt);
+    const isFinesse = /finesse/.test(props);
+
+    // Caractéristique : distance = DEX, corps à corps = FOR, finesse = la meilleure des deux
+    const ab = prof.abilities || {};
+    const forMod = abilityMod(Number(ab.for) || 10), dexMod = abilityMod(Number(ab.dex) || 10);
+    let abKey = isRanged ? 'dex' : 'for';
+    if (isFinesse) abKey = dexMod > forMod ? 'dex' : 'for';
+    const abMod = abKey === 'dex' ? dexMod : forMod;
+
+    // Maîtrise : l'arme précise, ou sa catégorie (Armes courantes/de guerre, mêlée/distance)
+    const profs = (prof.weaponProfs || []).map(normW);
+    let catFamily = catEntry ? catEntry.label : '';
+    if (!catFamily && it.weaponCat) catFamily = `Armes ${/guerre/i.test(it.weaponCat) ? 'de guerre' : 'courantes'} (${isRanged ? 'distance' : 'mêlée'})`;
+    const famShort = catFamily.replace(/\s*\(.*\)$/, '');
+    const proficient = (baseName && profs.includes(normW(baseName))) || profs.includes(normW(it.name))
+      || (catFamily && (profs.includes(normW(catFamily)) || profs.includes(normW(famShort))));
+    const pb = proficient ? (prof.profBonus || 0) : 0;
+
+    // Bonus magique (+1, +2…) : champ de l'objet, sinon lu dans le nom
+    let magic = parseInt(it.attackBonus) || 0;
+    if (!magic) { const mm = String(it.name || '').match(/\+\s*([1-3])\b/); if (mm) magic = parseInt(mm[1]); }
+
+    const toHitTotal = abMod + pb + magic;
+    const dmgTotal = abMod + magic;
+    const abLabel = abKey === 'dex' ? 'DEX' : 'FOR';
+    let damage = `${dice}${fmtBonus(dmgTotal)}${type ? ' ' + type : ''}`;
+    const vers = props.match(/polyvalente\s*\(?\s*(\d+d\d+)/);
+    if (vers) damage += ` (${vers[1].toUpperCase()}${fmtBonus(dmgTotal)} à deux mains)`;
+    if (it.extraDice) damage += ` + ${String(it.extraDice).toUpperCase()}${it.extraType ? ' ' + it.extraType : ''}`;
+    const versTxt = '';
+
+    const hitParts = [`${abLabel} ${fmtSignedMod(abMod)}`];
+    hitParts.push(proficient ? `maîtrise ${fmtSignedMod(pb)}` : 'non maîtrisée');
+    if (magic) hitParts.push(`magie ${fmtSignedMod(magic)}`);
+    const dmgParts = [`${abLabel} ${fmtSignedMod(abMod)}`];
+    if (magic) dmgParts.push(`magie ${fmtSignedMod(magic)}`);
+    return {
+      toHit: `1D20${fmtBonus(toHitTotal)}`,
+      damage: damage + versTxt,
+      toHitDetail: hitParts.join(' · ') + (isFinesse ? ' (finesse : meilleure de FOR/DEX)' : ''),
+      damageDetail: dmgParts.join(' · '),
+      proficient,
+    };
+  }
+
   const ABILITY_FULL = { for: 'Force', dex: 'Dextérité', con: 'Constitution', int: 'Intelligence', sag: 'Sagesse', cha: 'Charisme' };
   function renderCasterRows(p, profBonus) {
     const firstRow = document.getElementById('cardAtk')?.closest('.top-row');
@@ -7256,6 +7377,8 @@
       renderHitDice();
 
       window.AppData.totalCharacterLevel = p.level || 1;
+      window.AppData.attackProfile = { abilities: p.abilities || {}, profBonus: profBonusForLevel(p.level || 1), weaponProfs: p.weaponProfs || [] };
+      try { if (typeof renderCombatList === 'function') renderCombatList(); } catch (e) { /* liste combat pas encore prête */ }
       if (p.abilities && p.abilities.dex != null) dexModifier = Math.floor(((parseInt(p.abilities.dex) || 10) - 10) / 2);
       Object.assign(maxSlots, computeSpellSlots(p));
       { const ps = computePactSlots(p); pactSlots.lvl = ps.lvl; pactSlots.max = ps.max; pactSlots.used = Math.min(pactSlots.used, ps.max); }
