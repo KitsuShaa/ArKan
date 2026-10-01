@@ -1713,7 +1713,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (7)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (8)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2766,8 +2766,8 @@
     <div class="form-field"><label>Vulnérabilité</label><input type="text" id="anmfVulnerabilite"></div>
 
     <div class="form-field"><label>Sens</label><textarea id="anmfSens" style="min-height:140px;" placeholder="Titre : texte — une entrée par paragraphe (laisser une ligne vide entre deux)"></textarea></div>
-    <div class="form-field"><label>Actions</label><textarea id="anmfActions" style="min-height:70px;"></textarea></div>
-    <div class="form-field"><label>Divers</label><textarea id="anmfDivers" style="min-height:60px;"></textarea></div>
+    <div class="form-field"><label>Actions</label><textarea id="anmfActions" style="min-height:90px;" placeholder="Titre : texte — une entrée par paragraphe"></textarea></div>
+    <div class="form-field"><label>Divers</label><textarea id="anmfDivers" style="min-height:90px;" placeholder="Titre : texte — une entrée par paragraphe"></textarea></div>
 
     <button class="modal-confirm-btn" onclick="saveAnimalForm()">Enregistrer</button>
     <div style="display:flex; gap:10px; margin-top:8px;">
@@ -3377,7 +3377,7 @@
           id: r.id, name: r.nom, for: r.for, dex: r.dex, con: r.con, int: r.int_, sag: r.sag, cha: r.cha,
           taille: r.taille, puissance: r.puissance, langues: r.langues, pp: r.pp, competences: r.competences,
           vitesse: r.vitesse, ca: r.ca, pv: r.pv, resistance: r.resistance, immunites: r.immunites,
-          vulnerabilite: r.vulnerabilite, sens: r.sens || [], photo: r.photo, localThumb: null,
+          vulnerabilite: r.vulnerabilite, sens: r.sens || [], actions: r.actions || [], divers: r.divers || [], photo: r.photo, localThumb: null,
         }) },
       { table: 'continents', target: continentsDatabase, map: r => ({
           id: r.id, name: r.nom, tagline: r.tagline, description: r.description, type: r.type,
@@ -35613,7 +35613,7 @@
       showToast(`« ${name} » créé`);
     }
     if (sb && currentOrgEditKind === 'conseil') {
-      sb.from('conseil_astelorn').upsert({ id: entry.id, nom: entry.name, race: entry.race, classe: entry.classe, specialite: entry.specialite, physique: entry.physique, personnalite: entry.personnalite, relations: entry.relations, visible: entry.visible || false, photo: entry.photo }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+      sb.from('conseil_astelorn').upsert({ id: entry.id, nom: entry.name, race: entry.race, classe: entry.classe, specialite: entry.specialite, physique: entry.physique, personnalite: entry.personnalite, relations: entry.relations, visible: entry.visible || false, photo: entry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     }
     closeModal('modalConseilForm');
     renderAstelornSubContent();
@@ -35713,7 +35713,7 @@
       antennesDatabase.push(entry);
       showToast(`« ${name} » créée`);
     }
-    if (sb) sb.from('antennes_astelorn').upsert({ id: entry.id, nom: entry.name, visible: entry.visible, lieu: entry.lieu, primarch: entry.primarch, cap_savoir: entry.capSavoir, cap_ombre: entry.capOmbre, cap_ordre: entry.capOrdre, description: entry.description, salles: entry.salles, salle_commune: entry.salleCommune, photo: entry.photo, conseil_photo: entry.conseilPhoto }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (sb) sb.from('antennes_astelorn').upsert({ id: entry.id, nom: entry.name, visible: entry.visible, lieu: entry.lieu, primarch: entry.primarch, cap_savoir: entry.capSavoir, cap_ombre: entry.capOmbre, cap_ordre: entry.capOrdre, description: entry.description, salles: entry.salles, salle_commune: entry.salleCommune, photo: entry.photo, conseil_photo: entry.conseilPhoto }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalAntenneForm');
     renderAstelornSubContent();
   }
@@ -35798,7 +35798,7 @@
       dieuxDatabase.push(dieuEntry);
       showToast(`« ${name} » créé`);
     }
-    if (sb) sb.from('dieux').upsert({ id: dieuEntry.id, nom: dieuEntry.name, tagline: dieuEntry.tagline, citation: dieuEntry.citation, surnom: dieuEntry.nickname, presentation: dieuEntry.presentation, histoire: dieuEntry.histoire, clerge: dieuEntry.clerge, photo: dieuEntry.photo }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (sb) sb.from('dieux').upsert({ id: dieuEntry.id, nom: dieuEntry.name, tagline: dieuEntry.tagline, citation: dieuEntry.citation, surnom: dieuEntry.nickname, presentation: dieuEntry.presentation, histoire: dieuEntry.histoire, clerge: dieuEntry.clerge, photo: dieuEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalDieuForm');
     renderDieuxGrid();
   }
@@ -35876,7 +35876,7 @@
       kaorunDatabase.push(kEntry);
       showToast(`« ${name} » créé`);
     }
-    if (sb) sb.from('kaorun').upsert({ id: kEntry.id, nom: kEntry.name, description: kEntry.description, particularites: kEntry.particularites, photo: kEntry.photo, cle_photo: kEntry.clePhoto }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (sb) sb.from('kaorun').upsert({ id: kEntry.id, nom: kEntry.name, description: kEntry.description, particularites: kEntry.particularites, photo: kEntry.photo, cle_photo: kEntry.clePhoto }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalKaorunForm');
     renderKaorunGrid();
   }
@@ -36501,10 +36501,10 @@
   }
   function sbSyncOrgSlot(kind, entry) {
     if (!sb) return;
-    if (kind === 'fondateur') sb.from('fondateurs_astelorn').upsert({ id: entry.id, nom: entry.name, voie: entry.voie, visible: entry.visible, photo: entry.photo }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
-    if (kind === 'conseil') sb.from('conseil_astelorn').update({ visible: entry.visible }).eq('id', entry.id).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
-    if (kind === 'primarch') sb.from('primarchs_astelorn').upsert({ id: entry.id, pnj_id: entry.pnjId || null, antenne_id: entry.antenneId || null, visible: entry.visible }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
-    if (kind === 'capitaine') sb.from('capitaines_astelorn').upsert({ id: entry.id, primarch_id: entry.primarchId, voie: entry.voie, pnj_id: entry.pnjId || null, visible: entry.visible }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (kind === 'fondateur') sb.from('fondateurs_astelorn').upsert({ id: entry.id, nom: entry.name, voie: entry.voie, visible: entry.visible, photo: entry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+    if (kind === 'conseil') sb.from('conseil_astelorn').update({ visible: entry.visible }).eq('id', entry.id).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+    if (kind === 'primarch') sb.from('primarchs_astelorn').upsert({ id: entry.id, pnj_id: entry.pnjId || null, antenne_id: entry.antenneId || null, visible: entry.visible }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+    if (kind === 'capitaine') sb.from('capitaines_astelorn').upsert({ id: entry.id, primarch_id: entry.primarchId, voie: entry.voie, pnj_id: entry.pnjId || null, visible: entry.visible }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
   }
   function toggleOrgVisibility(kind, id) {
     const entry = orgKindDbAny(kind).find(x => x.id === id);
@@ -36680,7 +36680,7 @@
     useLoreLayout('antenne');
     document.getElementById('pnjvBody').innerHTML = `
       <div class="lv" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr); min-height:calc(92vh - 175px);">
-        <div class="lv-col" style="align-self:start;">
+        <div class="lv-col" style="justify-content:space-between;">
           ${lvPhoto(a.photo, 'data-antv-photo="1"', 'lv-landscape', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>')}
           <div class="lv-row">${lvInfo('Lieu', a.lieu)}${lvInfo('Primarch', a.primarch)}</div>
           <div class="lv-row">${lvInfo('Voie du Savoir', a.capSavoir)}${lvInfo('Voie de l\'Ombre', a.capOmbre)}${lvInfo('Voie de l\'Ordre', a.capOrdre)}</div>
@@ -38324,7 +38324,7 @@
     if (currentRaceId) { Object.assign(racesDatabase.find(x => x.id === currentRaceId), data); showToast(`« ${name} » mise à jour`); }
     else { racesDatabase.push({ id: 'race' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créée`); }
     const raceEntry = racesDatabase.find(x => x.id === currentRaceId) || racesDatabase[racesDatabase.length - 1];
-    if (sb) sb.from('races').upsert({ id: raceEntry.id, nom: raceEntry.name, description: raceEntry.description, noms: raceEntry.noms, traits: raceEntry.traits || [], age: raceEntry.age, taille: raceEntry.taille, poids: raceEntry.poids, vitesse: raceEntry.vitesse, langues: raceEntry.langues, photo: raceEntry.photo }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (sb) sb.from('races').upsert({ id: raceEntry.id, nom: raceEntry.name, description: raceEntry.description, noms: raceEntry.noms, traits: raceEntry.traits || [], age: raceEntry.age, taille: raceEntry.taille, poids: raceEntry.poids, vitesse: raceEntry.vitesse, langues: raceEntry.langues, photo: raceEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalRaceForm');
     renderSystemeContent();
   }
@@ -38373,7 +38373,7 @@
     if (currentSousraceId) { Object.assign(sousracesDatabase.find(x => x.id === currentSousraceId), data); showToast(`« ${name} » mise à jour`); }
     else { sousracesDatabase.push({ id: 'sousrace' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créée`); }
     const srEntry = sousracesDatabase.find(x => x.id === currentSousraceId) || sousracesDatabase[sousracesDatabase.length - 1];
-    if (sb) sb.from('sous_races').upsert({ id: srEntry.id, nom: srEntry.name, origines: srEntry.origines, traits: srEntry.traits || [], taille: srEntry.taille, poids: srEntry.poids, photo: srEntry.photo }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (sb) sb.from('sous_races').upsert({ id: srEntry.id, nom: srEntry.name, origines: srEntry.origines, traits: srEntry.traits || [], taille: srEntry.taille, poids: srEntry.poids, photo: srEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalSousraceForm');
     renderSystemeContent();
   }
@@ -38432,7 +38432,7 @@
     if (currentClasseId) { Object.assign(classesLoreDatabase.find(x => x.id === currentClasseId), data); showToast(`« ${name} » mise à jour`); }
     else { classesLoreDatabase.push({ id: 'classe' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créée`); }
     const clEntry = classesLoreDatabase.find(x => x.id === currentClasseId) || classesLoreDatabase[classesLoreDatabase.length - 1];
-    if (sb) sb.from('classes').upsert({ id: clEntry.id, nom: clEntry.name, flavor: clEntry.flavor, features: clEntry.features || [], de_vie: clEntry.de_vie, pv_niveau: clEntry.pv_niveau, valeur_haute: clEntry.valeur_haute, historique_conseille: clEntry.historique_conseille, armes: clEntry.armes, armures: clEntry.armures, outils: clEntry.outils, jds: clEntry.jds, competences: clEntry.competences, photo: clEntry.photo }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (sb) sb.from('classes').upsert({ id: clEntry.id, nom: clEntry.name, flavor: clEntry.flavor, features: clEntry.features || [], de_vie: clEntry.de_vie, pv_niveau: clEntry.pv_niveau, valeur_haute: clEntry.valeur_haute, historique_conseille: clEntry.historique_conseille, armes: clEntry.armes, armures: clEntry.armures, outils: clEntry.outils, jds: clEntry.jds, competences: clEntry.competences, photo: clEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalClasseForm');
     renderSystemeContent();
   }
@@ -38494,7 +38494,8 @@
     else { historiquesDatabase.push({ id: 'histo' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créé`); }
     const hEntry = historiquesDatabase.find(x => x.id === currentHistoId) || historiquesDatabase[historiquesDatabase.length - 1];
     const capacitesText = Array.isArray(hEntry.capacites) ? hEntry.capacites.map(c => `${c.title}.\n${c.text}`).join('\n\n') : (hEntry.capacites || '');
-    if (sb) sb.from('historiques').upsert({ id: hEntry.id, nom: hEntry.name, description: hEntry.description, capacites: capacitesText, competences: hEntry.competences, langues: hEntry.langues, outils: hEntry.outils, photo: hEntry.photo }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    hEntry.capacites = capacitesText;
+    if (sb) sb.from('historiques').upsert({ id: hEntry.id, nom: hEntry.name, description: hEntry.description, capacites: capacitesText, competences: hEntry.competences, langues: hEntry.langues, outils: hEntry.outils, photo: hEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalHistoForm');
     renderSystemeContent();
   }
@@ -39117,7 +39118,7 @@
         <div>${lvPhoto(a.photo, 'data-animalview-photo="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 10c0-2 2-3 3-1 1-3 4-3 5 0 1-3 4-3 5 0 1-2 3-1 3 1-1 5-4 9-8 9s-7-4-8-9z"/></svg>')}</div>
         <div class="lv-col lv-fit">
           <div class="lv-row">${abilityBoxes.map(b => lvInfo(b.label, b.value)).join('')}</div>
-          <div class="lv lv-grow" style="grid-template-columns:repeat(3, minmax(0,0.62fr)) minmax(0,2.3fr); grid-template-rows:1fr 1fr; gap:12px;">
+          <div class="lv" style="grid-template-columns:repeat(3, minmax(0,0.62fr)) minmax(0,2.3fr); gap:12px;">
             ${infoBoxes.slice(0, 3).map(b => lvInfo(b.label, b.value)).join('')}
             <div class="lv-card" style="grid-column:4; grid-row:1 / span 2;">
               <div class="lv-card-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12.5px;" title="Résistances / Immunités / Vulnérabilités">Résistances / Immunités / Vulnérabilités</div>
@@ -39129,6 +39130,10 @@
             </div>
             ${infoBoxes.slice(3).map(b => lvInfo(b.label, b.value)).join('')}
           </div>
+          <div class="lv-row lv-grow">
+            <div class="lv-card"><div class="lv-card-title">Actions</div>${traitList(a.actions).length ? traitList(a.actions).map(traitLine).join('') : '<div class="mve-text"><span class="lv-empty">—</span></div>'}</div>
+            <div class="lv-card"><div class="lv-card-title">Divers</div>${traitList(a.divers).length ? traitList(a.divers).map(traitLine).join('') : '<div class="mve-text"><span class="lv-empty">—</span></div>'}</div>
+          </div>
         </div>
         <div class="lv-col lv-fit">
           <div class="lv-card" style="flex:0 1 auto;">
@@ -39139,8 +39144,6 @@
           <div class="lv-card lv-grow">
             <div class="lv-card-title">Sens</div>
             ${traitList(a.sens).length ? traitList(a.sens).map(traitLine).join('') : '<div class="mve-text"><span class="lv-empty">—</span></div>'}
-            ${traitList(a.actions).length ? `<div class="lv-card-title" style="margin-top:10px;">Actions</div>${traitList(a.actions).map(traitLine).join('')}` : ''}
-            ${traitList(a.divers).length ? `<div class="lv-card-title" style="margin-top:10px;">Divers</div>${traitList(a.divers).map(traitLine).join('')}` : ''}
           </div>
         </div>
       </div>
@@ -39229,13 +39232,22 @@
 
   function sbSaveAnimal(entry) {
     if (!sb) return;
-    sb.from('animaux').upsert({
+    const payload = {
       id: entry.id, nom: entry.name, "for": entry.for, dex: entry.dex, con: entry.con, int_: entry.int,
       sag: entry.sag, cha: entry.cha, taille: entry.taille, puissance: entry.puissance, langues: entry.langues,
       pp: entry.pp, competences: entry.competences, vitesse: entry.vitesse, ca: entry.ca, pv: entry.pv,
       resistance: entry.resistance, immunites: entry.immunites, vulnerabilite: entry.vulnerabilite,
-      sens: Array.isArray(entry.sens) ? entry.sens : [], photo: entry.photo,
-    }).then(({ error }) => {
+      sens: traitList(entry.sens), actions: traitList(entry.actions), divers: traitList(entry.divers), photo: entry.photo,
+    };
+    sb.from('animaux').upsert(payload).then(({ error }) => {
+      if (error && /actions|divers/.test(error.message || '')) {
+        // colonnes pas encore créées : on enregistre le reste et on prévient
+        const p2 = { ...payload }; delete p2.actions; delete p2.divers;
+        return sb.from('animaux').upsert(p2).then(({ error: e2 }) => {
+          if (e2) { console.error('Supabase animaux upsert:', e2); showToast('⚠️ Non sauvegardé en ligne (' + e2.message + ')'); }
+          else showToast('Enregistré sans Actions/Divers — ajoute les colonnes actions et divers à la table animaux');
+        });
+      }
       if (error) { console.error('Supabase animaux upsert:', error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); }
     });
   }
@@ -40659,7 +40671,7 @@
     if (currentRegionId) { Object.assign(regionsDatabase.find(o => o.id === currentRegionId), data); showToast(`« ${name} » mise à jour`); }
     else { regionsDatabase.push({ id: 'reg' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créée`); }
     const regEntry = regionsDatabase.find(o => o.id === currentRegionId) || regionsDatabase[regionsDatabase.length - 1];
-    if (sb) sb.from('regions').upsert({ id: regEntry.id, nom: regEntry.name, description: regEntry.description, photo: regEntry.photo }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (sb) sb.from('regions').upsert({ id: regEntry.id, nom: regEntry.name, description: regEntry.description, photo: regEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalRegionForm'); renderGeoContent();
   }
   function deleteRegionForm() {
@@ -40741,7 +40753,7 @@
     if (currentVilleId) { Object.assign(villesDatabase.find(o => o.id === currentVilleId), data); showToast(`« ${name} » mise à jour`); }
     else { villesDatabase.push({ id: 'ville' + Date.now(), photo: null, plan: null, ...data }); showToast(`« ${name} » créée`); }
     const villeEntry = villesDatabase.find(o => o.id === currentVilleId) || villesDatabase[villesDatabase.length - 1];
-    if (sb) sb.from('villes').upsert({ id: villeEntry.id, nom: villeEntry.name, description: villeEntry.description, architecture: villeEntry.architecture, lieux_notables: villeEntry.lieuxNotables, dirigeant: villeEntry.dirigeant, population: villeEntry.population, photo: villeEntry.photo, plan: villeEntry.plan }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (sb) sb.from('villes').upsert({ id: villeEntry.id, nom: villeEntry.name, description: villeEntry.description, architecture: villeEntry.architecture, lieux_notables: villeEntry.lieuxNotables, dirigeant: villeEntry.dirigeant, population: villeEntry.population, photo: villeEntry.photo, plan: villeEntry.plan }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalVilleForm'); renderGeoContent();
   }
   function deleteVilleForm() {
@@ -40860,7 +40872,7 @@
     if (currentCommerceId) { Object.assign(commercesDatabase.find(o => o.id === currentCommerceId), data); showToast(`« ${name} » mis à jour`); }
     else { commercesDatabase.push({ id: 'com' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créé`); }
     const comEntry = commercesDatabase.find(o => o.id === currentCommerceId) || commercesDatabase[commercesDatabase.length - 1];
-    if (sb) sb.from('commerces').upsert({ id: comEntry.id, nom: comEntry.name, description: comEntry.description, tarifs: comEntry.tarifs, tarifs_parsed: comEntry.tarifsParsed || [], tags: comEntry.tags || [], photo: comEntry.photo }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (sb) sb.from('commerces').upsert({ id: comEntry.id, nom: comEntry.name, description: comEntry.description, tarifs: comEntry.tarifs, tarifs_parsed: comEntry.tarifsParsed || [], tags: comEntry.tags || [], photo: comEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalCommerceForm'); renderGeoContent();
   }
   function deleteCommerceForm() {
@@ -40914,7 +40926,7 @@
     if (currentLieuId) { Object.assign(lieuxDatabase.find(o => o.id === currentLieuId), data); showToast(`« ${name} » mis à jour`); }
     else { lieuxDatabase.push({ id: 'lieu' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créé`); }
     const lieuEntry = lieuxDatabase.find(o => o.id === currentLieuId) || lieuxDatabase[lieuxDatabase.length - 1];
-    if (sb) sb.from('lieux_importants').upsert({ id: lieuEntry.id, nom: lieuEntry.name, description: lieuEntry.description, region: lieuEntry.region, ville: lieuEntry.ville, photo: lieuEntry.photo }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
+    if (sb) sb.from('lieux_importants').upsert({ id: lieuEntry.id, nom: lieuEntry.name, description: lieuEntry.description, region: lieuEntry.region, ville: lieuEntry.ville, photo: lieuEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalLieuForm'); renderGeoContent();
   }
   function deleteLieuForm() {
