@@ -1627,6 +1627,8 @@
   .param-player-theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
   .param-player-theme-card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 14px; }
   .param-player-theme-name { font-family: var(--font-serif); font-size: 13px; color: var(--ink); margin-bottom: 10px; }
+  .param-player-theme-card.param-theme-mine { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold-soft); max-width: 260px; }
+  .param-theme-badge { font-family: var(--font-sans); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--gold); background: var(--gold-soft); border-radius: 10px; padding: 2px 7px; margin-left: 6px; vertical-align: middle; }
 
   .continent-tagline {
     font-family: var(--font-serif); font-style: italic; font-size: 13.5px; color: var(--gold);
@@ -1722,7 +1724,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (10)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (11)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2584,7 +2586,10 @@
   <div class="wizard-box" style="max-width:620px;">
     <div class="wizard-header" style="display:flex; align-items:flex-start; justify-content:space-between; border-bottom:none;">
       <div>
-        <h3 id="pnjvName" style="margin-bottom:4px;"></h3>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:4px;">
+          <h3 id="pnjvName" style="margin:0;"></h3>
+          <div id="pnjvTags" class="pnjv-tag-row" style="margin:0;"></div>
+        </div>
         <div class="modal-sub" id="pnjvSub" style="margin:0;"></div>
       </div>
       <div style="display:flex; gap:8px; flex-shrink:0;">
@@ -4363,10 +4368,13 @@
 
     if (currentParamSub === 'theme') {
       c.innerHTML = `
-        <div class="section-title" style="margin-top:0;">Ma couleur (console MJ)</div>
-        <div class="theme-grid" id="paramThemeGridMj"></div>
+        <div class="param-player-theme-grid">
+          <div class="param-player-theme-card param-theme-mine">
+            <div class="param-player-theme-name">Ma couleur <span class="param-theme-badge">Console MJ</span></div>
+            <div class="theme-grid small" id="paramThemeGridMj"></div>
+          </div>
+        </div>
         <div class="section-title">Couleur des joueurs</div>
-        <p class="wizard-hint" style="margin-top:-4px;">Sert à te souvenir de la couleur choisie par chacun sur sa propre fiche — ce réglage ne modifie pas leur appli tant que la synchronisation en temps réel n'est pas branchée.</p>
         <div class="param-player-theme-grid" id="paramPlayerThemes"></div>
       `;
       renderParamThemeMj();
@@ -5308,6 +5316,7 @@
       case 'classe-view': return T('classes', classesLoreDatabase.find(x => x.id === currentClasseId), 'photo');
       case 'histo-view': return T('historiques', historiquesDatabase.find(x => x.id === currentHistoId), 'photo');
       case 'antenne-view': return T('antennes_astelorn', antennesDatabase.find(x => x.id === currentAstelornAntenneId), 'photo');
+      case 'antenne-conseil-view': return T('antennes_astelorn', antennesDatabase.find(x => x.id === currentAstelornAntenneId), 'conseil_photo');
       case 'conseil-view': return T('conseil_astelorn', conseilDatabase.find(x => x.id === currentAstelornConseilId), 'photo');
       case 'kaorun-view': return T('kaorun', kaorunDatabase.find(x => x.id === currentKaorunId), 'photo');
       case 'kaorun-cle-view': return T('kaorun', kaorunDatabase.find(x => x.id === currentKaorunId), 'cle_photo');
@@ -5332,6 +5341,15 @@
   }
   function applyCropContext() {
     const ctx = photoCropContext;
+    if (ctx === 'antenne-conseil-view') {
+      const ant = antennesDatabase.find(x => x.id === currentAstelornAntenneId);
+      if (!ant) return;
+      ant.conseilPhoto = photoData.src;
+      persistCroppedPhoto(ctx);
+      openAntenneView(ant.id);
+      showToast('Image recadrée');
+      return;
+    }
     const GEO = {
       'continent-view': id => openContinentView(id), 'region-view': id => openRegionView(id), 'ville-view': id => openVilleView(id),
       'commerce-view': id => openCommerceView(id), 'lieu-view': id => openLieuView(id), 'ville-plan-view': id => openVilleView(id),
@@ -36476,12 +36494,12 @@
           </div>
           <div class="org-connector" id="orgConn2"></div>
           <div class="org-row" id="orgRowPrimarchs">
-            ${primarchsDatabase.map(p => `
+            ${[...primarchsDatabase].sort((a, b) => String(a.id).localeCompare(String(b.id), 'fr', { numeric: true })).map(p => `
               <div class="org-primarch-col">
                 ${orgPnjSlotHtml('primarch', p, 'Primarch')}
                 <div class="org-connector org-connector-small"></div>
                 <div class="org-cap-group">
-                  ${capitainesDatabase.filter(cp => cp.primarchId === p.id).map(cp => orgPnjSlotHtml('capitaine', cp, 'Voie ' + cp.voie)).join('')}
+                  ${capitainesDatabase.filter(cp => cp.primarchId === p.id).sort((a, b) => ['Savoir', 'Ombre', 'Ordre'].indexOf(a.voie) - ['Savoir', 'Ombre', 'Ordre'].indexOf(b.voie)).map(cp => orgPnjSlotHtml('capitaine', cp, 'Voie ' + cp.voie)).join('')}
                 </div>
               </div>
             `).join('')}
@@ -36708,13 +36726,22 @@
           ${lvPhoto(a.photo, 'data-antv-photo="1"', 'lv-landscape', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>')}
           <div class="lv-row">${lvInfo('Lieu', a.lieu)}${lvInfo('Primarch', a.primarch)}</div>
           <div class="lv-row">${lvInfo('Voie du Savoir', a.capSavoir)}${lvInfo('Voie de l\'Ombre', a.capOmbre)}${lvInfo('Voie de l\'Ordre', a.capOrdre)}</div>
-          ${lvPhoto(a.conseilPhoto, 'data-antv-conseil-photo="1"', 'lv-landscape', null, false)}
+          ${lvPhoto(a.conseilPhoto, 'data-antv-conseil-photo="1"', 'lv-landscape')}
         </div>
         <div class="lv-col lv-fit">${lvCard('Description', a.description, 'lv-grow')}</div>
         <div class="lv-col lv-fit">${lvCard('Salles principales', a.salles, 'lv-grow')}</div>
         <div class="lv-col lv-fit">${lvCard('Salle commune', a.salleCommune, 'lv-grow')}</div>
       </div>
     `;
+    const salleBox = document.querySelector('[data-antv-conseil-photo]');
+    if (salleBox && a.conseilPhoto) {
+      salleBox.style.cursor = 'pointer';
+      salleBox.addEventListener('click', () => {
+        photoData = { src: a.conseilPhoto, offsetX: 0, offsetY: 0, zoom: 100 };
+        photoCropContext = 'antenne-conseil-view';
+        openPhotoCropper();
+      });
+    }
     const photoBox = document.querySelector('[data-antv-photo]');
     if (photoBox && a.photo) {
       photoBox.style.cursor = 'pointer';
@@ -40803,12 +40830,11 @@
     const x = commercesDatabase.find(o => o.id === id);
     document.getElementById('pnjvName').textContent = x.name;
     document.getElementById('pnjvSub').textContent = 'Commerce';
-    useLoreLayout('commerce');
+    useLoreLayout('commerce'); setViewTags(x.tags);
     document.getElementById('pnjvBody').innerHTML = `
       <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) minmax(0,1.9fr);">
         <div>${lvPhoto(x.photo, 'data-geov-photo="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M6 8h12l1 12a2 2 0 01-2 2H7a2 2 0 01-2-2z"/><path d="M9 8a3 3 0 016 0"/></svg>')}</div>
         <div class="lv-col lv-fit">
-          ${x.tags && x.tags.length ? `<div class="pnjv-tag-row">${x.tags.map(t => `<span class="pnjv-tag">${t}</span>`).join('')}</div>` : ''}
           ${lvCard('Description', x.description, 'lv-grow')}
         </div>
         <div class="lv-col lv-fit">
@@ -41064,8 +41090,13 @@
   }
   // La fiche partagée #modalPnjView passe en grand format pour les fiches lore qui le demandent
   let pendingLoreLayout = null;
+  let pendingViewTags = null;
   function useLoreLayout(name) { pendingLoreLayout = name; }
+  function setViewTags(tags) { pendingViewTags = tags && tags.length ? tags : null; }
   function applyLoreLayout() {
+    const tagsEl = document.getElementById('pnjvTags');
+    if (tagsEl) tagsEl.innerHTML = pendingViewTags ? pendingViewTags.map(t => `<span class="pnjv-tag">${t}</span>`).join('') : '';
+    pendingViewTags = null;
     const box = document.querySelector('#modalPnjView .wizard-box');
     if (!box) return;
     box.className = box.className.split(' ').filter(c => c !== 'lv-wide' && !c.startsWith('lvt-')).join(' ');
@@ -41095,12 +41126,11 @@
 
     const photoStyle = p.photo ? `background-image:url(${p.photo}); background-size:${legacyBgSize(p.photoZoom)}; background-position: calc(50% + ${p.photoOffsetX || 0}px) calc(50% + ${p.photoOffsetY || 0}px);` : '';
 
-    useLoreLayout('pnj');
+    useLoreLayout('pnj'); setViewTags(p.tags);
     document.getElementById('pnjvBody').innerHTML = `
       <div class="lv" style="grid-template-columns:repeat(4, minmax(0,1fr));">
         <div>${lvPhoto(p.photo, 'data-pnjv-photo="1"', 'lv-portrait', null, true, p.photo && p.photoZoom && Number(p.photoZoom) !== 100 ? `background-size:${p.photoZoom}%; background-position:calc(50% + ${p.photoOffsetX || 0}px) calc(50% + ${p.photoOffsetY || 0}px);` : '')}</div>
         <div class="lv-col lv-fit">
-          ${p.tags.length ? `<div class="pnjv-tag-row">${p.tags.map(t => `<span class="pnjv-tag">${t}</span>`).join('')}</div>` : ''}
           ${infoBoxes.map(b => lvInfo(b.label, b.value, true)).join('')}
         </div>
         <div class="lv-col lv-fit">${lvCard('Physique', p.physique, 'lv-grow')}</div>
@@ -42617,31 +42647,42 @@
   }
 
   /* ===================== MODULE MESSAGERIE ===================== */
-  const messagesData = {
-    elowen: { messages: [], unread: false },
-    joueur2: { messages: [], unread: false },
-    joueur3: { messages: [], unread: false },
-    joueur4: { messages: [], unread: false },
-    joueur5: { messages: [], unread: false },
-    joueur6: { messages: [], unread: false },
-  };
+  const messagesData = {};
+  // Fil d'un joueur (créé à la demande : les joueurs viennent de Supabase)
+  function msgThread(pid) {
+    if (!messagesData[pid]) messagesData[pid] = { messages: [], unread: false };
+    return messagesData[pid];
+  }
+  const fmtMsgTime = d => d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
 
-  async function loadMessagesFromSupabase() {
+  let knownMsgIds = null;
+  async function loadMessagesFromSupabase(fromPoll) {
     if (!sb) return;
     const { data, error } = await sb.from('messages').select('*').order('cree_le', { ascending: true });
     if (error || !data) { console.error('Échec chargement messages', error); return; }
+    const fresh = [];
     Object.keys(messagesData).forEach(pid => { messagesData[pid].messages = []; messagesData[pid].unread = false; });
     data.forEach(row => {
-      if (!messagesData[row.joueur_id]) messagesData[row.joueur_id] = { messages: [], unread: false };
-      const time = new Date(row.cree_le);
-      messagesData[row.joueur_id].messages.push({
-        id: row.id, from: row.expediteur, text: row.texte,
-        time: time.getHours().toString().padStart(2, '0') + ':' + time.getMinutes().toString().padStart(2, '0'),
-      });
-      if (row.expediteur === 'joueur' && !row.lu) messagesData[row.joueur_id].unread = true;
+      const th = msgThread(row.joueur_id);
+      th.messages.push({ id: row.id, from: row.expediteur, text: row.texte, time: fmtMsgTime(new Date(row.cree_le)) });
+      if (row.expediteur === 'joueur' && !row.lu) th.unread = true;
+      if (knownMsgIds && !knownMsgIds.has(row.id) && row.expediteur === 'joueur') fresh.push(row);
     });
+    knownMsgIds = new Set(data.map(r => r.id));
+    // le fil ouvert est lu au fur et à mesure
+    if (currentMsgPlayerId && msgThread(currentMsgPlayerId).unread && document.getElementById('msgThreadActive')?.offsetParent) {
+      msgThread(currentMsgPlayerId).unread = false;
+      sb.from('messages').update({ lu: true }).eq('joueur_id', currentMsgPlayerId).eq('expediteur', 'joueur').eq('lu', false).then(() => {});
+    }
     renderMessagerieNotifBadge();
+    if (fromPoll) {
+      if (document.getElementById('msgConvList')) renderMsgConvList();
+      if (currentMsgPlayerId && document.getElementById('msgThreadBody')) renderMsgThreadBody(currentMsgPlayerId);
+      if (fresh.length) showMailNotifPopup(fresh[fresh.length - 1].joueur_id, fresh[fresh.length - 1].texte);
+    }
   }
+  // Nouveaux messages des joueurs : vérification toutes les 8 secondes
+  setInterval(() => { if (sb && knownMsgIds) loadMessagesFromSupabase(true); }, 8000);
   let currentMsgPlayerId = null;
 
   function renderMessagerieNotifBadge() {
@@ -42652,7 +42693,7 @@
   function renderMsgConvList() {
     const list = document.getElementById('msgConvList');
     list.innerHTML = players.map(p => {
-      const thread = messagesData[p.id];
+      const thread = msgThread(p.id);
       const last = thread.messages[thread.messages.length - 1];
       const initials = p.name.split(' ').map(w => w[0]).join('').slice(0, 2);
       return `
@@ -42674,7 +42715,8 @@
   function openMsgThread(playerId) {
     currentMsgPlayerId = playerId;
     const p = players.find(pl => pl.id === playerId);
-    const thread = messagesData[playerId];
+    if (!p) return;
+    const thread = msgThread(playerId);
     const wasUnread = thread.unread;
     thread.unread = false;
     renderMessagerieNotifBadge();
@@ -42684,11 +42726,17 @@
     document.getElementById('msgThreadEmpty').style.display = 'none';
     document.getElementById('msgThreadActive').style.display = 'flex';
     document.getElementById('msgThreadHeader').textContent = p.name;
-    document.getElementById('msgThreadBody').innerHTML = thread.messages.map(m => `
+    renderMsgThreadBody(playerId);
+  }
+  function renderMsgThreadBody(playerId) {
+    const body = document.getElementById('msgThreadBody');
+    if (!body) return;
+    const atBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
+    const before = body.innerHTML;
+    body.innerHTML = msgThread(playerId).messages.map(m => `
       <div class="mb-bubble ${m.from}">${m.text}<div class="mb-time">${m.time}</div></div>
     `).join('') || '<p style="color:var(--ink-faint); font-size:12.5px;">Aucun message pour le moment.</p>';
-    const body = document.getElementById('msgThreadBody');
-    body.scrollTop = body.scrollHeight;
+    if (atBottom || before !== body.innerHTML) body.scrollTop = body.scrollHeight;
   }
 
   function sendMjMessage() {
@@ -42698,19 +42746,21 @@
     if (!text) return;
     const now = new Date();
     const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-    messagesData[currentMsgPlayerId].messages.push({ from: 'mj', text, time });
+    msgThread(currentMsgPlayerId).messages.push({ from: 'mj', text, time });
     input.value = '';
     openMsgThread(currentMsgPlayerId);
-    if (sb) sb.from('messages').insert({ joueur_id: currentMsgPlayerId, expediteur: 'mj', texte: text, lu: true }).then(({ error }) => {
-      if (error) { console.error('Supabase messages insert:', error); showToast('⚠️ Message non sauvegardé en ligne'); }
+    // lu: false = le joueur verra la pastille « nouveau message » sur sa fiche
+    if (sb) sb.from('messages').insert({ joueur_id: currentMsgPlayerId, expediteur: 'mj', texte: text, lu: false }).select('id').then(({ data, error }) => {
+      if (error) { console.error('Supabase messages insert:', error); showToast('⚠️ Message non envoyé (' + error.message + ')'); return; }
+      if (knownMsgIds && data) data.forEach(r => knownMsgIds.add(r.id));
     });
   }
 
   function receiveSimulatedMessage(playerId, text) {
     const now = new Date();
     const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-    messagesData[playerId].messages.push({ from: 'joueur', text, time });
-    messagesData[playerId].unread = true;
+    msgThread(playerId).messages.push({ from: 'joueur', text, time });
+    msgThread(playerId).unread = true;
     renderMessagerieNotifBadge();
     renderMsgConvList();
     if (currentMsgPlayerId === playerId) openMsgThread(playerId);
@@ -42721,6 +42771,7 @@
   let mailPopupTimer = null;
   function showMailNotifPopup(playerId, text) {
     const p = players.find(pl => pl.id === playerId);
+    if (!p) return;
     document.getElementById('mnpName').textContent = p.name;
     document.getElementById('mnpPreview').textContent = text;
     const popup = document.getElementById('mailNotifPopup');

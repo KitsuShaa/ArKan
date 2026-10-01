@@ -4349,7 +4349,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 01/10 (10)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 01/10 (11)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -4501,10 +4501,37 @@
   }
 
   /* ===================== MESSAGERIE ===================== */
-  let messages = [
-    { from: 'mj', text: "Salut ! Petite question avant la prochaine session : tu comptes toujours investiguer la disparition à Valombre en premier ?", time: '18:42' },
-  ];
-  let hasUnreadMjMessage = true;
+  let messages = [];
+  let hasUnreadMjMessage = false;
+  let msgPollTimer = null;
+  const fmtMsgTime = d => d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+  // Charge le fil avec le MJ (table « messages », filtrée sur ce joueur)
+  async function loadPlayerMessages() {
+    const pid = window._gatePlayerId;
+    if (!sb || !pid) return;
+    const { data, error } = await sb.from('messages').select('*').eq('joueur_id', pid).order('cree_le', { ascending: true });
+    if (error || !data) { console.error('Messagerie : chargement impossible', error); return; }
+    const before = messages.length;
+    messages = data.map(r => ({ id: r.id, from: r.expediteur === 'mj' ? 'mj' : 'me', text: r.texte, time: fmtMsgTime(new Date(r.cree_le)), lu: r.lu }));
+    const overlayOpen = document.getElementById('messagerieOverlay')?.classList.contains('open');
+    const unread = messages.some(m => m.from === 'mj' && !m.lu);
+    if (overlayOpen) {
+      if (messages.length !== before) renderMsgThread();
+      if (unread) markMjMessagesRead();
+    } else {
+      hasUnreadMjMessage = unread;
+      document.getElementById('msgNotifBadge')?.classList.toggle('visible', unread);
+    }
+  }
+  function markMjMessagesRead() {
+    messages.forEach(m => { if (m.from === 'mj') m.lu = true; });
+    if (sb && window._gatePlayerId) sb.from('messages').update({ lu: true }).eq('joueur_id', window._gatePlayerId).eq('expediteur', 'mj').eq('lu', false).then(({ error }) => { if (error) console.error(error); });
+  }
+  function startMessagePolling() {
+    loadPlayerMessages();
+    if (msgPollTimer) clearInterval(msgPollTimer);
+    msgPollTimer = setInterval(loadPlayerMessages, 8000);
+  }
 
   function renderMsgThread() {
     document.getElementById('msgThread').innerHTML = messages.map(m => `
@@ -4520,7 +4547,9 @@
   function openMessagerie() {
     hasUnreadMjMessage = false;
     document.getElementById('msgNotifBadge').classList.remove('visible');
+    markMjMessagesRead();
     renderMsgThread();
+    loadPlayerMessages();
     document.getElementById('messagerieOverlay').classList.add('open');
   }
 
@@ -4533,6 +4562,11 @@
     messages.push({ from: 'me', text, time });
     input.value = '';
     renderMsgThread();
+    if (sb && window._gatePlayerId) {
+      sb.from('messages').insert({ joueur_id: window._gatePlayerId, expediteur: 'joueur', texte: text, lu: false }).then(({ error }) => {
+        if (error) { console.error('Messagerie : envoi impossible', error); if (typeof showToast === 'function') showToast('⚠️ Message non envoyé'); }
+      });
+    }
   }
 
   function closeNotesOverlay(id) {
@@ -4544,6 +4578,54 @@
     document.getElementById('guildeOverlay').classList.add('open');
     renderAntennesGrid();
     renderOrganigramme();
+    loadGuildFromSupabase().then(ok => { if (ok) { renderAntennesGrid(); renderOrganigramme(); } });
+  }
+
+  // Ce que le MJ a rendu visible dans sa console (Astelorn > Antennes / Organigramme)
+  async function loadGuildFromSupabase() {
+    if (!sb) return false;
+    try {
+      const [ant, fond, cons, prim, cap] = await Promise.all([
+        sb.from('antennes_astelorn').select('id, nom, visible, lieu, description, salles, salle_commune, photo, conseil_photo'),
+        sb.from('fondateurs_astelorn').select('id, nom, visible, photo'),
+        sb.from('conseil_astelorn').select('id, nom, visible, photo'),
+        sb.from('primarchs_astelorn').select('id, pnj_id, visible'),
+        sb.from('capitaines_astelorn').select('id, primarch_id, voie, pnj_id, visible'),
+      ]);
+      const byId = (a, b) => String(a.id).localeCompare(String(b.id), 'fr', { numeric: true });
+      if (!ant.error && ant.data) {
+        antennesData.length = 0;
+        ant.data.sort(byId).forEach(r => antennesData.push({
+          id: r.id, name: r.nom, unlocked: !!r.visible, photo: r.photo, conseilPhoto: r.conseil_photo,
+          lieu: r.lieu || '', description: r.description || '', salles: r.salles || '', salleCommune: r.salle_commune || '',
+        }));
+      }
+      // noms / photos des PNJ placés comme Primarchs et Capitaines (seulement ceux visibles)
+      const visibleSlots = [...(prim.data || []), ...(cap.data || [])].filter(x => x.visible && x.pnj_id);
+      const pnjIds = [...new Set(visibleSlots.map(x => x.pnj_id))];
+      let pnjById = {};
+      if (pnjIds.length) {
+        const pn = await sb.from('pnj').select('id, nom, photo').in('id', pnjIds);
+        (pn.data || []).forEach(r => { pnjById[r.id] = r; });
+      }
+      const slot = (x, role) => {
+        const pn = x.visible && x.pnj_id ? pnjById[x.pnj_id] : null;
+        return { name: pn ? pn.nom : '', role, visible: !!pn, photo: pn ? pn.photo : null };
+      };
+      if (!fond.error && fond.data) organigrammeData.fondateurs = fond.data.sort(byId).map(r => ({ name: r.nom, role: 'Fondateur', visible: !!r.visible, photo: r.photo }));
+      if (!cons.error && cons.data) organigrammeData.conseil = cons.data.sort((a, b) => String(a.nom).localeCompare(String(b.nom), 'fr')).map(r => ({ name: r.nom, role: 'Haut Conseil', visible: !!r.visible, photo: r.photo }));
+      if (!prim.error && prim.data) {
+        const VOIES = ['Savoir', 'Ombre', 'Ordre'];
+        organigrammeData.primarchs = prim.data.sort(byId).map(p => ({
+          ...slot(p, 'Primarch'),
+          capitaines: (cap.data || []).filter(c => c.primarch_id === p.id).sort((a, b) => VOIES.indexOf(a.voie) - VOIES.indexOf(b.voie)).map(c => slot(c, 'Voie ' + c.voie)),
+        }));
+      }
+      return true;
+    } catch (e) {
+      console.error('Guilde : chargement impossible', e);
+      return false;
+    }
   }
 
   function switchGuildTab(tab) {
@@ -4594,6 +4676,7 @@
       ${a.lieu ? `<div class="guild-lead" style="margin-top:0;">${a.lieu}</div>` : ''}
       ${a.description ? `<p>${a.description.replace(/\n/g,'<br>')}</p>` : '<p class="guild-placeholder">Ton MJ n\'a pas encore rempli la description de ce lieu.</p>'}
       ${a.salles ? `<div class="section-title">Salles</div><p>${a.salles.replace(/\n/g,'<br>')}</p>` : ''}
+      ${a.conseilPhoto ? `<div class="antenne-popup-photo" style="margin:14px 0 0; border-radius:14px; background-image:url(${a.conseilPhoto});"></div>` : ''}
       ${a.salleCommune ? `<div class="section-title">Salle commune</div><p>${a.salleCommune.replace(/\n/g,'<br>')}</p>` : ''}
     `;
     document.getElementById('antennePopupOverlay').classList.add('open');
@@ -4652,7 +4735,7 @@
             `).join('')}
           </div>
           <div class="org-connector"></div>
-          <div class="org-row">${groupBox('Veilleurs')}${groupBox('Émissaires')}</div>
+          <div class="org-row">${groupBox('Émissaires')}${groupBox('Veilleurs')}</div>
           <div class="org-connector"></div>
           <div class="org-row org-row-bottom">${groupBox('Aventuriers Confirmés')}${groupBox('Aspirants')}</div>
         </div>
@@ -4694,9 +4777,6 @@
     applyOrgZoom();
   }
 
-  if (hasUnreadMjMessage) {
-    document.getElementById('msgNotifBadge')?.classList.add('visible');
-  }
 
 
 
@@ -7553,6 +7633,7 @@
       hasUnreadMjMessage = false;
       const badge = document.getElementById('msgNotifBadge');
       if (badge) badge.classList.remove('visible');
+      startMessagePolling();
       const compBtn = document.getElementById('companionBtn');
       if (compBtn) compBtn.style.display = 'none';
 
