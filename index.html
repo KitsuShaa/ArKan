@@ -1631,6 +1631,42 @@
     text-align: center; padding: 10px 16px; margin-bottom: 14px;
     border-top: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border);
   }
+  /* ===== Fiches du lore en grand format (PC, horizontal) ===== */
+  #modalPnjView .wizard-box.lv-wide { max-width: min(1560px, 96vw); width: 96vw; max-height: 92vh; }
+  .lv { display: grid; gap: 14px; align-items: stretch; }
+  .lv > *, .lv-col > *, .lv-row > * { min-width: 0; }
+  .lv-col { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+  /* colonne qui prend la hauteur de la ligne (fixée par l'image) au lieu de l'agrandir ; son contenu défile si besoin */
+  .lv-fit { height: 0; min-height: 100%; overflow-y: auto; }
+  .lv-row { display: grid; gap: 12px; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+  .lv-grow { flex: 1 1 auto; }
+  .lv-fit .lv-grow { flex: 1 1 0; min-height: 0; }
+  .lv-photo {
+    width: 100%; border-radius: var(--radius-md); border: 1px solid var(--card-border);
+    background-color: var(--card); background-size: cover; background-position: center; background-repeat: no-repeat;
+    position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; color: var(--ink-faint);
+    max-height: calc(92vh - 150px);
+  }
+  .lv-portrait { aspect-ratio: 3 / 4; }
+  .lv-landscape { aspect-ratio: 16 / 10; }
+  .lv-banner { aspect-ratio: 7 / 2; }
+  .lv-landscape43 { aspect-ratio: 4 / 3; }
+  .lv .pnj-info-box { min-height: 58px; margin: 0; }
+  .lv-col > .pnj-info-box.lv-grow { min-height: 46px; }
+  .lv .pnj-info-box .pib-value { font-size: 13.5px; }
+  .lv-card {
+    background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-sm);
+    padding: 14px 16px; overflow-y: auto; display: flex; flex-direction: column; min-height: 0;
+  }
+  .lv-card-title { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--gold); margin-bottom: 8px; flex-shrink: 0; }
+  .lv-card .mve-text { font-size: 13px; line-height: 1.6; }
+  .lv-card .dieu-nickname { font-size: 15px; }
+  .lv-card .dieu-citation { margin: 0 0 10px; }
+  .lv .pnjv-tag-row { margin-bottom: 0; }
+  .lv .continent-tagline { margin: 0; display: flex; align-items: center; justify-content: center; }
+  .lv-tarifs { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); align-content: start; overflow-y: auto; }
+  .lv-tarifs .tarif-cat-block { min-width: 0; }
+  .lv-empty { color: var(--ink-faint); font-style: italic; }
   .continent-extra-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .dieu-citation {
     font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--gold);
@@ -1675,7 +1711,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (3)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (5)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3487,7 +3523,7 @@
         if (!(field in src) || isUsableImage(m[field]) || !isUsableImage(src[field])) return;
         m[field] = src[field];
         ['Zoom', 'OffsetX', 'OffsetY'].forEach(s => { if (src[field + s] != null) m[field + s] = src[field + s]; });
-        restoredPhotoQueue.push({ table, id: m.id, col: PHOTO_COLUMNS[field], val: src[field] });
+        restoredPhotoQueue.push({ table, id: m.id, col: PHOTO_COLUMNS[field], val: src[field], apply: url => { if (m[field] === src[field]) m[field] = url; } });
       });
     });
   }
@@ -3497,7 +3533,14 @@
     let ok = 0, ko = 0;
     while (restoredPhotoQueue.length) {
       const batch = restoredPhotoQueue.splice(0, 6);
-      const res = await Promise.all(batch.map(r => sb.from(r.table).update({ [r.col]: r.val }).eq('id', r.id).then(x => x, e => ({ error: e }))));
+      const res = await Promise.all(batch.map(async r => {
+        let val = r.val;
+        if (/^data:image\//i.test(val)) {
+          try { val = await uploadImageBlob(dataUrlToBlob(val), 'lore'); r.apply && r.apply(val); }
+          catch (e) { warnStorageOnce(e); } // pas de bucket : on garde l'image encodée dans la ligne
+        }
+        return sb.from(r.table).update({ [r.col]: val }).eq('id', r.id).then(x => x, e => ({ error: e }));
+      }));
       res.forEach((x, k) => { if (x && x.error) { ko++; console.error('Image non renvoyée', batch[k].table, batch[k].id, x.error); } else ok++; });
     }
     showToast(ko ? `${ok} image${ok > 1 ? 's' : ''} restaurée${ok > 1 ? 's' : ''} en ligne, ${ko} en échec (voir console)` : `${total} image${total > 1 ? 's' : ''} du lore restaurée${total > 1 ? 's' : ''} et enregistrée${total > 1 ? 's' : ''} en ligne`);
@@ -4429,6 +4472,7 @@
   // (avant, l'ordre dépendait de la place dans la page : "qui l'a achevé" pouvait s'ouvrir derrière la fiche ennemi)
   function openModal(id) {
     const el = document.getElementById(id);
+    if (id === 'modalPnjView' && typeof applyLoreLayout === 'function') applyLoreLayout();
     if (el.parentNode && el !== el.parentNode.lastElementChild) el.parentNode.appendChild(el);
     el.classList.add('open');
   }
@@ -4862,22 +4906,74 @@
   const originalsCache = {}; // cle -> { original, cadrage }
 
   async function imageKey(dataUrl) {
+    if (/^https?:\/\//i.test(String(dataUrl))) return 'url:' + dataUrl;
     try {
       const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(dataUrl)));
       return 'sha:' + [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
     } catch (e) { return null; }
   }
   function loadImageEl(src) {
-    return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+    return new Promise((res, rej) => {
+      const im = new Image();
+      if (/^https?:/i.test(String(src))) im.crossOrigin = 'anonymous'; // images Supabase : nécessaire pour les redécouper
+      im.onload = () => res(im); im.onerror = rej; im.src = src;
+    });
   }
+
+  /* ---- Stockage des images dans Supabase Storage (bucket public « images ») ----
+     L'original est envoyé tel quel (pleine qualité) ; la version cadrée est générée en haute définition.
+     La fiche ne garde que l'adresse de l'image : lignes légères, images nettes. */
+  const IMAGES_BUCKET = 'images';
+  let storageWarned = false;
+  function dataUrlToBlob(url) {
+    const [head, b64] = String(url).split(',');
+    const mime = (head.match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
+    const bin = atob(b64), arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
+  const extForMime = m => ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/svg+xml': 'svg', 'image/avif': 'avif' }[m] || 'jpg');
+  async function uploadImageBlob(blob, kind) {
+    if (!sb || !sb.storage) throw new Error('Supabase indisponible');
+    const d = new Date();
+    const path = `${kind}/${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extForMime(blob.type)}`;
+    const { error } = await sb.storage.from(IMAGES_BUCKET).upload(path, blob, { contentType: blob.type || 'image/jpeg', cacheControl: '31536000', upsert: false });
+    if (error) throw error;
+    return sb.storage.from(IMAGES_BUCKET).getPublicUrl(path).data.publicUrl;
+  }
+  function warnStorageOnce(err) {
+    console.error('Supabase Storage :', err);
+    if (storageWarned) return;
+    storageWarned = true;
+    showToast('⚠️ Stockage d\'images indisponible (bucket « images » ?) : image gardée dans la fiche');
+  }
+  // Fait passer une FileReader.readAsDataURL sur un « fichier » qui porte déjà son adresse :
+  // les formulaires existants reçoivent ainsi l'URL Supabase au lieu d'une image encodée.
+  (function () {
+    const orig = FileReader.prototype.readAsDataURL;
+    FileReader.prototype.readAsDataURL = function (blob) {
+      if (blob && blob._icropUrl) {
+        const fr = this;
+        setTimeout(() => {
+          Object.defineProperty(fr, 'result', { value: blob._icropUrl, configurable: true });
+          const ev = { target: fr, currentTarget: fr };
+          if (typeof fr.onload === 'function') fr.onload(ev);
+          if (typeof fr.onloadend === 'function') fr.onloadend(ev);
+        }, 0);
+        return;
+      }
+      return orig.call(this, blob);
+    };
+  })();
   function readFileAsDataUrl(file) {
     return new Promise((res, rej) => { const r = new FileReader(); r.onload = ev => res(ev.target.result); r.onerror = rej; r.readAsDataURL(file); });
   }
-  const isAlphaImage = src => /^data:image\/(png|webp|gif|svg)/i.test(String(src));
+  const isAlphaImage = src => /^data:image\/(png|webp|gif|svg)/i.test(String(src)) || /^https?:.*\.(png|webp|gif|svg)(\?|$)/i.test(String(src));
   function canvasToUrl(cv, alpha, q) {
     return alpha ? cv.toDataURL('image/webp', q) : cv.toDataURL('image/jpeg', q);
   }
   // Réduit un original trop lourd (photo de téléphone…) avant stockage : 2000 px max sur le grand côté
+  // Ne sert plus qu'en secours (pas de stockage disponible) : évite de mettre une photo de 10 Mo dans une ligne
   async function shrinkOriginal(src) {
     const im = await loadImageEl(src);
     const max = 2000, k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
@@ -5031,14 +5127,14 @@
       const f = e.target.files && e.target.files[0];
       e.target.value = '';
       if (!f) return;
-      try { await icropSetImage(await shrinkOriginal(await readFileAsDataUrl(f)), null); }
+      try { await icropSetImage(await readFileAsDataUrl(f), null, f); }
       catch (err) { showToast('Image illisible'); }
     });
   }
 
-  async function icropSetImage(original, cadrage) {
+  async function icropSetImage(original, cadrage, file) {
     const im = await loadImageEl(original);
-    icrop.original = original; icrop.img = im; icrop.natW = im.naturalWidth; icrop.natH = im.naturalHeight;
+    icrop.original = original; icrop.originalFile = file || null; icrop.img = im; icrop.natW = im.naturalWidth; icrop.natH = im.naturalHeight;
     document.getElementById('icropImg').src = original;
     if (cadrage && cadrage.w) {
       icrop.box = { x: cadrage.x * icrop.natW, y: cadrage.y * icrop.natH, w: cadrage.w * icrop.natW, h: cadrage.h * icrop.natH };
@@ -5060,26 +5156,46 @@
     document.getElementById('icropBox').style.width = '0px';
     document.getElementById('icropChangeBtn').style.display = opts.allowChange ? '' : 'none';
     openModal('modalPhotoCrop');
-    try { await icropSetImage(opts.original, opts.cadrage); }
+    try { await icropSetImage(opts.original, opts.cadrage, opts.file || null); }
     catch (e) { closeModal('modalPhotoCrop'); showToast('Image illisible'); }
   }
   function cancelImageCrop() { icrop.onDone = null; closeModal('modalPhotoCrop'); }
   async function confirmImageCrop() {
     const b = icrop.box; if (!b || !icrop.img) return;
-    const btn = document.getElementById('icropConfirmBtn'); btn.disabled = true;
+    const btn = document.getElementById('icropConfirmBtn');
+    if (btn.disabled) return;
+    btn.disabled = true; const label = btn.textContent; btn.textContent = 'Enregistrement…';
     try {
-      const maxOut = 1200, k = Math.min(1, maxOut / Math.max(b.w, b.h));
+      // Version cadrée en haute définition (jamais agrandie au-delà de la zone réelle de l'original)
+      const maxOut = 2000, k = Math.min(1, maxOut / Math.max(b.w, b.h));
       const cv = document.createElement('canvas');
       cv.width = Math.max(1, Math.round(b.w * k)); cv.height = Math.max(1, Math.round(b.h * k));
-      cv.getContext('2d').drawImage(icrop.img, b.x, b.y, b.w, b.h, 0, 0, cv.width, cv.height);
-      const src = canvasToUrl(cv, isAlphaImage(icrop.original), 0.86);
+      const ctx = cv.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(icrop.img, b.x, b.y, b.w, b.h, 0, 0, cv.width, cv.height);
+      const alpha = isAlphaImage(icrop.original) || (icrop.originalFile && /png|webp|gif|svg/i.test(icrop.originalFile.type));
       const cadrage = { x: b.x / icrop.natW, y: b.y / icrop.natH, w: b.w / icrop.natW, h: b.h / icrop.natH, ratio: icrop.ratio };
-      const original = icrop.original, cb = icrop.onDone;
+      let src, original;
+      try {
+        const croppedBlob = await new Promise((res, rej) => cv.toBlob(bl => bl ? res(bl) : rej(new Error('toBlob')), alpha ? 'image/webp' : 'image/jpeg', 0.92));
+        // original : fichier importé tel quel, sinon l'image déjà en ligne, sinon l'image intégrée qu'on envoie
+        if (icrop.originalFile) original = await uploadImageBlob(icrop.originalFile, 'originaux');
+        else if (/^https?:/i.test(icrop.original)) original = icrop.original;
+        else original = await uploadImageBlob(dataUrlToBlob(icrop.original), 'originaux');
+        src = await uploadImageBlob(croppedBlob, 'cadrees');
+      } catch (err) {
+        warnStorageOnce(err);
+        src = canvasToUrl(cv, alpha, 0.88);
+        original = icrop.originalFile ? await shrinkOriginal(icrop.original) : icrop.original;
+      }
+      const cb = icrop.onDone;
       icrop.onDone = null;
       closeModal('modalPhotoCrop');
       storeOriginal(src, original, cadrage);
       if (cb) await cb({ src, original, cadrage });
-    } finally { btn.disabled = false; }
+    } catch (e) {
+      console.error(e); showToast('⚠️ Cadrage impossible sur cette image');
+    } finally { btn.disabled = false; btn.textContent = label; }
   }
 
   // ---- Import : tout champ photo passe par le cadrage avant d'arriver dans son formulaire ----
@@ -5105,11 +5221,11 @@
     const ratio = guessImportRatio(input);
     input.value = '';
     let original;
-    try { original = await shrinkOriginal(await readFileAsDataUrl(file)); } catch (err) { showToast('Image illisible'); return; }
+    try { original = await readFileAsDataUrl(file); } catch (err) { showToast('Image illisible'); return; }
     openImageCropper({
-      original, ratio, allowChange: true,
+      original, file, ratio, allowChange: true,
       onDone: ({ src }) => {
-        const cropped = dataUrlToFile(src, file.name);
+        const cropped = /^https?:/i.test(src) ? Object.assign(new File([], file.name, { type: file.type || 'image/jpeg' }), { _icropUrl: src }) : dataUrlToFile(src, file.name);
         input.onchange.call(input, { target: { files: [cropped], value: '' }, currentTarget: input, preventDefault() {}, stopPropagation() {} });
       },
     });
@@ -35233,27 +35349,25 @@
     document.getElementById('pnjvName').textContent = g.name;
     document.getElementById('pnjvSub').textContent = '';
 
+    useLoreLayout('dieu');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${g.photo ? `background-image:url(${g.photo});` : ''}" data-pnjv-photo="1">
-        ${!g.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg>' : ''}
+      <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,3fr);">
+        <div>${lvPhoto(g.photo, 'data-pnjv-photo="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg>')}</div>
+        <div class="lv-col lv-fit">
+          ${(() => { const parts = g.tagline ? parseDieuTagline(g.tagline) : {};
+            return `<div class="lv-row">${lvInfo('Dieu / Déesse de', parts.domaine)}${lvInfo('Alignement', parts.alignement)}${lvInfo('Domaine (sort)', parts.type)}</div>`; })()}
+          <div class="lv-row lv-grow">
+            <div class="lv-card">
+              <div class="lv-card-title">Présentation</div>
+              ${g.citation ? `<div class="dieu-citation">« ${g.citation} »</div>` : ''}
+              ${g.nickname ? `<div class="dieu-nickname">${g.nickname}</div>` : ''}
+              <div class="mve-text">${lvText(g.presentation)}</div>
+            </div>
+            ${lvCard('Histoire et relation', g.histoire)}
+            ${lvCard('Clergé et temples', g.clerge)}
+          </div>
+        </div>
       </div>
-      ${g.citation ? `<div class="dieu-citation">« ${g.citation} »</div>` : ''}
-      ${g.tagline ? (() => {
-        const parts = parseDieuTagline(g.tagline);
-        return `<div class="mv-info-grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:14px;">
-          <div class="pnj-info-box"><div class="pib-label">Dieu / Déesse de</div><div class="pib-value">${parts.domaine || '—'}</div></div>
-          <div class="pnj-info-box"><div class="pib-label">Alignement</div><div class="pib-value">${parts.alignement || '—'}</div></div>
-          <div class="pnj-info-box"><div class="pib-label">Domaine (sort)</div><div class="pib-value">${parts.type || '—'}</div></div>
-        </div>`;
-      })() : ''}
-      ${(g.nickname || g.presentation) ? `
-        <div class="mv-entry-card" style="margin-bottom:14px;">
-          ${g.nickname ? `<div class="dieu-nickname">${g.nickname}</div>` : ''}
-          ${g.presentation ? `<div class="mve-text">${g.presentation.replace(/\n/g,'<br>')}</div>` : ''}
-        </div>` : ''}
-      ${g.histoire ? `<div class="section-title" style="margin-top:0;">Histoire et relation</div><div class="mv-entry-card"><div class="mve-text">${g.histoire.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${g.clerge ? `<div class="section-title">Clergé et temples</div><div class="mv-entry-card"><div class="mve-text">${g.clerge.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${!g.tagline && !g.nickname && !g.presentation && !g.histoire && !g.clerge && !g.citation ? '<p class="guild-placeholder">Fiche à compléter.</p>' : ''}
     `;
 
     const photoBox = document.querySelector('[data-pnjv-photo]');
@@ -35342,23 +35456,17 @@
     document.getElementById('pnjvName').textContent = k.name;
     document.getElementById('pnjvSub').textContent = 'La Secte de Kaorûn';
 
+    useLoreLayout('kaorun');
     document.getElementById('pnjvBody').innerHTML = `
-      <div style="display:flex; gap:10px; margin-bottom:14px;">
-        <div class="pnjv-photo" style="flex:1; margin-bottom:0; ${k.photo ? `background-image:url(${k.photo});` : ''}" data-kaorunv-photo="1">
-          ${!k.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M12 2C7 2 3 6 3 11c0 3 1.5 5 3 6.5V20a1 1 0 001 1h2v-2h1v2h4v-2h1v2h2a1 1 0 001-1v-2.5c1.5-1.5 3-3.5 3-6.5 0-5-4-9-9-9z"/></svg>' : ''}
+      <div class="lv" style="grid-template-columns:repeat(4, minmax(0,1fr));">
+        <div class="lv-col">
+          ${lvPhoto(k.photo, 'data-kaorunv-photo="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M12 2C7 2 3 6 3 11c0 3 1.5 5 3 6.5V20a1 1 0 001 1h2v-2h1v2h4v-2h1v2h2a1 1 0 001-1v-2.5c1.5-1.5 3-3.5 3-6.5 0-5-4-9-9-9z"/></svg>')}
+          ${lvInfo('Nom', k.name)}
         </div>
-        <div class="pnjv-photo" style="flex:1; margin-bottom:0; ${k.clePhoto ? `background-image:url(${k.clePhoto});` : ''}" data-kaorunv-cle="1">
-          ${!k.clePhoto ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M14 7a4 4 0 10-4 4l-6 6v3h3l6-6a4 4 0 001-7z"/></svg>' : ''}
-        </div>
+        <div class="lv-col lv-fit">${lvCard('Description', k.description, 'lv-grow')}</div>
+        <div class="lv-col lv-fit">${lvCard('Particularités', k.particularites, 'lv-grow')}</div>
+        <div class="lv-col">${lvPhoto(k.clePhoto, 'data-kaorunv-cle="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M14 7a4 4 0 10-4 4l-6 6v3h3l6-6a4 4 0 001-7z"/></svg>')}</div>
       </div>
-      <div class="mv-info-grid" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">
-        <div class="pnj-info-box"><div class="pib-label">Portrait</div><div class="pib-value">${k.name}</div></div>
-        <div class="pnj-info-box"><div class="pib-label">Clé</div><div class="pib-value">${k.clePhoto ? 'Renseignée' : 'À ajouter'}</div></div>
-      </div>
-      <div class="section-title" style="margin-top:0;">Description</div>
-      <div class="mv-entry-card"><div class="mve-text">${(k.description || 'À compléter.').replace(/\n/g,'<br>')}</div></div>
-      <div class="section-title">Particularités</div>
-      <div class="mv-entry-card"><div class="mve-text">${(k.particularites || 'À compléter.').replace(/\n/g,'<br>')}</div></div>
     `;
 
     const photoBox = document.querySelector('[data-kaorunv-photo]');
@@ -36202,7 +36310,7 @@
       c.innerHTML = `
         <div class="ast-bento">
           <div class="ast-bento-block ast-bento-logo">
-            <div class="pnjv-photo" style="margin-bottom:0; height:100%; ${astelornInfo.logo ? `background-image:url(${astelornInfo.logo});` : ''}">
+            <div class="pnjv-photo" style="margin-bottom:0; height:100%; aspect-ratio:auto; max-height:none; background-position:center; background-size:contain; background-repeat:no-repeat; ${astelornInfo.logo ? `background-image:url(${astelornInfo.logo});` : ''}">
               ${!astelornInfo.logo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><circle cx="12" cy="12" r="9"/></svg>' : ''}
             </div>
           </div>
@@ -36546,16 +36654,21 @@
       { label: 'Voie de l\'Ombre', value: a.capOmbre || '—' },
       { label: 'Voie de l\'Ordre', value: a.capOrdre || '—' },
     ];
+    useLoreLayout('antenne');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${a.photo ? `background-image:url(${a.photo});` : ''}" data-antv-photo="1">
-        ${!a.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>' : ''}
+      <div class="lv" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);">
+        <div class="lv-col">
+          ${lvPhoto(a.photo, 'data-antv-photo="1"', 'lv-landscape', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>')}
+          <div class="lv-row">${lvInfo('Lieu', a.lieu)}${lvInfo('Primarch', a.primarch)}</div>
+          <div class="lv-row">${lvInfo('Voie du Savoir', a.capSavoir)}${lvInfo('Voie de l\'Ombre', a.capOmbre)}${lvInfo('Voie de l\'Ordre', a.capOrdre)}</div>
+        </div>
+        <div class="lv-col lv-fit">${lvCard('Description', a.description, 'lv-grow')}</div>
+        <div class="lv-col lv-fit">${lvCard('Salles principales', a.salles, 'lv-grow')}</div>
+        <div class="lv-col lv-fit">
+          ${lvPhoto(a.conseilPhoto, 'data-antv-conseil-photo="1"', 'lv-landscape', null, false)}
+          ${lvCard('Salle commune', a.salleCommune, 'lv-grow')}
+        </div>
       </div>
-      <div class="mv-info-grid">${infoBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}</div>
-      ${a.description ? `<div class="section-title">Description</div><div class="mv-entry-card"><div class="mve-text">${a.description.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${a.salles ? `<div class="section-title">Salles principales</div><div class="mv-entry-card"><div class="mve-text">${a.salles.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${a.conseilPhoto ? `<div class="section-title">Salle du Conseil</div><div class="pnjv-photo" style="aspect-ratio:4/3; background-image:url(${a.conseilPhoto});" data-antv-conseil-photo="1"></div>` : ''}
-      ${a.salleCommune ? `<div class="section-title">Salle commune</div><div class="mv-entry-card"><div class="mve-text">${a.salleCommune.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${!a.description && !a.salles && !a.salleCommune ? '<p class="guild-placeholder">Fiche à compléter.</p>' : ''}
     `;
     const photoBox = document.querySelector('[data-antv-photo]');
     if (photoBox && a.photo) {
@@ -36575,21 +36688,17 @@
     const m = conseilDatabase.find(x => x.id === id);
     document.getElementById('pnjvName').textContent = m.name;
     document.getElementById('pnjvSub').textContent = 'Haut Conseil d\'Astelorn';
+    useLoreLayout('conseil');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${m.photo ? `background-image:url(${m.photo});` : ''}" data-consv-photo="1">
-        ${!m.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><circle cx="12" cy="8" r="3.3"/><path d="M5.5 21c0-4 3-7 6.5-7s6.5 3 6.5 7"/></svg>' : ''}
+      <div class="lv" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);">
+        <div>${lvPhoto(m.photo, 'data-consv-photo="1"', 'lv-landscape43', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><circle cx="12" cy="8" r="3.3"/><path d="M5.5 21c0-4 3-7 6.5-7s6.5 3 6.5 7"/></svg>')}</div>
+        <div class="lv-col lv-fit">
+          <div class="lv-row">${lvInfo('Race', m.race)}${lvInfo('Classe', m.classe)}${lvInfo('Spécialité', m.specialite)}</div>
+          ${lvCard('Relations au sein du Conseil', m.relations, 'lv-grow')}
+        </div>
+        <div class="lv-col lv-fit">${lvCard('Physique', m.physique, 'lv-grow')}</div>
+        <div class="lv-col lv-fit">${lvCard('Personnalité', m.personnalite, 'lv-grow')}</div>
       </div>
-      <div class="mv-info-grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:14px;">
-        <div class="pnj-info-box"><div class="pib-label">Race</div><div class="pib-value">${m.race || '—'}</div></div>
-        <div class="pnj-info-box"><div class="pib-label">Classe</div><div class="pib-value">${m.classe || '—'}</div></div>
-        <div class="pnj-info-box"><div class="pib-label">Spécialité</div><div class="pib-value">${m.specialite || '—'}</div></div>
-      </div>
-      <div class="section-title" style="margin-top:0;">Physique</div>
-      <div class="mv-entry-card"><div class="mve-text">${(m.physique || '—').replace(/\n/g,'<br>')}</div></div>
-      <div class="section-title">Personnalité</div>
-      <div class="mv-entry-card"><div class="mve-text">${(m.personnalite || '—').replace(/\n/g,'<br>')}</div></div>
-      <div class="section-title">Relations au sein du Conseil</div>
-      <div class="mv-entry-card"><div class="mve-text">${(m.relations || '—').replace(/\n/g,'<br>')}</div></div>
     `;
     const photoBox = document.querySelector('[data-consv-photo]');
     if (photoBox && m.photo) {
@@ -38955,27 +39064,39 @@
       { label: 'CA', value: a.ca || '—' }, { label: 'PV', value: a.pv || '—' },
     ];
 
+    useLoreLayout('animal');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${a.photo ? `background-image:url(${a.photo});` : ''}" data-animalview-photo="1">
-        ${!a.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 10c0-2 2-3 3-1 1-3 4-3 5 0 1-3 4-3 5 0 1-2 3-1 3 1-1 5-4 9-8 9s-7-4-8-9z"/></svg>' : ''}
-      </div>
-      <div class="mv-info-grid" style="grid-template-columns:repeat(6,1fr); margin-bottom:10px;">${abilityBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}</div>
-      <div class="mv-info-grid">${infoBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}</div>
-      ${(a.resistance || a.immunites || a.vulnerabilite) ? `
-        <div class="section-title">Résistances / Immunités / Vulnérabilité</div>
-        <div class="mv-entry-card">
-          ${a.resistance ? `<div class="mve-text"><strong style="color:var(--ink);">Résistance</strong> — ${a.resistance}</div>` : ''}
-          ${a.immunites ? `<div class="mve-text" style="margin-top:4px;"><strong style="color:var(--ink);">Immunités</strong> — ${a.immunites}</div>` : ''}
-          ${a.vulnerabilite ? `<div class="mve-text" style="margin-top:4px;"><strong style="color:var(--ink);">Vulnérabilité</strong> — ${a.vulnerabilite}</div>` : ''}
+      <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,1.7fr) minmax(0,1.8fr);">
+        <div>${lvPhoto(a.photo, 'data-animalview-photo="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 10c0-2 2-3 3-1 1-3 4-3 5 0 1-3 4-3 5 0 1-2 3-1 3 1-1 5-4 9-8 9s-7-4-8-9z"/></svg>')}</div>
+        <div class="lv-col lv-fit">
+          <div class="lv-row">${abilityBoxes.map(b => lvInfo(b.label, b.value)).join('')}</div>
+          <div class="lv lv-grow" style="grid-template-columns:repeat(3, minmax(0,1fr)) minmax(0,1.5fr); grid-template-rows:1fr 1fr; gap:12px;">
+            ${infoBoxes.slice(0, 3).map(b => lvInfo(b.label, b.value)).join('')}
+            <div class="lv-card" style="grid-column:4; grid-row:1 / span 2;">
+              <div class="lv-card-title">Résistances / Immunités / Vulnérabilité</div>
+              ${(a.resistance || a.immunites || a.vulnerabilite) ? `
+                ${a.resistance ? `<div class="mve-text"><strong style="color:var(--ink);">Résistance</strong> — ${a.resistance}</div>` : ''}
+                ${a.immunites ? `<div class="mve-text" style="margin-top:4px;"><strong style="color:var(--ink);">Immunités</strong> — ${a.immunites}</div>` : ''}
+                ${a.vulnerabilite ? `<div class="mve-text" style="margin-top:4px;"><strong style="color:var(--ink);">Vulnérabilité</strong> — ${a.vulnerabilite}</div>` : ''}
+              ` : '<div class="mve-text"><span class="lv-empty">—</span></div>'}
+            </div>
+            ${infoBoxes.slice(3).map(b => lvInfo(b.label, b.value)).join('')}
+          </div>
         </div>
-      ` : ''}
-      ${a.langues || a.competences ? `<div class="section-title">Langues &amp; Compétences</div><div class="mv-entry-card">
-        ${a.langues ? `<div class="mve-text"><strong style="color:var(--ink);">Langues</strong> — ${a.langues}</div>` : ''}
-        ${a.competences ? `<div class="mve-text" style="margin-top:4px;"><strong style="color:var(--ink);">Compétences</strong> — ${a.competences}</div>` : ''}
-      </div>` : ''}
-      ${a.sens && a.sens.length ? `<div class="section-title">Sens</div>${a.sens.map(x => `<div class="guild-voie-card"><div class="gvc-name">${x.title}</div><div class="grc-text">${x.text}</div></div>`).join('')}` : ''}
-      ${a.actions && a.actions.length ? `<div class="section-title">Actions</div>${a.actions.map(x => `<div class="guild-voie-card"><div class="gvc-name">${x.title}</div><div class="grc-text">${x.text}</div></div>`).join('')}` : ''}
-      ${a.divers && a.divers.length ? `<div class="section-title">Divers</div>${a.divers.map(x => `<div class="guild-voie-card"><div class="gvc-name">${x.title}</div><div class="grc-text">${x.text}</div></div>`).join('')}` : ''}
+        <div class="lv-col lv-fit">
+          <div class="lv-card" style="flex:0 1 auto;">
+            <div class="lv-card-title">Langues${a.competences ? ' &amp; compétences' : ''}</div>
+            <div class="mve-text">${lvText(a.langues)}</div>
+            ${a.competences ? `<div class="mve-text" style="margin-top:6px;"><strong style="color:var(--ink);">Compétences</strong> — ${a.competences}</div>` : ''}
+          </div>
+          <div class="lv-card lv-grow">
+            <div class="lv-card-title">Sens</div>
+            ${a.sens && a.sens.length ? a.sens.map(x => `<div class="mve-text" style="margin-bottom:6px;"><strong style="color:var(--ink);">${x.title}</strong> — ${x.text}</div>`).join('') : '<div class="mve-text"><span class="lv-empty">—</span></div>'}
+            ${a.actions && a.actions.length ? `<div class="lv-card-title" style="margin-top:10px;">Actions</div>${a.actions.map(x => `<div class="mve-text" style="margin-bottom:6px;"><strong style="color:var(--ink);">${x.title}</strong> — ${x.text}</div>`).join('')}` : ''}
+            ${a.divers && a.divers.length ? `<div class="lv-card-title" style="margin-top:10px;">Divers</div>${a.divers.map(x => `<div class="mve-text" style="margin-bottom:6px;"><strong style="color:var(--ink);">${x.title}</strong> — ${x.text}</div>`).join('')}` : ''}
+          </div>
+        </div>
+      </div>
     `;
     const photoBox = document.querySelector('[data-animalview-photo]');
     if (photoBox && a.photo) {
@@ -40365,18 +40486,22 @@
     document.getElementById('pnjvName').textContent = x.name;
     document.getElementById('pnjvSub').textContent = 'Continent';
     const infoBoxes = [{ label: 'Type', value: x.type || '—' }, { label: 'Inspiration', value: x.inspiration || '—' }];
+    useLoreLayout('continent');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${x.photo ? `background-image:url(${x.photo});` : ''}" data-geov-photo="1">${!x.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><circle cx="12" cy="12" r="9"/></svg>' : ''}</div>
-      ${x.tagline ? `<div class="continent-tagline">${x.tagline}</div>` : ''}
-      <div class="mv-info-grid" style="grid-template-columns:1fr 1fr;">${infoBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}</div>
-      ${x.description ? `<div class="section-title">Description</div><div class="mv-entry-card"><div class="mve-text">${x.description.replace(/\n/g,'<br>')}</div></div>` : '<p class="guild-placeholder">Fiche à compléter.</p>'}
-      ${(x.photo2 || x.photo3) ? `
-        <div class="section-title">Illustrations</div>
-        <div class="continent-extra-photos">
-          ${x.photo2 ? `<div class="pnjv-photo" style="margin-bottom:0; background-image:url(${x.photo2});" data-geov-photo2="1"></div>` : '<div></div>'}
-          ${x.photo3 ? `<div class="pnjv-photo" style="margin-bottom:0; background-image:url(${x.photo3});" data-geov-photo3="1"></div>` : '<div></div>'}
+      <div class="lv" style="grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);">
+        <div class="lv-col">
+          ${lvPhoto(x.photo, 'data-geov-photo="1"', 'lv-landscape', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><circle cx="12" cy="12" r="9"/></svg>')}
+          <div class="lv-row">
+            ${lvPhoto(x.photo2, x.photo2 ? 'data-geov-photo2="1"' : '', 'lv-landscape')}
+            ${lvPhoto(x.photo3, x.photo3 ? 'data-geov-photo3="1"' : '', 'lv-landscape')}
+          </div>
         </div>
-      ` : ''}
+        <div class="lv-col lv-fit">
+          ${x.tagline ? `<div class="lv-card" style="flex:0 0 auto;"><div class="continent-tagline" style="border:none; padding:4px 0;">${x.tagline}</div></div>` : ''}
+          <div class="lv-row">${lvInfo('Type', x.type)}${lvInfo('Inspiration', x.inspiration)}</div>
+          ${lvCard('Description', x.description, 'lv-grow')}
+        </div>
+      </div>
     `;
     const photoBox2 = document.querySelector('[data-geov-photo2]');
     if (photoBox2 && x.photo2) {
@@ -40500,13 +40625,17 @@
     document.getElementById('pnjvName').textContent = x.name;
     document.getElementById('pnjvSub').textContent = 'Ville / Village';
     const infoBoxes = [{ label: 'Dirigeant', value: x.dirigeant || '—' }, { label: 'Population', value: x.population || '—' }];
+    useLoreLayout('ville');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${x.photo ? `background-image:url(${x.photo});` : ''}" data-geov-photo="1">${!x.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>' : ''}</div>
-      <div class="mv-info-grid" style="grid-template-columns:1fr 1fr;">${infoBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}</div>
-      ${x.description ? `<div class="section-title">Description générale</div><div class="mv-entry-card"><div class="mve-text">${x.description.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${x.architecture ? `<div class="section-title">Architecture intérieure</div><div class="mv-entry-card"><div class="mve-text">${x.architecture.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${x.lieuxNotables ? `<div class="section-title">Lieux notables</div><div class="mv-entry-card"><div class="mve-text">${x.lieuxNotables.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${!x.description && !x.architecture ? '<p class="guild-placeholder">Fiche à compléter.</p>' : ''}
+      <div class="lv" style="grid-template-columns:repeat(3, minmax(0,1fr));">
+        <div style="grid-column:1 / -1;">${lvPhoto(x.photo, 'data-geov-photo="1"', 'lv-banner', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>')}</div>
+        <div class="lv-col">
+          <div class="lv-row">${infoBoxes.map(b => lvInfo(b.label, b.value)).join('')}</div>
+          ${lvCard('Description générale', x.description, 'lv-grow')}
+        </div>
+        <div class="lv-col">${lvCard('Architecture intérieure', x.architecture, 'lv-grow')}</div>
+        <div class="lv-col">${lvCard('Lieux notables', x.lieuxNotables, 'lv-grow')}</div>
+      </div>
     `;
     bindGeoPhotoCrop(x, 'ville-view');
     document.querySelector('#modalPnjView .icon-btn[title="Modifier"]').setAttribute('onclick', 'editCurrentVille()');
@@ -40557,26 +40686,28 @@
     const x = commercesDatabase.find(o => o.id === id);
     document.getElementById('pnjvName').textContent = x.name;
     document.getElementById('pnjvSub').textContent = 'Commerce';
+    useLoreLayout('commerce');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${x.photo ? `background-image:url(${x.photo});` : ''}" data-geov-photo="1">${!x.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M6 8h12l1 12a2 2 0 01-2 2H7a2 2 0 01-2-2z"/><path d="M9 8a3 3 0 016 0"/></svg>' : ''}</div>
-      ${x.tags && x.tags.length ? `<div class="pnjv-tag-row">${x.tags.map(t => `<span class="pnjv-tag">${t}</span>`).join('')}</div>` : ''}
-      ${x.description ? `<div class="section-title" style="margin-top:0;">Description</div><div class="mv-entry-card"><div class="mve-text">${x.description.replace(/\n/g,'<br>')}</div></div>` : '<p class="guild-placeholder">Fiche à compléter.</p>'}
-      ${x.tarifsParsed && x.tarifsParsed.length ? `
-        <div class="section-title">Tarifs</div>
-        <div class="tarif-cat-row">
-          ${x.tarifsParsed.map(cat => `
-            <div class="tarif-cat-block">
-              ${cat.category ? `<div class="tarif-cat-title">${cat.category}</div>` : ''}
-              ${cat.items.map(it => `
-                <div class="tarif-item">
-                  <div class="tarif-item-row"><span class="tarif-item-name">${it.name}</span><span class="tarif-item-price">${it.price}</span></div>
-                  ${it.desc ? `<div class="tarif-item-desc">${it.desc}</div>` : ''}
-                </div>
-              `).join('')}
-            </div>
-          `).join('')}
+      <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) minmax(0,1.9fr);">
+        <div>${lvPhoto(x.photo, 'data-geov-photo="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M6 8h12l1 12a2 2 0 01-2 2H7a2 2 0 01-2-2z"/><path d="M9 8a3 3 0 016 0"/></svg>')}</div>
+        <div class="lv-col lv-fit">
+          ${x.tags && x.tags.length ? `<div class="pnjv-tag-row">${x.tags.map(t => `<span class="pnjv-tag">${t}</span>`).join('')}</div>` : ''}
+          ${lvCard('Description', x.description, 'lv-grow')}
         </div>
-      ` : ''}
+        <div class="lv-col lv-fit">
+          <div class="lv-tarifs lv-grow">
+            ${x.tarifsParsed && x.tarifsParsed.length ? x.tarifsParsed.map(cat => `
+              <div class="tarif-cat-block">
+                ${cat.category ? `<div class="tarif-cat-title">${cat.category}</div>` : ''}
+                ${cat.items.map(it => `
+                  <div class="tarif-item">
+                    <div class="tarif-item-row"><span class="tarif-item-name">${it.name}</span><span class="tarif-item-price">${it.price}</span></div>
+                    ${it.desc ? `<div class="tarif-item-desc">${it.desc}</div>` : ''}
+                  </div>`).join('')}
+              </div>`).join('') : lvCard('Tarifs', x.tarifs, '')}
+          </div>
+        </div>
+      </div>
     `;
     bindGeoPhotoCrop(x, 'commerce-view');
     document.querySelector('#modalPnjView .icon-btn[title="Modifier"]').setAttribute('onclick', 'editCurrentCommerce()');
@@ -40675,10 +40806,15 @@
     document.getElementById('pnjvName').textContent = x.name;
     document.getElementById('pnjvSub').textContent = 'Lieu important';
     const infoBoxes = [{ label: 'Région', value: x.region || '—' }, { label: 'Ville', value: x.ville || '—' }];
+    useLoreLayout('lieu');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${x.photo ? `background-image:url(${x.photo});` : ''}" data-geov-photo="1">${!x.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg>' : ''}</div>
-      <div class="mv-info-grid" style="grid-template-columns:1fr 1fr;">${infoBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}</div>
-      ${x.description ? `<div class="section-title">Description</div><div class="mv-entry-card"><div class="mve-text">${x.description.replace(/\n/g,'<br>')}</div></div>` : '<p class="guild-placeholder">Fiche à compléter.</p>'}
+      <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,2.6fr);">
+        <div class="lv-col">
+          ${lvPhoto(x.photo, 'data-geov-photo="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg>')}
+          <div class="lv-row">${infoBoxes.map(b => lvInfo(b.label, b.value)).join('')}</div>
+        </div>
+        <div class="lv-col lv-fit">${lvCard('Description', x.description, 'lv-grow')}</div>
+      </div>
     `;
     bindGeoPhotoCrop(x, 'lieu-view');
     document.querySelector('#modalPnjView .icon-btn[title="Modifier"]').setAttribute('onclick', 'editCurrentLieu()');
@@ -40742,6 +40878,33 @@
     }
   }
 
+  /* ---- Briques des fiches lore en grand format ---- */
+  function lvText(t) { return t ? String(t).replace(/\n/g, '<br>') : '<span class="lv-empty">—</span>'; }
+  function lvPhoto(src, attr, shape, icon, recrop, extraStyle) {
+    return `<div class="lv-photo ${shape}" style="${src ? `background-image:url(${src});` : ''}${extraStyle || ''}" ${attr}>
+      ${!src ? (icon || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>') : ''}
+      ${src && recrop !== false ? '<div class="pnjv-recrop-badge">✏️ Recadrer</div>' : ''}
+    </div>`;
+  }
+  function lvInfo(label, value, grow) {
+    return `<div class="pnj-info-box${grow ? ' lv-grow' : ''}"><div class="pib-label">${label}</div><div class="pib-value">${value || '—'}</div></div>`;
+  }
+  function lvCard(title, text, cls) {
+    return `<div class="lv-card ${cls || ''}">${title ? `<div class="lv-card-title">${title}</div>` : ''}<div class="mve-text">${lvText(text)}</div></div>`;
+  }
+  // La fiche partagée #modalPnjView passe en grand format pour les fiches lore qui le demandent
+  let pendingLoreLayout = null;
+  function useLoreLayout(name) { pendingLoreLayout = name; }
+  function applyLoreLayout() {
+    const box = document.querySelector('#modalPnjView .wizard-box');
+    if (!box) return;
+    box.className = box.className.split(' ').filter(c => c !== 'lv-wide' && !c.startsWith('lvt-')).join(' ');
+    if (box.dataset.baseMaxWidth === undefined) box.dataset.baseMaxWidth = box.style.maxWidth || '';
+    if (pendingLoreLayout) { box.classList.add('lv-wide', 'lvt-' + pendingLoreLayout); box.style.maxWidth = ''; }
+    else box.style.maxWidth = box.dataset.baseMaxWidth;
+    pendingLoreLayout = null;
+  }
+
   function openPnjView(id) {
     currentPnjId = id;
     document.querySelector('#modalPnjView .icon-btn[title="Modifier"]').setAttribute('onclick', 'editCurrentPnj()');
@@ -40762,19 +40925,17 @@
 
     const photoStyle = p.photo ? `background-image:url(${p.photo}); background-size:${legacyBgSize(p.photoZoom)}; background-position: calc(50% + ${p.photoOffsetX || 0}px) calc(50% + ${p.photoOffsetY || 0}px);` : '';
 
+    useLoreLayout('pnj');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${photoStyle}" data-pnjv-photo="1">
-        ${!p.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>' : ''}
-        ${p.photo ? '<div class="pnjv-recrop-badge">✏️ Recadrer</div>' : ''}
+      <div class="lv" style="grid-template-columns:repeat(4, minmax(0,1fr));">
+        <div>${lvPhoto(p.photo, 'data-pnjv-photo="1"', 'lv-portrait', null, true, p.photo && p.photoZoom && Number(p.photoZoom) !== 100 ? `background-size:${p.photoZoom}%; background-position:calc(50% + ${p.photoOffsetX || 0}px) calc(50% + ${p.photoOffsetY || 0}px);` : '')}</div>
+        <div class="lv-col lv-fit">
+          ${p.tags.length ? `<div class="pnjv-tag-row">${p.tags.map(t => `<span class="pnjv-tag">${t}</span>`).join('')}</div>` : ''}
+          ${infoBoxes.map(b => lvInfo(b.label, b.value, true)).join('')}
+        </div>
+        <div class="lv-col lv-fit">${lvCard('Physique', p.physique, 'lv-grow')}</div>
+        <div class="lv-col lv-fit">${lvCard('Personnalité', p.personnalite, 'lv-grow')}</div>
       </div>
-      ${p.tags.length ? `<div class="pnjv-tag-row">${p.tags.map(t => `<span class="pnjv-tag">${t}</span>`).join('')}</div>` : ''}
-      <div class="mv-info-grid">
-        ${infoBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}
-      </div>
-      <div class="section-title" style="margin-top:14px;">Physique</div>
-      <div class="mv-entry-card"><div class="mve-text">${(p.physique || '—').replace(/\n/g,'<br>')}</div></div>
-      <div class="section-title">Personnalité</div>
-      <div class="mv-entry-card"><div class="mve-text">${(p.personnalite || '—').replace(/\n/g,'<br>')}</div></div>
     `;
 
     const photoBox = document.querySelector('[data-pnjv-photo]');
