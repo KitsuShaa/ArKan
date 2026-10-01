@@ -4360,7 +4360,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 30/09 (8)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 30/09 (10)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -6979,6 +6979,9 @@
   // Données tenues par le MJ : sorts connus, PV max, états, épuisement
   function applyMjOwned(d) {
     if (!d) return;
+    { const h = document.querySelectorAll('.hunt-num');
+      if (h[0]) h[0].textContent = (d.huntBoard || []).length;
+      if (h[1]) h[1].textContent = (d.companionHuntBoard || []).length; }
     if (d.themeColor && d.themeColor !== lastThemeFromData) { lastThemeFromData = d.themeColor; applyTheme(d.themeColor, true); }
     const newKnown = d.knownSpellNames || [];
     if (JSON.stringify(newKnown) !== JSON.stringify(knownSpellNames)) {
@@ -7299,7 +7302,7 @@
       if (typeof updateExhaustionWarnings === 'function') updateExhaustionWarnings();
       const huntEls = document.querySelectorAll('.hunt-num');
       if (huntEls[0]) huntEls[0].textContent = (p.huntBoard || []).length;
-      if (huntEls[1]) huntEls[1].textContent = '0';
+      if (huntEls[1]) huntEls[1].textContent = (p.companionHuntBoard || []).length;
       window.AppData.companionInCombat = false;
       concentrationSpellId = null;
       if (typeof updateConcBadge === 'function') updateConcBadge();
