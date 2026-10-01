@@ -1669,6 +1669,13 @@
   .lv-tarifs { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); align-content: start; overflow-y: auto; }
   .lv-tarifs .tarif-cat-block { min-width: 0; }
   .lv-empty { color: var(--ink-faint); font-style: italic; }
+  .lv-subs { display: flex; flex-direction: column; gap: 10px; }
+  .lv-subs.two { display: block; column-count: 2; column-gap: 12px; }
+  .lv-subs.two .lv-sub { break-inside: avoid; margin-bottom: 10px; }
+  .lv-sub { background: var(--bg-elevated); border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 11px 13px; }
+  .lv-sub-name { font-family: var(--font-serif); font-size: 14px; color: var(--gold); margin-bottom: 5px; line-height: 1.3; }
+  .lv-sub .mve-text { font-size: 12.5px; line-height: 1.55; }
+  .lv-sub .mve-text strong { color: var(--ink); font-weight: 600; }
   .continent-extra-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .dieu-citation {
     font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--gold);
@@ -1713,7 +1720,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (8)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (9)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2822,6 +2829,7 @@
       <div class="form-field"><label>Poids</label><input type="text" id="srfPoids"></div>
     </div>
     <div class="form-field"><label>Origines</label><textarea id="srfOrigines" style="min-height:70px;"></textarea></div>
+    <div class="form-field"><label>Description</label><textarea id="srfDescription" style="min-height:90px;"></textarea></div>
     <div class="section-title" style="margin-top:6px;">Traits raciaux</div>
     <div id="srfTraitsList"></div>
     <button class="filter-reset-btn" onclick="addStatBlockEntry('srfTraitsList')">+ Ajouter un trait</button>
@@ -3427,7 +3435,7 @@
           age: r.age, taille: r.taille, poids: r.poids, vitesse: r.vitesse, langues: r.langues, photo: r.photo,
         }) },
       { table: 'sous_races', target: sousracesDatabase, map: r => ({
-          id: r.id, name: r.nom, origines: r.origines, traits: r.traits || [], taille: r.taille, poids: r.poids, photo: r.photo,
+          id: r.id, name: r.nom, origines: r.origines, description: r.description, traits: r.traits || [], taille: r.taille, poids: r.poids, photo: r.photo,
         }) },
       { table: 'classes', target: classesLoreDatabase, map: r => ({
           id: r.id, name: r.nom, flavor: r.flavor, features: r.features || [], de_vie: r.de_vie,
@@ -38347,6 +38355,7 @@
     document.getElementById('srfTaille').value = s ? s.taille : '';
     document.getElementById('srfPoids').value = s ? s.poids : '';
     document.getElementById('srfOrigines').value = s ? s.origines : '';
+    document.getElementById('srfDescription').value = s ? (s.description || '') : '';
     document.getElementById('srfDeleteBtn').style.display = s ? 'block' : 'none';
     const preview = document.getElementById('srfPhotoPreview');
     if (s && s.photo) { preview.style.backgroundImage = `url(${s.photo})`; document.getElementById('srfPhotoPlaceholder').style.display = 'none'; }
@@ -38367,13 +38376,26 @@
     const data = {
       name, taille: document.getElementById('srfTaille').value.trim(), poids: document.getElementById('srfPoids').value.trim(),
       origines: document.getElementById('srfOrigines').value.trim(),
+      description: document.getElementById('srfDescription').value.trim(),
       traits: readStatBlockList('srfTraitsList').map(t => ({ title: t.name, text: t.text })),
     };
     if (sousracePendingPhoto) data.photo = sousracePendingPhoto;
     if (currentSousraceId) { Object.assign(sousracesDatabase.find(x => x.id === currentSousraceId), data); showToast(`« ${name} » mise à jour`); }
     else { sousracesDatabase.push({ id: 'sousrace' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créée`); }
     const srEntry = sousracesDatabase.find(x => x.id === currentSousraceId) || sousracesDatabase[sousracesDatabase.length - 1];
-    if (sb) sb.from('sous_races').upsert({ id: srEntry.id, nom: srEntry.name, origines: srEntry.origines, traits: srEntry.traits || [], taille: srEntry.taille, poids: srEntry.poids, photo: srEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+    if (sb) {
+      const srPayload = { id: srEntry.id, nom: srEntry.name, origines: srEntry.origines, description: srEntry.description || '', traits: srEntry.traits || [], taille: srEntry.taille, poids: srEntry.poids, photo: srEntry.photo };
+      sb.from('sous_races').upsert(srPayload).then(({error}) => {
+        if (error && /description/.test(error.message || '')) {
+          const p2 = { ...srPayload }; delete p2.description;
+          return sb.from('sous_races').upsert(p2).then(({ error: e2 }) => {
+            if (e2) { console.error(e2); showToast('⚠️ Non sauvegardé en ligne (' + e2.message + ')'); }
+            else showToast('Enregistré sans la description — ajoute la colonne description à la table sous_races');
+          });
+        }
+        if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); }
+      });
+    }
     closeModal('modalSousraceForm');
     renderSystemeContent();
   }
@@ -38516,14 +38538,17 @@
       { label: 'Poids', value: r.poids || '—' }, { label: 'Vitesse', value: r.vitesse || '—' },
       { label: 'Langues', value: r.langues || '—' },
     ];
+    useLoreLayout('race');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${r.photo ? `background-image:url(${r.photo});` : ''}" data-raceview-photo="1">
-        ${!r.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><circle cx="12" cy="8" r="3.3"/><path d="M5.5 21c0-4 3-7 6.5-7s6.5 3 6.5 7"/></svg>' : ''}
+      <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,0.75fr) minmax(0,1.45fr) minmax(0,1.6fr);">
+        <div>${lvPhoto(r.photo, 'data-raceview-photo="1"', 'lv-portrait')}</div>
+        <div class="lv-col lv-fit">${infoBoxes.map(b => lvInfo(b.label, b.value, true)).join('')}</div>
+        <div class="lv-col lv-fit">
+          <div class="lv-card lv-grow"><div class="lv-card-title">Traits raciaux</div>${lvSubBlocks(r.traits)}</div>
+          ${r.noms ? `<div class="lv-card" style="flex:0 1 auto; max-height:38%;"><div class="lv-card-title">Exemples de noms</div><div class="mve-text">${lvText(r.noms)}</div></div>` : ''}
+        </div>
+        <div class="lv-col lv-fit">${lvCard('Description', r.description, 'lv-grow')}</div>
       </div>
-      <div class="mv-info-grid">${infoBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}</div>
-      ${r.description ? `<div class="section-title">Description</div><div class="mv-entry-card"><div class="mve-text">${r.description.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${r.traits && r.traits.length ? `<div class="section-title">Traits raciaux</div>${r.traits.map(tr => `<div class="guild-voie-card"><div class="gvc-name">${tr.title}</div><div class="grc-text">${tr.text}</div></div>`).join('')}` : ''}
-      ${r.noms ? `<div class="section-title">Exemples de noms</div><div class="mv-entry-card"><div class="mve-text">${r.noms.replace(/\n/g,'<br>')}</div></div>` : ''}
     `;
     const photoBox = document.querySelector('[data-raceview-photo]');
     if (photoBox && r.photo) {
@@ -38546,13 +38571,17 @@
     const infoBoxes = [
       { label: 'Taille', value: s.taille || '—' }, { label: 'Poids', value: s.poids || '—' },
     ];
+    useLoreLayout('sousrace');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${s.photo ? `background-image:url(${s.photo});` : ''}" data-sousraceview-photo="1">
-        ${!s.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><circle cx="12" cy="8" r="3.3"/><path d="M5.5 21c0-4 3-7 6.5-7s6.5 3 6.5 7"/></svg>' : ''}
+      <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,1.3fr) minmax(0,1.5fr);">
+        <div>${lvPhoto(s.photo, 'data-sousraceview-photo="1"', 'lv-portrait')}</div>
+        <div class="lv-col lv-fit">
+          <div class="lv-row">${infoBoxes.map(b => lvInfo(b.label, b.value)).join('')}</div>
+          ${lvCard('Origines', s.origines, 'lv-grow')}
+        </div>
+        <div class="lv-col lv-fit"><div class="lv-card lv-grow"><div class="lv-card-title">Augmentation de caractéristiques &amp; traits</div>${lvSubBlocks(s.traits)}</div></div>
+        <div class="lv-col lv-fit">${lvCard('Description', s.description, 'lv-grow')}</div>
       </div>
-      <div class="mv-info-grid" style="grid-template-columns:1fr 1fr;">${infoBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}</div>
-      ${s.traits && s.traits.length ? `<div class="section-title">Traits raciaux</div>${s.traits.map(tr => `<div class="guild-voie-card"><div class="gvc-name">${tr.title}</div><div class="grc-text">${tr.text}</div></div>`).join('')}` : ''}
-      ${s.origines ? `<div class="section-title">Origines</div><div class="mv-entry-card"><div class="mve-text">${s.origines.replace(/\n/g,'<br>')}</div></div>` : ''}
     `;
     const photoBox = document.querySelector('[data-sousraceview-photo]');
     if (photoBox && s.photo) {
@@ -38576,21 +38605,21 @@
       { label: 'Dé de vie', value: cl.de_vie || '—' }, { label: 'PV / niveau', value: cl.pv_niveau || '—' },
       { label: 'Valeur haute', value: cl.valeur_haute || '—' }, { label: 'Historique conseillé', value: cl.historique_conseille || '—' },
     ];
+    useLoreLayout('classe');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${cl.photo ? `background-image:url(${cl.photo});` : ''}" data-classeview-photo="1">
-        ${!cl.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><circle cx="12" cy="8" r="3.3"/><path d="M5.5 21c0-4 3-7 6.5-7s6.5 3 6.5 7"/></svg>' : ''}
+      <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) minmax(0,2.7fr);">
+        <div>${lvPhoto(cl.photo, 'data-classeview-photo="1"', 'lv-portrait')}</div>
+        <div class="lv-col lv-fit">
+          <div class="lv-row">${lvInfo('Dé de vie', cl.de_vie)}${lvInfo('PV / niveau', cl.pv_niveau)}</div>
+          <div class="lv-row">${lvInfo('Valeur haute', cl.valeur_haute)}${lvInfo('Historique conseillé', cl.historique_conseille)}</div>
+          <div class="lv-card lv-grow">
+            <div class="lv-card-title">Maîtrises</div>
+            ${[['Armes', cl.armes], ['Armures', cl.armures], ['Outils', cl.outils], ['Jets de sauvegarde', cl.jds], ['Compétences', cl.competences]].map(([k, v]) => `<div class="mve-text" style="margin-bottom:6px;"><strong style="color:var(--ink);">${k} :</strong> ${v || '—'}</div>`).join('')}
+          </div>
+        </div>
+        <div class="lv-col lv-fit"><div class="lv-card lv-grow"><div class="lv-card-title">Capacités de classe</div>${lvSubBlocks(cl.features, true)}</div></div>
       </div>
-      <div class="mv-info-grid">${infoBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}</div>
-      <div class="section-title">Maîtrises</div>
-      <div class="mv-entry-card">
-        <div class="mve-text"><strong style="color:var(--ink);">Armes</strong> — ${cl.armes || '—'}</div>
-        <div class="mve-text" style="margin-top:4px;"><strong style="color:var(--ink);">Armures</strong> — ${cl.armures || '—'}</div>
-        <div class="mve-text" style="margin-top:4px;"><strong style="color:var(--ink);">Outils</strong> — ${cl.outils || '—'}</div>
-        <div class="mve-text" style="margin-top:4px;"><strong style="color:var(--ink);">Jets de sauvegarde</strong> — ${cl.jds || '—'}</div>
-        <div class="mve-text" style="margin-top:4px;"><strong style="color:var(--ink);">Compétences</strong> — ${cl.competences || '—'}</div>
-      </div>
-      ${cl.flavor ? `<div class="section-title">Description</div><div class="mv-entry-card"><div class="mve-text">${cl.flavor.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${cl.features && cl.features.length ? `<div class="section-title">Capacités de classe</div>${cl.features.map(f => `<div class="guild-voie-card"><div class="gvc-name">${f.title}</div><div class="grc-text">${f.text}</div></div>`).join('')}` : ''}
+      <div style="margin-top:14px;">${lvCard('Description', cl.flavor)}</div>
     `;
     const photoBox = document.querySelector('[data-classeview-photo]');
     if (photoBox && cl.photo) {
@@ -38613,13 +38642,18 @@
     const infoBoxes = [
       { label: 'Compétences', value: h.competences || '—' }, { label: 'Langues', value: h.langues || '—' }, { label: 'Outils', value: h.outils || '—' },
     ];
+    useLoreLayout('histo');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="pnjv-photo" style="${h.photo ? `background-image:url(${h.photo});` : ''}" data-histoview-photo="1">
-        ${!h.photo ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><circle cx="12" cy="8" r="3.3"/><path d="M5.5 21c0-4 3-7 6.5-7s6.5 3 6.5 7"/></svg>' : ''}
+      <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,3.2fr);">
+        <div>${lvPhoto(h.photo, 'data-histoview-photo="1"', 'lv-portrait')}</div>
+        <div class="lv-col lv-fit">
+          <div class="lv-row">${infoBoxes.map(b => lvInfo(b.label, b.value)).join('')}</div>
+          <div class="lv-row lv-grow">
+            <div class="lv-card"><div class="lv-card-title">Capacités acquises</div>${lvSubBlocks(parseCapacitesText(h.capacites))}</div>
+            ${lvCard('Description', h.description)}
+          </div>
+        </div>
       </div>
-      <div class="mv-info-grid" style="grid-template-columns:repeat(3,1fr);">${infoBoxes.map(b => `<div class="pnj-info-box"><div class="pib-label">${b.label}</div><div class="pib-value">${b.value}</div></div>`).join('')}</div>
-      ${h.description ? `<div class="section-title">Description</div><div class="mv-entry-card"><div class="mve-text">${h.description.replace(/\n/g,'<br>')}</div></div>` : ''}
-      ${h.capacites ? `<div class="section-title">Capacités acquises</div><div class="mv-entry-card"><div class="mve-text">${h.capacites.replace(/\n/g,'<br>')}</div></div>` : ''}
     `;
     const photoBox = document.querySelector('[data-histoview-photo]');
     if (photoBox && h.photo) {
@@ -40960,6 +40994,59 @@
     }
   }
 
+  /* ---- Capacités / traits : remise en forme « nom » + « détail » ---- */
+  const UPPER = 'A-ZÀ-ÖØ-Þ', LOWER = 'a-zß-öø-ÿ';
+  // « RageEn combat, vous… » → nom « Rage », détail « En combat, vous… »
+  function splitGluedHead(t) {
+    const m = String(t || '').match(new RegExp(`^(.{1,70}?[${LOWER})])([${UPPER}](?:[${LOWER}'’ ]|$)[\\s\\S]*)$`));
+    return m ? [m[1].trim(), m[2].trim()] : null;
+  }
+  const HEAD_STOP = /^(Votre|Vos|Vous|Les|Le|La|L'|L’|Un|Une|Des|De|Du|Si|Lorsque|Lorsqu|Quand|Au|Aux|À|En|Ce|Cette|Ces|Il|Elle|Ils|Elles|Dans|Par|Pour|Chaque|Tant|Une fois|Cela|Sa|Son|Ses|Leur|Leurs|On|Mais|Et|Ou)\b/;
+  // « Vision dans le noir. Vous pouvez… » (ligne) → un trait à part
+  function splitDotHead(line) {
+    const m = String(line).match(new RegExp(`^([${UPPER}][^.:!?\\n]{1,60})\\.\\s+([${UPPER}0-9][\\s\\S]*)$`));
+    if (!m || HEAD_STOP.test(m[1]) || m[1].trim().split(/\s+/).length > 7) return null;
+    return [m[1].trim(), m[2].trim()];
+  }
+  function normalizeFeatureList(list, splitLines) {
+    if (!Array.isArray(list)) return list;
+    const out = [];
+    list.forEach(it => {
+      if (!it) return;
+      let t = String(it.title || '').trim(), x = String(it.text || '').trim();
+      if (t.includes('\n')) { const k = t.indexOf('\n'); x = [t.slice(k + 1).trim(), x].filter(Boolean).join('\n'); t = t.slice(0, k).trim(); }
+      const g = t.length > 3 ? splitGluedHead(t) : null;
+      if (g) { t = g[0]; x = [g[1], x].filter(Boolean).join('\n'); }
+      if (!splitLines) { out.push({ ...it, title: t, text: x }); return; }
+      const lines = x.split('\n');
+      let cur = { ...it, title: t, text: [] };
+      lines.forEach((ln, i) => {
+        const d = i > 0 || !cur.title ? splitDotHead(ln.trim()) : null;
+        if (d) { out.push({ ...cur, text: cur.text.join('\n').trim() }); cur = { title: d[0], text: [d[1]] }; }
+        else cur.text.push(ln);
+      });
+      out.push({ ...cur, text: cur.text.join('\n').trim() });
+    });
+    return out.filter(o => o.title || o.text);
+  }
+  function normalizeSystemTexts() {
+    racesDatabase.forEach(r => { r.traits = normalizeFeatureList(r.traits, true); });
+    sousracesDatabase.forEach(r => { r.traits = normalizeFeatureList(r.traits, true); });
+    classesLoreDatabase.forEach(c => { c.features = normalizeFeatureList(c.features, false); });
+  }
+  // Détail d'une capacité : les sous-titres collés (« Sorts mineursAu niveau 1… ») passent en gras
+  function lvRichText(x) {
+    return String(x || '').split('\n').map(ln => {
+      const g = ln.length > 8 ? splitGluedHead(ln) : null;
+      return g && g[0].split(/\s+/).length <= 6 ? `<strong>${g[0]}</strong> — ${g[1]}` : ln;
+    }).join('<br>');
+  }
+  function lvSubBlocks(list, two) {
+    const items = (list || []).filter(x => x && (x.title || x.text));
+    if (!items.length) return '<div class="mve-text"><span class="lv-empty">—</span></div>';
+    return `<div class="lv-subs${two ? ' two' : ''}">${items.map(x => `<div class="lv-sub">${x.title ? `<div class="lv-sub-name">${x.title}</div>` : ''}${x.text ? `<div class="mve-text">${lvRichText(x.text)}</div>` : ''}</div>`).join('')}</div>`;
+  }
+
   /* ---- Briques des fiches lore en grand format ---- */
   function lvText(t) { return t ? String(t).replace(/\n/g, '<br>') : '<span class="lv-empty">—</span>'; }
   function lvPhoto(src, attr, shape, icon, recrop, extraStyle) {
@@ -42923,6 +43010,7 @@
     try {
       const failCount = await loadLoreFromSupabase();
       await loadEnnemisFromSupabase();
+      try { normalizeSystemTexts(); } catch (e) { console.error('normalizeSystemTexts', e); }
       flushRestoredPhotos(); // renvoie en ligne les images du lore qui manquaient (en arrière-plan)
       await loadMessagesFromSupabase();
       await loadPlayersFromSupabase();
