@@ -1650,6 +1650,8 @@
   .lv-portrait { aspect-ratio: 3 / 4; }
   .lv-landscape { aspect-ratio: 16 / 10; }
   .lv-banner { aspect-ratio: 7 / 2; }
+  .lv-wide169 { aspect-ratio: 16 / 9; }
+  .lv-photo.lv-grow { aspect-ratio: auto; max-height: none; }
   .lv-landscape43 { aspect-ratio: 4 / 3; }
   .lv .pnj-info-box { min-height: 58px; margin: 0; }
   .lv-col > .pnj-info-box.lv-grow { min-height: 46px; }
@@ -1711,7 +1713,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (5)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (6)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2944,8 +2946,13 @@
   <div class="modal-box" style="max-width:520px;">
     <h3 id="gvfTitle">Ville / Village</h3>
     <div class="form-field"><label>Nom</label><input type="text" id="gvfName"></div>
-    <div class="photo-preview-box" id="gvfPhotoPreview" onclick="document.getElementById('gvfPhotoInput').click()"><div class="photo-preview-placeholder" id="gvfPhotoPlaceholder"><span>Photo</span></div></div>
+    <div style="display:grid; grid-template-columns:1.8fr 1fr; gap:10px;">
+      <div class="photo-preview-box" id="gvfPhotoPreview" style="margin-bottom:0;" onclick="document.getElementById('gvfPhotoInput').click()"><div class="photo-preview-placeholder" id="gvfPhotoPlaceholder"><span>Photo</span></div></div>
+      <div class="photo-preview-box" id="gvfPlanPreview" style="margin-bottom:0;" onclick="document.getElementById('gvfPlanInput').click()"><div class="photo-preview-placeholder" id="gvfPlanPlaceholder"><span>Plan de la ville</span></div></div>
+    </div>
+    <div style="height:14px;"></div>
     <input type="file" id="gvfPhotoInput" accept="image/*" style="display:none;" onchange="onVillePhotoSelected(event)">
+    <input type="file" id="gvfPlanInput" accept="image/*" style="display:none;" onchange="onVillePlanSelected(event)">
     <div class="two-col-fields">
       <div class="form-field"><label>Dirigeant</label><input type="text" id="gvfDirigeant"></div>
       <div class="form-field"><label>Population</label><input type="text" id="gvfPopulation"></div>
@@ -5199,8 +5206,16 @@
   }
 
   // ---- Import : tout champ photo passe par le cadrage avant d'arriver dans son formulaire ----
+  // Format de l'image telle qu'affichée dans la fiche (largeur / hauteur)
+  const IMPORT_RATIOS = {
+    pnjfPhotoInput: 3 / 4, dfPhotoInput: 3 / 4, kfPhotoInput: 3 / 4, kfClePhotoInput: 3 / 4, cofPhotoInput: 3 / 4,
+    anmfPhotoInput: 3 / 4, gmfPhotoInput: 3 / 4, glfPhotoInput: 3 / 4,
+    anfPhotoInput: 16 / 10, anfConseilPhotoInput: 16 / 10, gcfPhotoInput: 16 / 10, gcfPhoto2Input: 16 / 10, gcfPhoto3Input: 16 / 10,
+    gvfPhotoInput: 16 / 9, gvfPlanInput: 1,
+  };
   function guessImportRatio(input) {
     const id = input.id || '';
+    if (IMPORT_RATIOS[id]) return IMPORT_RATIOS[id];
     const prev = document.getElementById(id.replace(/Input(Row)?$/, 'Preview'));
     return measureRatio(prev) || measureRatio(lastPhotoClickEl) || 3 / 4;
   }
@@ -5289,6 +5304,7 @@
       case 'ville-view': return T('villes', geoCropEntry, 'photo');
       case 'commerce-view': return T('commerces', geoCropEntry, 'photo');
       case 'lieu-view': return T('lieux_importants', geoCropEntry, 'photo');
+      case 'ville-plan-view': return T('villes', geoCropEntry, 'plan');
     }
     return null;
   }
@@ -5303,12 +5319,13 @@
     const ctx = photoCropContext;
     const GEO = {
       'continent-view': id => openContinentView(id), 'region-view': id => openRegionView(id), 'ville-view': id => openVilleView(id),
-      'commerce-view': id => openCommerceView(id), 'lieu-view': id => openLieuView(id),
+      'commerce-view': id => openCommerceView(id), 'lieu-view': id => openLieuView(id), 'ville-plan-view': id => openVilleView(id),
     };
     if (GEO[ctx]) {
       if (!geoCropEntry) return;
-      geoCropEntry.photo = photoData.src;
-      geoCropEntry.photoZoom = 100; geoCropEntry.photoOffsetX = 0; geoCropEntry.photoOffsetY = 0;
+      const f = ctx === 'ville-plan-view' ? 'plan' : 'photo';
+      geoCropEntry[f] = photoData.src;
+      geoCropEntry[f + 'Zoom'] = 100; geoCropEntry[f + 'OffsetX'] = 0; geoCropEntry[f + 'OffsetY'] = 0;
       persistCroppedPhoto(ctx);
       if (typeof renderGeoContent === 'function') renderGeoContent();
       GEO[ctx](geoCropEntry.id);
@@ -35465,7 +35482,7 @@
         </div>
         <div class="lv-col lv-fit">${lvCard('Description', k.description, 'lv-grow')}</div>
         <div class="lv-col lv-fit">${lvCard('Particularités', k.particularites, 'lv-grow')}</div>
-        <div class="lv-col">${lvPhoto(k.clePhoto, 'data-kaorunv-cle="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M14 7a4 4 0 10-4 4l-6 6v3h3l6-6a4 4 0 001-7z"/></svg>')}</div>
+        <div class="lv-col lv-fit">${lvPhoto(k.clePhoto, 'data-kaorunv-cle="1"', 'lv-grow', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M14 7a4 4 0 10-4 4l-6 6v3h3l6-6a4 4 0 001-7z"/></svg>')}</div>
       </div>
     `;
 
@@ -36656,8 +36673,8 @@
     ];
     useLoreLayout('antenne');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="lv" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);">
-        <div class="lv-col">
+      <div class="lv" style="grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr); min-height:calc(92vh - 175px);">
+        <div class="lv-col" style="align-self:start;">
           ${lvPhoto(a.photo, 'data-antv-photo="1"', 'lv-landscape', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>')}
           <div class="lv-row">${lvInfo('Lieu', a.lieu)}${lvInfo('Primarch', a.primarch)}</div>
           <div class="lv-row">${lvInfo('Voie du Savoir', a.capSavoir)}${lvInfo('Voie de l\'Ombre', a.capOmbre)}${lvInfo('Voie de l\'Ordre', a.capOrdre)}</div>
@@ -36690,8 +36707,8 @@
     document.getElementById('pnjvSub').textContent = 'Haut Conseil d\'Astelorn';
     useLoreLayout('conseil');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="lv" style="grid-template-columns:minmax(0,1.3fr) minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);">
-        <div>${lvPhoto(m.photo, 'data-consv-photo="1"', 'lv-landscape43', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><circle cx="12" cy="8" r="3.3"/><path d="M5.5 21c0-4 3-7 6.5-7s6.5 3 6.5 7"/></svg>')}</div>
+      <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);">
+        <div>${lvPhoto(m.photo, 'data-consv-photo="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><circle cx="12" cy="8" r="3.3"/><path d="M5.5 21c0-4 3-7 6.5-7s6.5 3 6.5 7"/></svg>')}</div>
         <div class="lv-col lv-fit">
           <div class="lv-row">${lvInfo('Race', m.race)}${lvInfo('Classe', m.classe)}${lvInfo('Spécialité', m.specialite)}</div>
           ${lvCard('Relations au sein du Conseil', m.relations, 'lv-grow')}
@@ -39070,7 +39087,7 @@
         <div>${lvPhoto(a.photo, 'data-animalview-photo="1"', 'lv-portrait', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 10c0-2 2-3 3-1 1-3 4-3 5 0 1-3 4-3 5 0 1-2 3-1 3 1-1 5-4 9-8 9s-7-4-8-9z"/></svg>')}</div>
         <div class="lv-col lv-fit">
           <div class="lv-row">${abilityBoxes.map(b => lvInfo(b.label, b.value)).join('')}</div>
-          <div class="lv lv-grow" style="grid-template-columns:repeat(3, minmax(0,1fr)) minmax(0,1.5fr); grid-template-rows:1fr 1fr; gap:12px;">
+          <div class="lv lv-grow" style="grid-template-columns:repeat(3, minmax(0,0.72fr)) minmax(0,2fr); grid-template-rows:1fr 1fr; gap:12px;">
             ${infoBoxes.slice(0, 3).map(b => lvInfo(b.label, b.value)).join('')}
             <div class="lv-card" style="grid-column:4; grid-row:1 / span 2;">
               <div class="lv-card-title">Résistances / Immunités / Vulnérabilité</div>
@@ -39086,7 +39103,7 @@
         <div class="lv-col lv-fit">
           <div class="lv-card" style="flex:0 1 auto;">
             <div class="lv-card-title">Langues${a.competences ? ' &amp; compétences' : ''}</div>
-            <div class="mve-text">${lvText(a.langues)}</div>
+            <div class="mve-text"><strong style="color:var(--ink);">Langues</strong> — ${a.langues || '<span class="lv-empty">—</span>'}</div>
             ${a.competences ? `<div class="mve-text" style="margin-top:6px;"><strong style="color:var(--ink);">Compétences</strong> — ${a.competences}</div>` : ''}
           </div>
           <div class="lv-card lv-grow">
@@ -40627,8 +40644,13 @@
     const infoBoxes = [{ label: 'Dirigeant', value: x.dirigeant || '—' }, { label: 'Population', value: x.population || '—' }];
     useLoreLayout('ville');
     document.getElementById('pnjvBody').innerHTML = `
-      <div class="lv" style="grid-template-columns:repeat(3, minmax(0,1fr));">
-        <div style="grid-column:1 / -1;">${lvPhoto(x.photo, 'data-geov-photo="1"', 'lv-banner', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>')}</div>
+      <div class="lv" style="grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);">
+        ${lvPhoto(x.photo, 'data-geov-photo="1"', 'lv-wide169', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>')}
+        <div class="lv-col lv-fit">
+          ${lvPhoto(x.plan, 'data-geov-plan="1"', 'lv-grow', '<div style="text-align:center; font-size:12px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="26" height="26"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg><div>Plan de la ville</div></div>')}
+        </div>
+      </div>
+      <div class="lv" style="grid-template-columns:repeat(3, minmax(0,1fr)); margin-top:14px;">
         <div class="lv-col">
           <div class="lv-row">${infoBoxes.map(b => lvInfo(b.label, b.value)).join('')}</div>
           ${lvCard('Description générale', x.description, 'lv-grow')}
@@ -40637,15 +40659,27 @@
         <div class="lv-col">${lvCard('Lieux notables', x.lieuxNotables, 'lv-grow')}</div>
       </div>
     `;
+    { const planBox = document.querySelector('[data-geov-plan]');
+      if (planBox && x.plan) {
+        planBox.style.cursor = 'pointer';
+        planBox.addEventListener('click', () => {
+          geoCropEntry = x;
+          photoData = { src: x.plan, offsetX: 0, offsetY: 0, zoom: 100 };
+          photoCropContext = 'ville-plan-view';
+          openPhotoCropper();
+        });
+      } }
     bindGeoPhotoCrop(x, 'ville-view');
     document.querySelector('#modalPnjView .icon-btn[title="Modifier"]').setAttribute('onclick', 'editCurrentVille()');
     openModal('modalPnjView');
   }
   function editCurrentVille() { closeModal('modalPnjView'); openVilleForm(currentVilleId); }
   let villePendingPhoto = null;
+  let villePendingPlan = null;
   function openVilleForm(id) {
     currentVilleId = id;
     villePendingPhoto = null;
+    villePendingPlan = null;
     const x = id ? villesDatabase.find(o => o.id === id) : null;
     document.getElementById('gvfTitle').textContent = x ? x.name : 'Nouvelle ville';
     document.getElementById('gvfName').value = x ? x.name : '';
@@ -40656,9 +40690,11 @@
     document.getElementById('gvfLieuxNotables').value = x ? x.lieuxNotables : '';
     document.getElementById('gvfDeleteBtn').style.display = x ? 'block' : 'none';
     setGeoPhotoPreview('gvfPhotoPreview', 'gvfPhotoPlaceholder', x && x.photo);
+    setGeoPhotoPreview('gvfPlanPreview', 'gvfPlanPlaceholder', x && x.plan);
     openModal('modalVilleForm');
   }
   function onVillePhotoSelected(e) { readGeoPhoto(e, (src) => { villePendingPhoto = src; setGeoPhotoPreview('gvfPhotoPreview', 'gvfPhotoPlaceholder', src); }); }
+  function onVillePlanSelected(e) { readGeoPhoto(e, (src) => { villePendingPlan = src; setGeoPhotoPreview('gvfPlanPreview', 'gvfPlanPlaceholder', src); }); }
   function saveVilleForm() {
     const name = document.getElementById('gvfName').value.trim();
     if (!name) { showToast('Donne au moins un nom'); return; }
@@ -40668,8 +40704,9 @@
       lieuxNotables: document.getElementById('gvfLieuxNotables').value.trim(),
     };
     if (villePendingPhoto) data.photo = villePendingPhoto;
+    if (villePendingPlan) data.plan = villePendingPlan;
     if (currentVilleId) { Object.assign(villesDatabase.find(o => o.id === currentVilleId), data); showToast(`« ${name} » mise à jour`); }
-    else { villesDatabase.push({ id: 'ville' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créée`); }
+    else { villesDatabase.push({ id: 'ville' + Date.now(), photo: null, plan: null, ...data }); showToast(`« ${name} » créée`); }
     const villeEntry = villesDatabase.find(o => o.id === currentVilleId) || villesDatabase[villesDatabase.length - 1];
     if (sb) sb.from('villes').upsert({ id: villeEntry.id, nom: villeEntry.name, description: villeEntry.description, architecture: villeEntry.architecture, lieux_notables: villeEntry.lieuxNotables, dirigeant: villeEntry.dirigeant, population: villeEntry.population, photo: villeEntry.photo, plan: villeEntry.plan }).then(({error}) => { if (error) showToast('⚠️ Non sauvegardé en ligne'); });
     closeModal('modalVilleForm'); renderGeoContent();
