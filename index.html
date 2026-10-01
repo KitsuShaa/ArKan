@@ -900,6 +900,33 @@
     pointer-events: none;
     -webkit-user-select: none; user-select: none;
   }
+  /* ---- Cadrage d'image (cadre déplaçable / redimensionnable sur l'image entière) ---- */
+  .icrop-stage {
+    position: relative; width: 100%; height: min(52vh, 520px); background: #0d0d0d;
+    border-radius: var(--radius-md); overflow: hidden; touch-action: none;
+    -webkit-user-select: none; user-select: none;
+  }
+  .icrop-img { position: absolute; max-width: none; pointer-events: none; -webkit-user-drag: none; }
+  .icrop-box {
+    position: absolute; cursor: move; box-sizing: border-box;
+    border: 1.5px solid var(--gold, #d4b46a);
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.62);
+  }
+  .icrop-box::before, .icrop-box::after { content: ''; position: absolute; pointer-events: none; border: 0 solid rgba(255,255,255,0.28); }
+  .icrop-box::before { left: 33.33%; right: 33.33%; top: 0; bottom: 0; border-left-width: 1px; border-right-width: 1px; }
+  .icrop-box::after { top: 33.33%; bottom: 33.33%; left: 0; right: 0; border-top-width: 1px; border-bottom-width: 1px; }
+  .icrop-h { position: absolute; width: 18px; height: 18px; background: var(--gold, #d4b46a); border: 2px solid #111; border-radius: 50%; z-index: 2; }
+  .icrop-h[data-h="nw"] { left: -10px; top: -10px; cursor: nwse-resize; }
+  .icrop-h[data-h="ne"] { right: -10px; top: -10px; cursor: nesw-resize; }
+  .icrop-h[data-h="sw"] { left: -10px; bottom: -10px; cursor: nesw-resize; }
+  .icrop-h[data-h="se"] { right: -10px; bottom: -10px; cursor: nwse-resize; }
+  .icrop-ratios { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 4px; align-items: center; }
+  .icrop-ratios span { font-size: 11.5px; color: var(--ink-faint); margin-right: 4px; }
+  .icrop-ratios button { background: var(--card); border: 1px solid var(--card-border); color: var(--ink-dim); border-radius: 999px; padding: 5px 11px; font-size: 12px; cursor: pointer; }
+  .icrop-ratios button.active { border-color: var(--gold); color: var(--gold); }
+  .icrop-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .icrop-actions .modal-confirm-btn, .icrop-actions .modal-cancel-btn { margin-top: 0; flex: 1; }
+  .icrop-change { background: none; border: none; color: var(--gold); font-size: 12.5px; cursor: pointer; padding: 6px 0; text-decoration: underline; }
   .wizard-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
 
   .form-field input, .form-field select, .form-field textarea {
@@ -1648,7 +1675,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (2)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (3)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3054,18 +3081,23 @@
 <!-- Theme picker -->
 <!-- PHOTO CROP MODAL -->
 <div class="modal-backdrop" id="modalPhotoCrop">
-  <div class="modal-box" style="max-width:420px;">
-    <h3>Cadrer le portrait</h3>
-    <div class="modal-sub">Fais glisser l'image pour la repositionner, utilise le curseur pour zoomer.</div>
-    <div class="crop-viewport" id="cropViewport">
-      <img class="crop-image" id="cropImage" alt="" draggable="false">
+  <div class="modal-box" style="max-width:640px;">
+    <h3>Cadrer l'image</h3>
+    <div class="modal-sub">Déplace le cadre sur la zone à garder, tire un coin pour l'agrandir ou le réduire (molette aussi).</div>
+    <div class="icrop-stage" id="icropStage">
+      <img class="icrop-img" id="icropImg" alt="" draggable="false">
+      <div class="icrop-box" id="icropBox">
+        <div class="icrop-h" data-h="nw"></div><div class="icrop-h" data-h="ne"></div>
+        <div class="icrop-h" data-h="sw"></div><div class="icrop-h" data-h="se"></div>
+      </div>
     </div>
-    <div class="form-field" style="margin-top:14px;">
-      <label>Zoom</label>
-      <input type="range" id="cropZoom" min="100" max="300" value="100" oninput="updateCropTransform()">
+    <div class="icrop-ratios" id="icropRatios"></div>
+    <button class="icrop-change" id="icropChangeBtn" type="button" onclick="document.getElementById('icropFileInput').click()">Changer d'image</button>
+    <input type="file" id="icropFileInput" accept="image/*" style="display:none;" data-icrop-internal="1">
+    <div class="icrop-actions">
+      <button class="modal-cancel-btn" onclick="cancelImageCrop()">Annuler</button>
+      <button class="modal-confirm-btn" id="icropConfirmBtn" onclick="confirmImageCrop()">Valider le cadrage</button>
     </div>
-    <button class="modal-confirm-btn" onclick="confirmCrop()">Valider le cadrage</button>
-    <button class="modal-cancel-btn" onclick="closeModal('modalPhotoCrop')">Annuler</button>
   </div>
 </div>
 
@@ -3372,6 +3404,7 @@
       const job = jobs[i];
       if (res.status === 'fulfilled' && !res.value.error && res.value.data) {
         const mapped = res.value.data.map(job.map);
+        restoreEmbeddedPhotos(job.table, job.target, mapped);
         job.target.length = 0;
         job.target.push(...mapped);
       } else {
@@ -3430,8 +3463,44 @@
       legendaryActions: legMap[r.id] || [], source: r.source, legendary: r.legendaire,
       combatCount: 0, photo: r.photo,
     }));
+    restoreEmbeddedPhotos('ennemis', monstersDatabase, mapped);
     monstersDatabase.length = 0;
     monstersDatabase.push(...mapped);
+  }
+
+  /* ===================== RESTAURATION DES IMAGES DU LORE ===================== */
+  // Les images envoyées sont intégrées dans ce fichier (données de secours). Quand une ligne Supabase
+  // n'a pas (ou plus) d'image, on reprend celle du fichier au lieu de l'effacer, puis on la renvoie
+  // dans Supabase pour qu'elle y soit stockée durablement.
+  const PHOTO_COLUMNS = { photo: 'photo', photo2: 'photo2', photo3: 'photo3', clePhoto: 'cle_photo', conseilPhoto: 'conseil_photo', plan: 'plan' };
+  const restoredPhotoQueue = [];
+  const isUsableImage = v => typeof v === 'string' && /^(data:image\/|https?:\/\/)/i.test(v.trim());
+  const photoNameKey = n => String(n || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  function restoreEmbeddedPhotos(table, embedded, mapped) {
+    if (!embedded || !embedded.length) return;
+    const byId = {}, byName = {};
+    embedded.forEach(e => { if (!e) return; if (e.id != null) byId[String(e.id)] = e; const k = photoNameKey(e.name); if (k && !byName[k]) byName[k] = e; });
+    mapped.forEach(m => {
+      const src = byId[String(m.id)] || byName[photoNameKey(m.name)];
+      if (!src) return;
+      Object.keys(PHOTO_COLUMNS).forEach(field => {
+        if (!(field in src) || isUsableImage(m[field]) || !isUsableImage(src[field])) return;
+        m[field] = src[field];
+        ['Zoom', 'OffsetX', 'OffsetY'].forEach(s => { if (src[field + s] != null) m[field + s] = src[field + s]; });
+        restoredPhotoQueue.push({ table, id: m.id, col: PHOTO_COLUMNS[field], val: src[field] });
+      });
+    });
+  }
+  async function flushRestoredPhotos() {
+    if (!sb || !restoredPhotoQueue.length) return;
+    const total = restoredPhotoQueue.length;
+    let ok = 0, ko = 0;
+    while (restoredPhotoQueue.length) {
+      const batch = restoredPhotoQueue.splice(0, 6);
+      const res = await Promise.all(batch.map(r => sb.from(r.table).update({ [r.col]: r.val }).eq('id', r.id).then(x => x, e => ({ error: e }))));
+      res.forEach((x, k) => { if (x && x.error) { ko++; console.error('Image non renvoyée', batch[k].table, batch[k].id, x.error); } else ok++; });
+    }
+    showToast(ko ? `${ok} image${ok > 1 ? 's' : ''} restaurée${ok > 1 ? 's' : ''} en ligne, ${ko} en échec (voir console)` : `${total} image${total > 1 ? 's' : ''} du lore restaurée${total > 1 ? 's' : ''} et enregistrée${total > 1 ? 's' : ''} en ligne`);
   }
 
   /* ===================== DATA (fictif pour le prototype) ===================== */
@@ -4780,8 +4849,271 @@
   }
 
   /* ===================== PORTRAIT + RECADRAGE ===================== */
-  let photoData = null; // { src, offsetX, offsetY, zoom }
-  let cropDragBound = false;
+  // Fonctionnement :
+  //  - à l'import d'une image (n'importe quel champ photo), on ouvre le cadrage sur l'image ENTIÈRE ;
+  //  - l'image enregistrée dans la fiche est la zone cadrée (affichée partout telle quelle) ;
+  //  - l'original + la position du cadre sont gardés dans la table Supabase « images_originales »
+  //    (clé = empreinte de l'image cadrée) : recadrer plus tard repart de l'image complète.
+  let photoData = null; // { src, offsetX, offsetY, zoom } — format historique, conservé pour les écrans existants
+  const ICROP_RATIOS = [
+    { label: '3:4', v: 3 / 4 }, { label: '1:1', v: 1 }, { label: '4:3', v: 4 / 3 }, { label: '16:9', v: 16 / 9 }, { label: 'Libre', v: null },
+  ];
+  const icrop = { img: null, natW: 0, natH: 0, ratio: 3 / 4, box: null, original: null, onDone: null, autoRatio: null, k: 1, ox: 0, oy: 0 };
+  const originalsCache = {}; // cle -> { original, cadrage }
+
+  async function imageKey(dataUrl) {
+    try {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(String(dataUrl)));
+      return 'sha:' + [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) { return null; }
+  }
+  function loadImageEl(src) {
+    return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+  }
+  function readFileAsDataUrl(file) {
+    return new Promise((res, rej) => { const r = new FileReader(); r.onload = ev => res(ev.target.result); r.onerror = rej; r.readAsDataURL(file); });
+  }
+  const isAlphaImage = src => /^data:image\/(png|webp|gif|svg)/i.test(String(src));
+  function canvasToUrl(cv, alpha, q) {
+    return alpha ? cv.toDataURL('image/webp', q) : cv.toDataURL('image/jpeg', q);
+  }
+  // Réduit un original trop lourd (photo de téléphone…) avant stockage : 2000 px max sur le grand côté
+  async function shrinkOriginal(src) {
+    const im = await loadImageEl(src);
+    const max = 2000, k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight));
+    if (k >= 1 && String(src).length < 1.5e6) return src;
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(im.naturalWidth * k); cv.height = Math.round(im.naturalHeight * k);
+    cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+    return canvasToUrl(cv, isAlphaImage(src), 0.9);
+  }
+  async function fetchOriginal(src) {
+    const key = await imageKey(src);
+    if (!key) return null;
+    if (originalsCache[key]) return originalsCache[key];
+    if (!sb) return null;
+    try {
+      const { data, error } = await sb.from('images_originales').select('original, cadrage').eq('cle', key).maybeSingle();
+      if (error || !data) return null;
+      originalsCache[key] = data;
+      return data;
+    } catch (e) { return null; }
+  }
+  let originalsTableWarned = false;
+  async function storeOriginal(croppedUrl, original, cadrage) {
+    const key = await imageKey(croppedUrl);
+    if (!key) return;
+    originalsCache[key] = { original, cadrage };
+    if (!sb) return;
+    const { error } = await sb.from('images_originales').upsert({ cle: key, original, cadrage });
+    if (error) {
+      console.error('images_originales :', error);
+      if (!originalsTableWarned) { originalsTableWarned = true; showToast("⚠️ Image enregistrée, mais l'original n'a pas pu être gardé (table images_originales ?)"); }
+    }
+  }
+
+  // Ratio d'un cadre d'affichage (largeur / hauteur), ou null s'il n'est pas mesurable
+  function measureRatio(el) {
+    if (!el || !el.getBoundingClientRect) return null;
+    const r = el.getBoundingClientRect();
+    return r.width > 10 && r.height > 10 ? r.width / r.height : null;
+  }
+  let lastPhotoClickEl = null;
+  document.addEventListener('pointerdown', e => {
+    const t = e.target && e.target.closest && e.target.closest('[data-pnjv-photo],[data-mv-photo],[data-geov-photo],[data-geov-photo2],[data-geov-photo3],[data-animalview-photo],.photo-preview-box,[style*="background-image"]');
+    if (t) lastPhotoClickEl = t;
+  }, true);
+
+  // ---- Affichage du cadre ----
+  function icropLayout() {
+    const stage = document.getElementById('icropStage');
+    const pad = 14; // marge pour que les poignées restent visibles au bord de l'image
+    const sw = stage.clientWidth, sh = stage.clientHeight;
+    if (!sw || !sh || !icrop.natW) return;
+    const k = Math.min((sw - 2 * pad) / icrop.natW, (sh - 2 * pad) / icrop.natH);
+    const dw = icrop.natW * k, dh = icrop.natH * k;
+    icrop.k = k; icrop.ox = (sw - dw) / 2; icrop.oy = (sh - dh) / 2;
+    const img = document.getElementById('icropImg');
+    Object.assign(img.style, { width: dw + 'px', height: dh + 'px', left: icrop.ox + 'px', top: icrop.oy + 'px' });
+    icropDrawBox();
+  }
+  function icropDrawBox() {
+    const b = icrop.box, el = document.getElementById('icropBox');
+    if (!b) return;
+    Object.assign(el.style, { left: (icrop.ox + b.x * icrop.k) + 'px', top: (icrop.oy + b.y * icrop.k) + 'px', width: (b.w * icrop.k) + 'px', height: (b.h * icrop.k) + 'px' });
+  }
+  // Plus grand cadre au ratio voulu (limité à la largeur souhaitée), centré au mieux sur (cx, cy)
+  function icropFitBox(ratio, cx, cy, wantW, wantH) {
+    const W = icrop.natW, H = icrop.natH;
+    let w, h;
+    if (!ratio) { w = Math.min(wantW || W, W); h = Math.min(wantH || H, H); }
+    else { w = Math.min(wantW || W, W, H * ratio); h = w / ratio; }
+    const x = Math.min(Math.max(0, cx - w / 2), W - w), y = Math.min(Math.max(0, cy - h / 2), H - h);
+    return { x, y, w, h };
+  }
+  function renderIcropRatios() {
+    const el = document.getElementById('icropRatios');
+    const auto = icrop.autoRatio;
+    const opts = [...(auto ? [{ label: 'Comme le cadre', v: auto }] : []), ...ICROP_RATIOS];
+    const same = (a, b) => (a == null && b == null) || (a != null && b != null && Math.abs(a - b) < 0.002);
+    const activeIdx = opts.findIndex(o => same(o.v, icrop.ratio));
+    el.innerHTML = '<span>Format</span>' + opts.map((o, i) => `<button type="button" data-i="${i}" class="${i === activeIdx ? 'active' : ''}">${o.label}</button>`).join('');
+    el.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+      const o = opts[parseInt(btn.dataset.i)];
+      icrop.ratio = o.v;
+      const b = icrop.box;
+      icrop.box = icropFitBox(o.v, b.x + b.w / 2, b.y + b.h / 2, b.w, b.h);
+      icropDrawBox(); renderIcropRatios();
+    }));
+  }
+
+  let icropBound = false;
+  function bindIcropEvents() {
+    if (icropBound) return;
+    icropBound = true;
+    const stage = document.getElementById('icropStage');
+    let drag = null;
+    const toNat = e => {
+      const r = stage.getBoundingClientRect();
+      return { x: (e.clientX - r.left - icrop.ox) / icrop.k, y: (e.clientY - r.top - icrop.oy) / icrop.k };
+    };
+    stage.addEventListener('pointerdown', e => {
+      if (!icrop.box) return;
+      const h = e.target.closest('.icrop-h');
+      const onBox = e.target.closest('.icrop-box');
+      const p = toNat(e), b = { ...icrop.box };
+      if (h) {
+        const hx = h.dataset.h.includes('e') ? 1 : -1, hy = h.dataset.h.includes('s') ? 1 : -1;
+        drag = { type: 'resize', dx: hx, dy: hy, ax: hx > 0 ? b.x : b.x + b.w, ay: hy > 0 ? b.y : b.y + b.h };
+      } else {
+        if (!onBox) { // clic hors du cadre : le cadre vient se centrer sous le pointeur
+          icrop.box = icropFitBox(icrop.ratio, p.x, p.y, b.w, b.h);
+          icropDrawBox();
+        }
+        drag = { type: 'move', sx: p.x, sy: p.y, b: { ...icrop.box } };
+      }
+      stage.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    stage.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const p = toNat(e), W = icrop.natW, H = icrop.natH;
+      if (drag.type === 'move') {
+        const b = drag.b;
+        icrop.box = { ...b, x: Math.min(Math.max(0, b.x + p.x - drag.sx), W - b.w), y: Math.min(Math.max(0, b.y + p.y - drag.sy), H - b.h) };
+      } else {
+        const minS = Math.max(30 / icrop.k, 8);
+        const maxW = drag.dx > 0 ? W - drag.ax : drag.ax, maxH = drag.dy > 0 ? H - drag.ay : drag.ay;
+        let w = Math.max(minS, (p.x - drag.ax) * drag.dx), h = Math.max(minS, (p.y - drag.ay) * drag.dy);
+        if (icrop.ratio) {
+          w = Math.max(w, h * icrop.ratio); h = w / icrop.ratio;
+          if (w > maxW) { w = maxW; h = w / icrop.ratio; }
+          if (h > maxH) { h = maxH; w = h * icrop.ratio; }
+        } else { w = Math.min(w, maxW); h = Math.min(h, maxH); }
+        icrop.box = { x: drag.dx > 0 ? drag.ax : drag.ax - w, y: drag.dy > 0 ? drag.ay : drag.ay - h, w, h };
+      }
+      icropDrawBox();
+    });
+    const end = () => { drag = null; };
+    stage.addEventListener('pointerup', end);
+    stage.addEventListener('pointercancel', end);
+    // molette : agrandir / réduire le cadre autour de son centre
+    stage.addEventListener('wheel', e => {
+      if (!icrop.box) return;
+      e.preventDefault();
+      const b = icrop.box, f = e.deltaY > 0 ? 1.06 : 1 / 1.06;
+      icrop.box = icropFitBox(icrop.ratio, b.x + b.w / 2, b.y + b.h / 2, Math.max(20, b.w * f), Math.max(20, b.h * f));
+      icropDrawBox();
+    }, { passive: false });
+    window.addEventListener('resize', () => { if (document.getElementById('modalPhotoCrop').classList.contains('open')) icropLayout(); });
+    // « Changer d'image » depuis le cadrage
+    document.getElementById('icropFileInput').addEventListener('change', async e => {
+      const f = e.target.files && e.target.files[0];
+      e.target.value = '';
+      if (!f) return;
+      try { await icropSetImage(await shrinkOriginal(await readFileAsDataUrl(f)), null); }
+      catch (err) { showToast('Image illisible'); }
+    });
+  }
+
+  async function icropSetImage(original, cadrage) {
+    const im = await loadImageEl(original);
+    icrop.original = original; icrop.img = im; icrop.natW = im.naturalWidth; icrop.natH = im.naturalHeight;
+    document.getElementById('icropImg').src = original;
+    if (cadrage && cadrage.w) {
+      icrop.box = { x: cadrage.x * icrop.natW, y: cadrage.y * icrop.natH, w: cadrage.w * icrop.natW, h: cadrage.h * icrop.natH };
+      if (cadrage.ratio !== undefined) icrop.ratio = cadrage.ratio;
+    } else {
+      icrop.box = icropFitBox(icrop.ratio, icrop.natW / 2, icrop.natH / 2);
+    }
+    renderIcropRatios();
+    requestAnimationFrame(icropLayout);
+  }
+
+  // Ouvre le cadrage. opts : { original, cadrage, ratio, allowChange, onDone({ src, original, cadrage }) }
+  async function openImageCropper(opts) {
+    bindIcropEvents();
+    icrop.onDone = opts.onDone;
+    icrop.autoRatio = opts.ratio || null;
+    icrop.ratio = opts.ratio || 3 / 4;
+    icrop.box = null;
+    document.getElementById('icropBox').style.width = '0px';
+    document.getElementById('icropChangeBtn').style.display = opts.allowChange ? '' : 'none';
+    openModal('modalPhotoCrop');
+    try { await icropSetImage(opts.original, opts.cadrage); }
+    catch (e) { closeModal('modalPhotoCrop'); showToast('Image illisible'); }
+  }
+  function cancelImageCrop() { icrop.onDone = null; closeModal('modalPhotoCrop'); }
+  async function confirmImageCrop() {
+    const b = icrop.box; if (!b || !icrop.img) return;
+    const btn = document.getElementById('icropConfirmBtn'); btn.disabled = true;
+    try {
+      const maxOut = 1200, k = Math.min(1, maxOut / Math.max(b.w, b.h));
+      const cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.round(b.w * k)); cv.height = Math.max(1, Math.round(b.h * k));
+      cv.getContext('2d').drawImage(icrop.img, b.x, b.y, b.w, b.h, 0, 0, cv.width, cv.height);
+      const src = canvasToUrl(cv, isAlphaImage(icrop.original), 0.86);
+      const cadrage = { x: b.x / icrop.natW, y: b.y / icrop.natH, w: b.w / icrop.natW, h: b.h / icrop.natH, ratio: icrop.ratio };
+      const original = icrop.original, cb = icrop.onDone;
+      icrop.onDone = null;
+      closeModal('modalPhotoCrop');
+      storeOriginal(src, original, cadrage);
+      if (cb) await cb({ src, original, cadrage });
+    } finally { btn.disabled = false; }
+  }
+
+  // ---- Import : tout champ photo passe par le cadrage avant d'arriver dans son formulaire ----
+  function guessImportRatio(input) {
+    const id = input.id || '';
+    const prev = document.getElementById(id.replace(/Input(Row)?$/, 'Preview'));
+    return measureRatio(prev) || measureRatio(lastPhotoClickEl) || 3 / 4;
+  }
+  function dataUrlToFile(url, name) {
+    const [head, b64] = url.split(',');
+    const mime = (head.match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
+    const bin = atob(b64), arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new File([arr], name || 'image', { type: mime });
+  }
+  document.addEventListener('change', async e => {
+    const input = e.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== 'file' || !/image/.test(input.accept || '')) return;
+    if (input.dataset.icropInternal) return;
+    const file = input.files && input.files[0];
+    if (!file || typeof input.onchange !== 'function') return;
+    e.stopImmediatePropagation(); e.stopPropagation();
+    const ratio = guessImportRatio(input);
+    input.value = '';
+    let original;
+    try { original = await shrinkOriginal(await readFileAsDataUrl(file)); } catch (err) { showToast('Image illisible'); return; }
+    openImageCropper({
+      original, ratio, allowChange: true,
+      onDone: ({ src }) => {
+        const cropped = dataUrlToFile(src, file.name);
+        input.onchange.call(input, { target: { files: [cropped], value: '' }, currentTarget: input, preventDefault() {}, stopPropagation() {} });
+      },
+    });
+  }, true);
 
   function onPhotoSelected(e) {
     const file = e.target.files[0];
@@ -4790,49 +5122,88 @@
     reader.onload = (ev) => {
       photoData = { src: ev.target.result, offsetX: 0, offsetY: 0, zoom: 100 };
       photoCropContext = 'wizard';
-      openPhotoCropper();
+      applyCropContext();
     };
     reader.readAsDataURL(file);
   }
 
-  function openPhotoCropper() {
-    if (!photoData) return;
-    document.getElementById('cropImage').src = photoData.src;
-    document.getElementById('cropZoom').value = photoData.zoom;
-    updateCropTransform();
-    setupCropDrag();
-    openModal('modalPhotoCrop');
-  }
-
-  function updateCropTransform() {
-    photoData.zoom = parseInt(document.getElementById('cropZoom').value);
-    const img = document.getElementById('cropImage');
-    img.style.transform = `translate(${photoData.offsetX}px, ${photoData.offsetY}px) scale(${photoData.zoom / 100})`;
-  }
-
-  function setupCropDrag() {
-    if (cropDragBound) return;
-    cropDragBound = true;
-    const vp = document.getElementById('cropViewport');
-    let dragging = false, startX = 0, startY = 0, startOffX = 0, startOffY = 0;
-    vp.addEventListener('pointerdown', (e) => {
-      dragging = true;
-      startX = e.clientX; startY = e.clientY;
-      startOffX = photoData.offsetX; startOffY = photoData.offsetY;
-      vp.setPointerCapture(e.pointerId);
+  // ---- Recadrer une image déjà en place (clic sur la photo d'une fiche) : repart de l'original complet ----
+  async function openPhotoCropper() {
+    if (!photoData || !photoData.src) return;
+    const current = photoData.src;
+    const ratio = measureRatio(lastPhotoClickEl) || 3 / 4;
+    const saved = await fetchOriginal(current);
+    const savedRatio = saved && saved.cadrage ? saved.cadrage.ratio : undefined;
+    openImageCropper({
+      original: saved ? saved.original : current,
+      cadrage: saved ? saved.cadrage : null,
+      ratio: savedRatio !== undefined && savedRatio !== null ? savedRatio : ratio,
+      allowChange: true,
+      onDone: ({ src }) => {
+        photoData = { src, offsetX: 0, offsetY: 0, zoom: 100 };
+        applyCropContext();
+      },
     });
-    vp.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      photoData.offsetX = startOffX + (e.clientX - startX);
-      photoData.offsetY = startOffY + (e.clientY - startY);
-      updateCropTransform();
+  }
+  function updateCropTransform() { /* ancien curseur de zoom : plus utilisé */ }
+  // Anciennes images (zoom/décalage CSS) : sans zoom particulier, l'image remplit son cadre
+  function legacyBgSize(z) { return z && Number(z) !== 100 ? z + '%' : 'cover'; }
+
+  // Où enregistrer l'image recadrée, selon l'écran d'où vient le recadrage
+  let geoCropEntry = null;
+  function cropPersistTarget(ctx) {
+    const T = (table, entity, col) => entity ? { table, id: entity.id, col } : null;
+    switch (ctx) {
+      case 'animal-view': return T('animaux', animauxDatabase.find(x => x.id === currentAnimalId), 'photo');
+      case 'continent-view2': return T('continents', continentsDatabase.find(o => o.id === currentContinentId), 'photo2');
+      case 'continent-view3': return T('continents', continentsDatabase.find(o => o.id === currentContinentId), 'photo3');
+      case 'race-view': return T('races', racesDatabase.find(x => x.id === currentRaceId), 'photo');
+      case 'sousrace-view': return T('sous_races', sousracesDatabase.find(x => x.id === currentSousraceId), 'photo');
+      case 'classe-view': return T('classes', classesLoreDatabase.find(x => x.id === currentClasseId), 'photo');
+      case 'histo-view': return T('historiques', historiquesDatabase.find(x => x.id === currentHistoId), 'photo');
+      case 'antenne-view': return T('antennes_astelorn', antennesDatabase.find(x => x.id === currentAstelornAntenneId), 'photo');
+      case 'conseil-view': return T('conseil_astelorn', conseilDatabase.find(x => x.id === currentAstelornConseilId), 'photo');
+      case 'kaorun-view': return T('kaorun', kaorunDatabase.find(x => x.id === currentKaorunId), 'photo');
+      case 'kaorun-cle-view': return T('kaorun', kaorunDatabase.find(x => x.id === currentKaorunId), 'cle_photo');
+      case 'monster-view': return T('ennemis', monstersDatabase.find(x => x.id === currentMonsterFormId), 'photo');
+      case 'dieu-view': return T('dieux', dieuxDatabase.find(x => x.id === currentDieuId), 'photo');
+      case 'pnj-view': return T('pnj', pnjDatabase.find(x => x.id === currentPnjId), 'photo');
+      case 'continent-view': return T('continents', geoCropEntry, 'photo');
+      case 'region-view': return T('regions', geoCropEntry, 'photo');
+      case 'ville-view': return T('villes', geoCropEntry, 'photo');
+      case 'commerce-view': return T('commerces', geoCropEntry, 'photo');
+      case 'lieu-view': return T('lieux_importants', geoCropEntry, 'photo');
+    }
+    return null;
+  }
+  function persistCroppedPhoto(ctx) {
+    const t = cropPersistTarget(ctx);
+    if (!t || !sb) return;
+    sb.from(t.table).update({ [t.col]: photoData.src }).eq('id', t.id).then(({ error }) => {
+      if (error) { console.error('Recadrage non sauvegardé', t.table, error); showToast('⚠️ Recadrage non sauvegardé en ligne'); }
     });
-    vp.addEventListener('pointerup', () => { dragging = false; });
-    vp.addEventListener('pointercancel', () => { dragging = false; });
+  }
+  function applyCropContext() {
+    const ctx = photoCropContext;
+    const GEO = {
+      'continent-view': id => openContinentView(id), 'region-view': id => openRegionView(id), 'ville-view': id => openVilleView(id),
+      'commerce-view': id => openCommerceView(id), 'lieu-view': id => openLieuView(id),
+    };
+    if (GEO[ctx]) {
+      if (!geoCropEntry) return;
+      geoCropEntry.photo = photoData.src;
+      geoCropEntry.photoZoom = 100; geoCropEntry.photoOffsetX = 0; geoCropEntry.photoOffsetY = 0;
+      persistCroppedPhoto(ctx);
+      if (typeof renderGeoContent === 'function') renderGeoContent();
+      GEO[ctx](geoCropEntry.id);
+      showToast('Image recadrée');
+      return;
+    }
+    persistCroppedPhoto(ctx);
+    confirmCrop();
   }
 
   function confirmCrop() {
-    closeModal('modalPhotoCrop');
     if (photoCropContext === 'combat') {
       const mi = activeCombat.monsterInstances.find(m => m.instanceId === currentCombatMonsterInstanceId);
       mi.photo = photoData.src;
@@ -4960,7 +5331,7 @@
       pendingPnjPhotoCrop = { src: photoData.src, zoom: photoData.zoom, offsetX: photoData.offsetX, offsetY: photoData.offsetY };
       const preview = document.getElementById('pnjfPhotoPreview');
       preview.style.backgroundImage = `url(${photoData.src})`;
-      preview.style.backgroundSize = `${photoData.zoom}%`;
+      preview.style.backgroundSize = legacyBgSize(photoData.zoom);
       preview.style.backgroundPosition = `calc(50% + ${photoData.offsetX}px) calc(50% + ${photoData.offsetY}px)`;
       document.getElementById('pnjfPhotoPlaceholder').style.display = 'none';
       document.getElementById('pnjfChangePhotoLine').style.display = 'block';
@@ -4969,7 +5340,7 @@
     }
     const preview = document.getElementById('wPhotoPreview');
     preview.style.backgroundImage = `url(${photoData.src})`;
-    preview.style.backgroundSize = `${photoData.zoom}%`;
+    preview.style.backgroundSize = legacyBgSize(photoData.zoom);
     preview.style.backgroundPosition = `calc(50% + ${photoData.offsetX}px) calc(50% + ${photoData.offsetY}px)`;
     document.getElementById('wPhotoPlaceholder').style.display = 'none';
     document.getElementById('wPhotoRecadrerBtn').style.display = 'block';
@@ -40363,6 +40734,7 @@
     if (photoBox && entry.photo) {
       photoBox.style.cursor = 'pointer';
       photoBox.addEventListener('click', () => {
+        geoCropEntry = entry;
         photoData = { src: entry.photo, offsetX: entry.photoOffsetX||0, offsetY: entry.photoOffsetY||0, zoom: entry.photoZoom||100 };
         photoCropContext = context;
         openPhotoCropper();
@@ -40388,7 +40760,7 @@
       infoBoxes.push({ label: 'Titre', value: p.titre || '—' });
     }
 
-    const photoStyle = p.photo ? `background-image:url(${p.photo}); background-size:${p.photoZoom || 100}%; background-position: calc(50% + ${p.photoOffsetX || 0}px) calc(50% + ${p.photoOffsetY || 0}px);` : '';
+    const photoStyle = p.photo ? `background-image:url(${p.photo}); background-size:${legacyBgSize(p.photoZoom)}; background-position: calc(50% + ${p.photoOffsetX || 0}px) calc(50% + ${p.photoOffsetY || 0}px);` : '';
 
     document.getElementById('pnjvBody').innerHTML = `
       <div class="pnjv-photo" style="${photoStyle}" data-pnjv-photo="1">
@@ -40454,7 +40826,7 @@
     const preview = document.getElementById('pnjfPhotoPreview');
     if (p && p.photo) {
       preview.style.backgroundImage = `url(${p.photo})`;
-      preview.style.backgroundSize = `${p.photoZoom || 100}%`;
+      preview.style.backgroundSize = legacyBgSize(p.photoZoom);
       preview.style.backgroundPosition = `calc(50% + ${p.photoOffsetX || 0}px) calc(50% + ${p.photoOffsetY || 0}px)`;
       document.getElementById('pnjfPhotoPlaceholder').style.display = 'none';
       document.getElementById('pnjfChangePhotoLine').style.display = 'block';
@@ -40512,7 +40884,7 @@
     reader.onload = (ev) => {
       photoData = { src: ev.target.result, offsetX: 0, offsetY: 0, zoom: 100 };
       photoCropContext = 'pnj-form';
-      openPhotoCropper();
+      applyCropContext();
     };
     reader.readAsDataURL(file);
   }
@@ -41169,7 +41541,7 @@
       }
 
       const cb = c.combatants.find(x => x.kind === 'monster' && x.refId === mi.instanceId);
-      const photoStyle = mi.photo ? `background-image:url(${mi.photo}); background-size:${mi.photoZoom || 100}%; background-position: calc(50% + ${mi.photoOffsetX || 0}px) calc(50% + ${mi.photoOffsetY || 0}px);` : '';
+      const photoStyle = mi.photo ? `background-image:url(${mi.photo}); background-size:${legacyBgSize(mi.photoZoom)}; background-position: calc(50% + ${mi.photoOffsetX || 0}px) calc(50% + ${mi.photoOffsetY || 0}px);` : '';
       const activeSpeeds = Object.keys(speedLabels).filter(k => mi.speeds[k] > 0);
       const badges = [
         ...mi.states.map(s => `<span class="cmc-badge">${s}</span>`),
@@ -41281,7 +41653,7 @@
     const cb = activeCombat.combatants.find(c => c.kind === 'monster' && c.refId === instanceId);
     const speedLabels = { marche: 'Marche', vol: 'Vol', nage: 'Nage', escalade: 'Escalade', fouissement: 'Fouissement' };
     const activeSpeeds = Object.keys(speedLabels).filter(k => mi.speeds[k] > 0);
-    const photoStyle = mi.photo ? `background-image:url(${mi.photo}); background-size:${mi.photoZoom || 100}%; background-position: calc(50% + ${mi.photoOffsetX || 0}px) calc(50% + ${mi.photoOffsetY || 0}px);` : '';
+    const photoStyle = mi.photo ? `background-image:url(${mi.photo}); background-size:${legacyBgSize(mi.photoZoom)}; background-position: calc(50% + ${mi.photoOffsetX || 0}px) calc(50% + ${mi.photoOffsetY || 0}px);` : '';
 
     const badges = [
       ...mi.states.map(s => `<span class="cmc-badge">${s}</span>`),
@@ -41457,7 +41829,7 @@
     reader.onload = (ev) => {
       photoData = { src: ev.target.result, offsetX: 0, offsetY: 0, zoom: 100 };
       photoCropContext = 'combat';
-      openPhotoCropper();
+      applyCropContext();
     };
     reader.readAsDataURL(file);
   }
@@ -42308,6 +42680,7 @@
     try {
       const failCount = await loadLoreFromSupabase();
       await loadEnnemisFromSupabase();
+      flushRestoredPhotos(); // renvoie en ligne les images du lore qui manquaient (en arrière-plan)
       await loadMessagesFromSupabase();
       await loadPlayersFromSupabase();
       await loadRollTablesFromSupabase();
