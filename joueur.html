@@ -467,7 +467,11 @@
   }
 
   .org-row { display: flex; gap: 14px; justify-content: center; flex-wrap: nowrap; }
-  .org-row-bottom { gap: 60px; }
+  .org-row-bottom { gap: 16px; align-items: flex-start; padding-left: 146px; }
+  .org-zoom-inner { position: relative; }
+  .org-zoom-inner > .org-row, .org-zoom-inner > .org-connector { position: relative; z-index: 1; }
+  .org-svg { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 0; overflow: visible; }
+  .org-svg .org-line { fill: none; stroke: var(--card-border); stroke-width: 1.4; }
   .org-connector { height: 24px; }
   .org-connector-small { height: 12px; }
   .org-primarch-col { display: flex; flex-direction: column; align-items: center; }
@@ -499,7 +503,7 @@
     background: var(--card); border-style: dashed;
   }
   .org-box-group-label { font-family: var(--font-serif); font-size: 12px; color: var(--ink-dim); }
-  .org-row-bottom .org-box-group:last-child { margin-top: 30px; }
+  .org-row-bottom .org-box-group:last-child { margin-top: 48px; }
 
   .antenne-popup-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200;
@@ -4338,9 +4342,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l1 12a2 2 0 01-2 2H7a2 2 0 01-2-2z"/><path d="M9 8a3 3 0 016 0"/></svg>
     <span>Sac</span>
   </button>
-  <button class="nav-btn" data-tab="notes" onclick="switchTab('notes')">
+  <button class="nav-btn" data-tab="notes" onclick="switchTab('notes')" style="position:relative;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20l1-4L16 5l3 3L8 19l-4 1z"/></svg>
     <span>Notes</span>
+    <span class="notif-badge" id="notesTabBadge" style="top:6px; right:calc(50% - 17px);"></span>
   </button>
 </div>
 
@@ -4349,7 +4354,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 01/10 (11)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 01/10 (12)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -4520,8 +4525,13 @@
       if (unread) markMjMessagesRead();
     } else {
       hasUnreadMjMessage = unread;
-      document.getElementById('msgNotifBadge')?.classList.toggle('visible', unread);
+      setMsgBadge(unread);
     }
+  }
+  // Pastille « nouveau message » : sur le bouton Messagerie ET sur l'onglet Notes
+  function setMsgBadge(on) {
+    document.getElementById('msgNotifBadge')?.classList.toggle('visible', !!on);
+    document.getElementById('notesTabBadge')?.classList.toggle('visible', !!on);
   }
   function markMjMessagesRead() {
     messages.forEach(m => { if (m.from === 'mj') m.lu = true; });
@@ -4546,7 +4556,7 @@
 
   function openMessagerie() {
     hasUnreadMjMessage = false;
-    document.getElementById('msgNotifBadge').classList.remove('visible');
+    setMsgBadge(false);
     markMjMessagesRead();
     renderMsgThread();
     loadPlayerMessages();
@@ -4632,6 +4642,7 @@
     document.querySelectorAll('.guild-tab').forEach(t => t.classList.toggle('active', t.dataset.gtab === tab));
     document.querySelectorAll('.guild-content').forEach(c => c.style.display = 'none');
     document.getElementById('guildContent-' + tab).style.display = 'block';
+    requestAnimationFrame(drawPlayerOrgLines);
   }
 
   // Visibilité décidée par le MJ dans sa console (module Astelorn > Antennes).
@@ -4716,16 +4727,17 @@
         <div class="org-box-sub">${p.role}</div>
       </div>
     `;
-    const groupBox = (label) => `<div class="org-box org-box-group"><div class="org-box-group-label">${label}</div></div>`;
+    const groupBox = (label, id) => `<div class="org-box org-box-group" data-org-id="${id}"><div class="org-box-group-label">${label}</div></div>`;
 
     chart.innerHTML = `
       <div class="org-zoom-wrap" id="orgZoomWrap">
         <div class="org-zoom-inner" id="orgZoomInner">
-          <div class="org-row">${organigrammeData.fondateurs.map(f => box(f)).join('')}</div>
+          <svg class="org-svg" id="orgSvgPlayer"></svg>
+          <div class="org-row" id="porgFondateurs">${organigrammeData.fondateurs.map(f => box(f)).join('')}</div>
           <div class="org-connector"></div>
-          <div class="org-row">${organigrammeData.conseil.map(m => box(m)).join('')}</div>
+          <div class="org-row" id="porgConseil">${organigrammeData.conseil.map(m => box(m)).join('')}</div>
           <div class="org-connector"></div>
-          <div class="org-row">
+          <div class="org-row" id="porgPrimarchs">
             ${organigrammeData.primarchs.map(p => `
               <div class="org-primarch-col">
                 ${box(p)}
@@ -4735,13 +4747,57 @@
             `).join('')}
           </div>
           <div class="org-connector"></div>
-          <div class="org-row">${groupBox('Émissaires')}${groupBox('Veilleurs')}</div>
+          <div class="org-row">${groupBox('Émissaires', 'emissaires')}${groupBox('Veilleurs', 'veilleurs')}</div>
           <div class="org-connector"></div>
-          <div class="org-row org-row-bottom">${groupBox('Aventuriers Confirmés')}${groupBox('Aspirants')}</div>
+          <div class="org-row org-row-bottom">${groupBox('Aventuriers Confirmés', 'confirmes')}${groupBox('Aspirants', 'aspirants')}</div>
         </div>
       </div>
     `;
     initOrgZoom();
+    requestAnimationFrame(drawPlayerOrgLines);
+  }
+
+  // Traits entre les cases (mêmes règles que la console MJ), dessinés dans le bloc zoomable
+  function drawPlayerOrgLines() {
+    const inner = document.getElementById('orgZoomInner');
+    const svg = document.getElementById('orgSvgPlayer');
+    if (!inner || !svg || !inner.offsetWidth) return;
+    svg.setAttribute('width', inner.scrollWidth); svg.setAttribute('height', inner.scrollHeight);
+    const box = el => {
+      let x = 0, y = 0, e = el;
+      while (e && e !== inner) { x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; }
+      return { l: x, r: x + el.offsetWidth, t: y, b: y + el.offsetHeight, x: x + el.offsetWidth / 2 };
+    };
+    let d = '';
+    const line = (x1, y1, x2, y2) => { d += `M${x1},${y1} L${x2},${y2} `; };
+    function connect(parents, children, mid) {
+      parents = parents.filter(Boolean); children = children.filter(Boolean);
+      if (!parents.length || !children.length) return;
+      const P = parents.map(box), C = children.map(box);
+      const y = Math.max(...P.map(p => p.b)) + (mid || 12);
+      const pMin = Math.min(...P.map(p => p.x)), pMax = Math.max(...P.map(p => p.x));
+      P.forEach(p => line(p.x, p.b, p.x, y));
+      const cMin = Math.min(...C.map(c => c.x)), cMax = Math.max(...C.map(c => c.x));
+      line(Math.min(pMin, cMin), y, Math.max(pMax, cMax), y);
+      C.forEach(c => line(c.x, y, c.x, c.t));
+    }
+    const q = sel => Array.from(inner.querySelectorAll(sel));
+    const conseil = q('#porgConseil > .org-box');
+    connect(q('#porgFondateurs > .org-box'), conseil);
+    const primarchs = q('#porgPrimarchs > .org-primarch-col > .org-box');
+    connect(conseil, primarchs);
+    q('.org-primarch-col').forEach(col => connect([col.querySelector(':scope > .org-box')], Array.from(col.querySelectorAll('.org-cap-group .org-box')), 6));
+    const em = inner.querySelector('[data-org-id="emissaires"]'), ve = inner.querySelector('[data-org-id="veilleurs"]');
+    connect(q('.org-cap-group .org-box'), [em, ve]);
+    connect([em, ve], [inner.querySelector('[data-org-id="confirmes"]')], 12);
+    const as = inner.querySelector('[data-org-id="aspirants"]');
+    if (ve && as) {
+      const v = box(ve), a = box(as);
+      const lo = Math.max(v.x + 12, a.l + 10), hi = Math.min(v.r - 8, a.r - 10);
+      if (lo <= hi) line((lo + hi) / 2, v.b, (lo + hi) / 2, a.t);
+      else { const x1 = v.r - 12, yM = (v.b + a.t) / 2 + 14; line(x1, v.b, x1, yM); line(x1, yM, a.x, yM); line(a.x, yM, a.x, a.t); }
+    }
+    svg.innerHTML = `<path d="${d}" class="org-line"/>`;
   }
 
   let orgZoomLevel = 1;
@@ -7631,8 +7687,7 @@
       if (typeof updateConcBadge === 'function') updateConcBadge();
       messages = [];
       hasUnreadMjMessage = false;
-      const badge = document.getElementById('msgNotifBadge');
-      if (badge) badge.classList.remove('visible');
+      setMsgBadge(false);
       startMessagePolling();
       const compBtn = document.getElementById('companionBtn');
       if (compBtn) compBtn.style.display = 'none';
