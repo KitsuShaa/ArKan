@@ -1161,6 +1161,10 @@
   .combat-monster-card.full .cmc-badges { padding: 12px 10px 2px; gap: 6px; }
   .combat-monster-card.full .cmc-badge { font-size: 10.5px; padding: 3px 9px; }
   .loot-linked { color: var(--success); font-size: 13px; align-self: center; margin: 0 2px; }
+  .tc-delete-btn { width: 40px; flex-shrink: 0; border-radius: 12px; border: 1px solid var(--card-border); background: var(--bg-elevated);
+    color: var(--garnet); cursor: pointer; font-size: 14px; }
+  .tc-delete-btn:hover { border-color: var(--garnet); background: var(--garnet-soft); }
+  .tc-delete-corner { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; font-size: 12px; border-radius: 50%; }
 
   /* ---- Combat monster detail view ---- */
   .cmv-photo {
@@ -1644,7 +1648,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 30/09 (10)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 30/09 (11)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
       <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2457,8 +2461,8 @@
       <input type="number" id="chpInput" value="0" inputmode="numeric">
       <button class="hp-btn plus" onclick="adjustHpPopupInput(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
     </div>
-    <button class="modal-confirm-btn" onclick="applyCombatHpDamage()">Appliquer des dégâts</button>
-    <button class="modal-confirm-btn" style="background:var(--success); margin-top:8px;" onclick="applyCombatHpHeal()">Appliquer des soins</button>
+    <button class="modal-confirm-btn" onpointerdown="event.preventDefault(); applyCombatHpDamage()" onclick="return false">Appliquer des dégâts</button>
+    <button class="modal-confirm-btn" style="background:var(--success); margin-top:8px;" onpointerdown="event.preventDefault(); applyCombatHpHeal()" onclick="return false">Appliquer des soins</button>
     <button class="modal-cancel-btn" onclick="closeModal('modalCombatHpPopup')">Annuler</button>
   </div>
 </div>
@@ -4351,7 +4355,13 @@
   }
 
   /* ===================== MODAL HELPERS ===================== */
-  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  // La fenêtre ouverte en dernier passe toujours au-dessus des autres
+  // (avant, l'ordre dépendait de la place dans la page : "qui l'a achevé" pouvait s'ouvrir derrière la fiche ennemi)
+  function openModal(id) {
+    const el = document.getElementById(id);
+    if (el.parentNode && el !== el.parentNode.lastElementChild) el.parentNode.appendChild(el);
+    el.classList.add('open');
+  }
   function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
   /* ===================== TOAST ===================== */
@@ -40856,7 +40866,10 @@
   }
 
   function deleteCombatDraft() {
+    const d = combatDrafts.find(x => x.id === currentDraftFormId);
+    if (d && !confirm(`Supprimer définitivement le combat « ${d.name} » ?`)) return;
     combatDrafts = combatDrafts.filter(d => d.id !== currentDraftFormId);
+    persistCombats();
     closeModal('modalCombatDraftForm');
     renderCombatDraftGrid();
     showToast('Combat supprimé');
@@ -41070,6 +41083,7 @@
     closeModal('modalCombatHpPopup');
     refreshCombatMonsterView();
     checkCombatMonsterDeath(mi);
+    persistCombats();
     renderCombatMonsterRow();
     updateCloseCombatButtonVisibility();
   }
@@ -41338,7 +41352,8 @@
     if (mi.hpCur <= 0 && !mi.dead) {
       mi.dead = true;
       closeModal('modalCombatMonsterView');
-      openFinisherModal(mi.instanceId);
+      closeModal('modalCombatHpPopup');
+      setTimeout(() => openFinisherModal(mi.instanceId), 0);
     } else if (mi.hpCur > 0 && mi.dead) {
       mi.dead = false;
     }
@@ -41504,7 +41519,8 @@
         const entry = { name: mi.name, session: activeCombat.session, combat: activeCombat.name, date: new Date().toISOString() };
         p.huntBoard = [...(p.huntBoard || []), entry];
         // enregistré sur la fiche du joueur
-        sbPatchPlayer(p, d => { d.huntBoard = [...(d.huntBoard || []), entry]; }, `${mi.name} ajouté au tableau de chasse de ${p.name}`);
+        sbPatchPlayer(p, d => { d.huntBoard = [...(d.huntBoard || []), entry]; p.huntBoard = d.huntBoard; }, `${mi.name} ajouté au tableau de chasse de ${p.name}`)
+          .then(() => { lastLiveSnapshot = ''; if (typeof renderPlayerDetail === 'function') renderPlayerDetail(); });
         closeModal('modalFinisher');
         renderCombatMonsterRow();
         renderInitFrieze();
@@ -41707,16 +41723,17 @@
     const names = msSelectedPlayers.map(id => players.find(p=>p.id===id).name).join(', ');
     // Répartition équitable (en pièces de cuivre), le reste va au premier joueur sélectionné
     const l = pendingLootMoneyRow;
-    const totalPc = ['pp','po','pe','pa','pc'].reduce((n, k) => n + (parseInt(l[k]) || 0) * COIN_VALUE_PC[k], 0);
-    const share = Math.floor(totalPc / msSelectedPlayers.length);
-    const rest = totalPc - share * msSelectedPlayers.length;
-    const toCoins = pc => { const c = {}; ['pp','po','pa','pc'].forEach(k => { c[k] = Math.floor(pc / COIN_VALUE_PC[k]); pc -= c[k] * COIN_VALUE_PC[k]; }); c.pp = 0; return c; };
+    const n = msSelectedPlayers.length;
+    // Chaque type de pièce est partagé tel quel (des PE restent des PE) ; ce qui ne se divise pas va au premier joueur
     msSelectedPlayers.forEach((id, i) => {
       const p = players.find(pl => pl.id === id);
-      const amount = share + (i === 0 ? rest : 0);
-      if (!p || amount <= 0) return;
-      // on garde les PO/PA/PC (pas de conversion en platine)
-      const c = { pp: 0, po: Math.floor(amount / 100), pe: 0, pa: Math.floor((amount % 100) / 10), pc: amount % 10 };
+      if (!p) return;
+      const c = {};
+      ['pp','po','pe','pa','pc'].forEach(k => {
+        const total = parseInt(l[k]) || 0;
+        c[k] = Math.floor(total / n) + (i === 0 ? total % n : 0);
+      });
+      if (!Object.values(c).some(v => v > 0)) return;
       sbPatchPlayer(p, d => { d.pendingCoins = [...(d.pendingCoins || []), { pid: 'p' + Date.now() + i + Math.random().toString(36).slice(2, 6), add: c }]; });
     });
     pendingLootMoneyRow.done = true;
@@ -41738,26 +41755,39 @@
             <div class="cd-chip"><div class="cd-chip-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7 2 3 6 3 11c0 3 1.5 5 3 6.5V20a1 1 0 001 1h2v-2h1v2h4v-2h1v2h2a1 1 0 001-1v-2.5c1.5-1.5 3-3.5 3-6.5 0-5-4-9-9-9z"/></svg></div><span>${d.enemies.reduce((s,e)=>s+e.count,0)}</span></div>
             <div class="cd-chip"><div class="cd-chip-bg"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.5 5.5L20 8.5l-4 4 1 5.5L12 15.5 7 18l1-5.5-4-4 5.5-1z"/></svg></div><span>${xp} XP</span></div>
           </div>
-          <button class="tc-launch-btn" data-launch="${d.id}">▶ Lancer ce combat</button>
+          <div style="display:flex; gap:8px;">
+            <button class="tc-launch-btn" style="flex:1;" data-launch="${d.id}">▶ Lancer ce combat</button>
+            <button class="tc-delete-btn" title="Supprimer ce combat" data-delete-draft="${d.id}">🗑</button>
+          </div>
         </div>
       `;
     }).join('') || '<p style="color:var(--ink-faint); font-size:13px;">Aucun combat préparé. Clique « + Nouveau combat » pour commencer.</p>';
 
     document.querySelectorAll('#combatDraftGrid .table-card').forEach(el => {
       el.addEventListener('click', (e) => {
-        if (e.target.closest('.tc-launch-btn')) return;
+        if (e.target.closest('.tc-launch-btn') || e.target.closest('.tc-delete-btn')) return;
         openCombatDraftForm(el.dataset.draft);
       });
     });
     document.querySelectorAll('.tc-launch-btn').forEach(btn => {
       btn.addEventListener('click', (e) => { e.stopPropagation(); launchCombat(btn.dataset.launch); });
     });
+    document.querySelectorAll('[data-delete-draft]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const d = combatDrafts.find(x => x.id === btn.dataset.deleteDraft);
+        if (!d || !confirm(`Supprimer définitivement le combat « ${d.name} » ?`)) return;
+        combatDrafts = combatDrafts.filter(x => x.id !== d.id);
+        persistCombats(); renderCombatDraftGrid(); showToast(`Combat « ${d.name} » supprimé`);
+      });
+    });
 
     let pastHtml = '';
     if (pastCombats.length) {
       pastHtml = `<div class="section-title">Combats terminés</div><div class="table-card-grid">` + pastCombats.map(pc => `
-        <div class="table-card" style="cursor:pointer; opacity:0.75;" data-past="${pc.id}">
-          <div class="tc-head"><div class="tc-name">${pc.name}</div><div class="tc-die">Sess. ${pc.session || '?'}</div></div>
+        <div class="table-card" style="cursor:pointer; opacity:0.75; position:relative;" data-past="${pc.id}">
+          <button class="tc-delete-btn tc-delete-corner" title="Supprimer ce combat" data-delete-past="${pc.id}">🗑</button>
+          <div class="tc-head" style="padding-right:36px;"><div class="tc-name">${pc.name}</div><div class="tc-die">Sess. ${pc.session || '?'}</div></div>
           <div class="tc-sub">${pc.playerIds.length} joueur${pc.playerIds.length > 1 ? 's' : ''} · ${pc.monsterInstances.length} ennemi${pc.monsterInstances.length > 1 ? 's' : ''} — terminé, consultable</div>
         </div>
       `).join('') + `</div>`;
@@ -41770,7 +41800,16 @@
     }
     pastContainer.innerHTML = pastHtml;
     pastContainer.querySelectorAll('[data-past]').forEach(el => {
-      el.addEventListener('click', () => openPastCombatView(el.dataset.past));
+      el.addEventListener('click', (e) => { if (e.target.closest('.tc-delete-btn')) return; openPastCombatView(el.dataset.past); });
+    });
+    pastContainer.querySelectorAll('[data-delete-past]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pc = pastCombats.find(x => x.id === btn.dataset.deletePast);
+        if (!pc || !confirm(`Supprimer définitivement le combat terminé « ${pc.name} » ?`)) return;
+        pastCombats = pastCombats.filter(x => x.id !== pc.id);
+        persistCombats(); renderCombatDraftGrid(); showToast(`Combat « ${pc.name} » supprimé`);
+      });
     });
   }
 

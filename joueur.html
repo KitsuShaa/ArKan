@@ -3718,18 +3718,12 @@
       <h2>Tableau de chasse</h2>
     </div>
     <div class="hunt-total">
-      <div class="num">7</div>
+      <div class="num" id="huntTotal">0</div>
       <div class="lbl">Ennemis achevés au total</div>
     </div>
   </div>
 
-  <div class="kill-item"><span class="kill-name">Gobelin éclaireur</span><span class="kill-session">Session 4</span></div>
-  <div class="kill-item"><span class="kill-name">Loup de l'ombre</span><span class="kill-session">Session 4</span></div>
-  <div class="kill-item"><span class="kill-name">Zombie putréfié</span><span class="kill-session">Session 5</span></div>
-  <div class="kill-item"><span class="kill-name">Nécromancien Vald</span><span class="kill-session">Session 6</span></div>
-  <div class="kill-item"><span class="kill-name">Squelette guerrier</span><span class="kill-session">Session 6</span></div>
-  <div class="kill-item"><span class="kill-name">Squelette archer</span><span class="kill-session">Session 6</span></div>
-  <div class="kill-item"><span class="kill-name">Ombre errante</span><span class="kill-session">Session 7</span></div>
+  <div id="huntList"></div>
 
 </div>
 </div>
@@ -4023,14 +4017,11 @@
       <h2>Tableau de chasse — Grondin</h2>
     </div>
     <div class="hunt-total">
-      <div class="num">3</div>
+      <div class="num" id="compHuntTotal">0</div>
       <div class="lbl">Ennemis achevés au total</div>
     </div>
   </div>
-
-  <div class="kill-item"><span class="kill-name">Loup de l'ombre</span><span class="kill-session">Session 4</span></div>
-  <div class="kill-item"><span class="kill-name">Gobelin éclaireur</span><span class="kill-session">Session 5</span></div>
-  <div class="kill-item"><span class="kill-name">Squelette archer</span><span class="kill-session">Session 6</span></div>
+  <div id="compHuntList"></div>
 
 </div>
 
@@ -4360,7 +4351,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 30/09 (10)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 30/09 (11)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -6977,11 +6968,24 @@
   }
 
   // Données tenues par le MJ : sorts connus, PV max, états, épuisement
+  // Tableau de chasse (rempli par la console MJ quand le joueur achève un ennemi)
+  function renderHuntBoards(d) {
+    const fill = (list, numSel, totalId, listId) => {
+      list = list || [];
+      const nums = document.querySelectorAll('.hunt-num');
+      if (nums[numSel]) nums[numSel].textContent = list.length;
+      const tot = document.getElementById(totalId); if (tot) tot.textContent = list.length;
+      const box = document.getElementById(listId);
+      if (box) box.innerHTML = list.length
+        ? list.slice().reverse().map(k => `<div class="kill-item"><span class="kill-name">${k.name}</span><span class="kill-session">${k.session ? 'Session ' + k.session : ''}</span></div>`).join('')
+        : '<p style="color:var(--ink-faint);font-size:13px;padding:10px 4px;">Aucun ennemi achevé pour le moment.</p>';
+    };
+    fill(d.huntBoard, 0, 'huntTotal', 'huntList');
+    fill(d.companionHuntBoard, 1, 'compHuntTotal', 'compHuntList');
+  }
   function applyMjOwned(d) {
     if (!d) return;
-    { const h = document.querySelectorAll('.hunt-num');
-      if (h[0]) h[0].textContent = (d.huntBoard || []).length;
-      if (h[1]) h[1].textContent = (d.companionHuntBoard || []).length; }
+    renderHuntBoards(d);
     if (d.themeColor && d.themeColor !== lastThemeFromData) { lastThemeFromData = d.themeColor; applyTheme(d.themeColor, true); }
     const newKnown = d.knownSpellNames || [];
     if (JSON.stringify(newKnown) !== JSON.stringify(knownSpellNames)) {
@@ -7300,9 +7304,7 @@
       // (l'épuisement N'EST PAS remis à zéro ici : le MJ peut légitimement le modifier
       // depuis sa console, et cette valeur doit alors persister d'une connexion à l'autre.)
       if (typeof updateExhaustionWarnings === 'function') updateExhaustionWarnings();
-      const huntEls = document.querySelectorAll('.hunt-num');
-      if (huntEls[0]) huntEls[0].textContent = (p.huntBoard || []).length;
-      if (huntEls[1]) huntEls[1].textContent = (p.companionHuntBoard || []).length;
+      renderHuntBoards(p);
       window.AppData.companionInCombat = false;
       concentrationSpellId = null;
       if (typeof updateConcBadge === 'function') updateConcBadge();
