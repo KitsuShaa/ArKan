@@ -1719,7 +1719,7 @@
   .of-hint b { color: var(--ink-dim); font-weight: 600; }
 
   /* ===================== MODULE HISTOIRE ===================== */
-  .hist-subtabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; max-width: 460px; }
+  .hist-subtabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; max-width: 600px; }
   .hist-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
   .hist-toolbar .hist-count { font-size: 12px; color: var(--ink-faint); }
   .hist-toolbar .new-spell-btn { margin-left: auto; }
@@ -1733,9 +1733,20 @@
   /* Tuile de chapitre (Tome) : nom centré, date fixée en bas */
   .hist-chap-chip.tome-chip { display: flex; flex-direction: column; }
   .hist-chap-chip.tome-chip .hist-chap-chip-photo { flex-shrink: 0; }
-  .tome-chip-body { flex: 1; display: flex; flex-direction: column; padding: 10px 12px 8px; min-height: 74px; }
-  .tome-chip-body .tcb-name { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; font-family: var(--font-serif); font-size: 14px; color: var(--ink); line-height: 1.3; }
-  .tome-chip-body .tcb-date { margin-top: 6px; text-align: center; font-family: var(--font-sans); font-size: 11px; color: var(--ink-faint); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tome-chip-body { flex: 1; display: flex; flex-direction: column; padding: 10px 8px 7px; min-height: 58px; min-width: 0; }
+  .tome-chip-body .tcb-name { flex: 1; display: flex; align-items: center; min-width: 0; font-family: var(--font-serif); font-size: 14px; color: var(--ink); line-height: 1.3; }
+  .tome-chip-body .tcb-name span { flex: 1; min-width: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tome-chip-body .tcb-date { margin-top: 5px; text-align: center; font-family: var(--font-sans); font-size: 9.5px; letter-spacing: -.1px; color: var(--ink-faint); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Histoire › Récap de session */
+  .hist-recap-text { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 20px 24px; font-size: 14.5px; color: var(--ink); line-height: 1.75; white-space: pre-wrap; font-family: var(--font-serif); max-width: 900px; }
+
+  /* Lore › Chroniques */
+  .chro-view { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 16px; align-items: start; }
+  .chro-view-photo { aspect-ratio: 4 / 3; border-radius: var(--radius-md); background: var(--card) center / cover no-repeat; border: 1px solid var(--card-border); display: flex; align-items: center; justify-content: center; color: var(--ink-faint); }
+  .chro-view-photo svg { width: 34px; height: 34px; }
+  .chro-view .hist-recap-text { max-width: none; }
+  @media (max-width: 800px) { .chro-view { grid-template-columns: 1fr; } }
   .hist-back { background: none; border: none; color: var(--ink-dim); font-size: 13px; cursor: pointer; padding: 4px 0; font-family: var(--font-sans); }
   .hist-back:hover { color: var(--gold); }
   .hist-chap-title { font-family: var(--font-serif); font-size: 22px; color: var(--gold); margin: 0; }
@@ -1926,7 +1937,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 02/10 (27)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 02/10 (28)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2308,6 +2319,32 @@
     <div class="form-field"><label>Texte</label><textarea id="hsfTexte" style="min-height:340px; font-family:var(--font-serif); font-size:14px; line-height:1.6;"></textarea></div>
     <button class="modal-confirm-btn" id="hsfSaveBtn" onclick="saveHistScene()">Créer</button>
     <button class="modal-cancel-btn" onclick="closeModal('modalHistScene')">Annuler</button>
+  </div>
+</div>
+
+<!-- HISTOIRE : RÉCAP DE SESSION -->
+<div class="modal-backdrop" id="modalHistRecap">
+  <div class="modal-box" style="max-width:760px;">
+    <h3 id="hrfTitle">Nouveau récap</h3>
+    <div class="form-field"><label>Titre</label><input type="text" id="hrfName"></div>
+    <div class="form-field"><label>Texte</label><textarea id="hrfTexte" style="min-height:340px; font-family:var(--font-serif); font-size:14px; line-height:1.6;"></textarea></div>
+    <button class="modal-confirm-btn" id="hrfSaveBtn" onclick="saveHistRecap()">Créer</button>
+    <button class="modal-cancel-btn" onclick="closeModal('modalHistRecap')">Annuler</button>
+  </div>
+</div>
+
+<!-- LORE : CHRONIQUES -->
+<div class="modal-backdrop" id="modalChronique">
+  <div class="modal-box" style="max-width:760px;">
+    <h3 id="chfTitle">Nouvelle chronique</h3>
+    <div class="form-field"><label>Titre</label><input type="text" id="chfName"></div>
+    <div class="photo-preview-box" id="chfPhotoPreview" style="aspect-ratio:4/3; max-width:360px; margin:0 auto 12px;" onclick="document.getElementById('chfPhotoInput').click()">
+      <div class="photo-preview-placeholder" id="chfPhotoPlaceholder"><span>Image</span></div>
+    </div>
+    <input type="file" id="chfPhotoInput" accept="image/*" style="display:none;" onchange="onChroniquePhotoSelected(event)">
+    <div class="form-field"><label>Texte</label><textarea id="chfTexte" style="min-height:300px; font-family:var(--font-serif); font-size:14px; line-height:1.6;"></textarea></div>
+    <button class="modal-confirm-btn" id="chfSaveBtn" onclick="saveChronique()">Créer</button>
+    <button class="modal-cancel-btn" onclick="closeModal('modalChronique')">Annuler</button>
   </div>
 </div>
 
@@ -33715,6 +33752,7 @@
     { key: 'animaux', label: 'Animaux', ready: true, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10c0-2 2-3 3-1 1-3 4-3 5 0 1-3 4-3 5 0 1-2 3-1 3 1-1 5-4 9-8 9s-7-4-8-9z"/></svg>' },
     { key: 'dieux', label: 'Dieux', ready: true, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg>' },
     { key: 'temporalite', label: 'Temporalité', ready: true, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 21h12"/><path d="M7 3c0 4 3 6 5 9-2 3-5 5-5 9M17 3c0 4-3 6-5 9 2 3 5 5 5 9"/><path d="M9.5 18.5h5"/></svg>' },
+    { key: 'chroniques', label: 'Chroniques', ready: true, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h11a2 2 0 012 2v0a2 2 0 01-2 2h-1"/><path d="M7 4a2 2 0 00-2 2v12a2 2 0 01-2 2h12a2 2 0 002-2V8"/><path d="M7 4a2 2 0 012 2v0"/><path d="M8.5 11h5.5M8.5 14.5h5.5"/></svg>' },
     { key: 'systeme', label: 'Système de jeu', ready: true, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M4 10h16M4 16h16M10 4v16M16 4v16"/></svg>' },
   ];
   let currentLoreSubmodule = 'pnj';
@@ -33736,6 +33774,7 @@
   function switchLoreSubmodule(key) {
     const sub = loreSubmodules.find(s => s.key === key);
     if (!sub.ready) { showToast(`« ${sub.label} » — sous-module à venir`); return; }
+    if (key === 'chroniques' && currentLoreSubmodule === 'chroniques') chroOpenId = null; // re-clic = retour à la liste
     currentLoreSubmodule = key;
     renderLoreModule();
   }
@@ -33772,6 +33811,7 @@
       renderPnjGrid();
     }
     if (currentLoreSubmodule === 'temporalite') renderTemporalite(container);
+    if (currentLoreSubmodule === 'chroniques') { if (chroOpenId && chroniquesData.some(c => c.id === chroOpenId)) renderChroniqueView(); else { chroOpenId = null; renderChroniques(); } }
     if (currentLoreSubmodule === 'dieux') {
       container.innerHTML = `
         <div class="spells-toolbar">
@@ -43359,11 +43399,12 @@
   }
 
   /* ===================== MODULE HISTOIRE (Tome · Prépa de session · Notes) ===================== */
-  // Tables Supabase : histoire_chapitres, histoire_scenes, histoire_prepas, histoire_notes
-  const histData = { chapitres: [], scenes: [], prepas: [], notes: [] };
+  // Tables Supabase : histoire_chapitres, histoire_scenes, histoire_prepas, histoire_notes, histoire_recaps
+  const histData = { chapitres: [], scenes: [], prepas: [], notes: [], recaps: [] };
   let histSub = 'tome';          // sous-module affiché
   let histChapId = null;         // chapitre ouvert (null = liste des chips)
   let histPrepId = null;         // prépa ouverte (null = liste des chips)
+  let histRecapId = null, histEditRecapId = null; // récap ouvert / en cours d'édition
   let histEditChapId = null, histEditSceneId = null, histEditPrepId = null;
   let histChapPendingPhoto = null;
   const HIST_NOTE_COLORS = [
@@ -43377,6 +43418,7 @@
     tome: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M9 7h7M9 11h5"/></svg>',
     prepa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3C14 3.5 8.6 8 7 15.5l-.4 2 2-.4C16 15.4 20.5 10 21 3z"/><path d="M21 3 7.6 16.4"/><path d="M17.2 4.6l-.6 2.6M14.3 6.8l-.4 2.7M11.6 9.6l-.2 2.6M18.6 7.4l-2.4.5M16.8 10.4l-2.6.4M14.5 13.2l-2.6.3"/><path d="M7.6 16.4 4 20"/><path d="M3 21.6h8" stroke-width="1.2" opacity=".55"/></svg>',
     notes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v11l-5 5H4z"/><path d="M15 20v-5h5"/></svg>',
+    recap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 2.5c-6 1-10.5 5.5-11.6 12.2l-.3 1.8 1.8-.3C16.6 15 20.4 9.6 20 2.5z"/><path d="M20 2.5 9.2 15.8"/><path d="M15.6 5.2l-.4 2.4M12.9 7.9l-.3 2.4M17.4 8.4l-2.3.4M15 11.5l-2.4.3"/><path d="M9.2 15.8 6.5 19"/><path d="M3.5 21.2c1.2-.9 2.3-1 3.3-.3s2.1.6 3.2-.2"/></svg>',
     edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
     lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>',
@@ -43388,7 +43430,7 @@
   /* ---- Chargement / enregistrement ---- */
   async function loadHistoireFromSupabase() {
     if (!sb) return;
-    const tables = [['histoire_chapitres', 'chapitres'], ['histoire_scenes', 'scenes'], ['histoire_prepas', 'prepas'], ['histoire_notes', 'notes']];
+    const tables = [['histoire_chapitres', 'chapitres'], ['histoire_scenes', 'scenes'], ['histoire_prepas', 'prepas'], ['histoire_notes', 'notes'], ['histoire_recaps', 'recaps']];
     const res = await Promise.all(tables.map(([t]) => sb.from(t).select('*')));
     let failed = 0;
     tables.forEach(([t, k], i) => {
@@ -43414,6 +43456,7 @@
     { key: 'tome', label: 'Tome', icon: HIST_ICONS.tome },
     { key: 'prepa', label: 'Prépa de session', icon: HIST_ICONS.prepa },
     { key: 'notes', label: 'Notes', icon: HIST_ICONS.notes },
+    { key: 'recap', label: 'Récap de session', icon: HIST_ICONS.recap },
   ];
   function renderHistoireModule() {
     document.getElementById('histSubTabs').innerHTML = histSubmodules.map(s => `
@@ -43424,9 +43467,10 @@
     if (histSub === 'tome') { if (histChapId && histData.chapitres.some(c => c.id === histChapId)) renderHistChapitreView(); else { histChapId = null; renderHistTome(); } }
     if (histSub === 'prepa') { if (histPrepId && histData.prepas.some(p => p.id === histPrepId)) renderHistPrepaView(); else { histPrepId = null; renderHistPrepas(); } }
     if (histSub === 'notes') renderHistNotes();
+    if (histSub === 'recap') { if (histRecapId && histData.recaps.some(r => r.id === histRecapId)) renderHistRecapView(); else { histRecapId = null; renderHistRecaps(); } }
   }
   function switchHistSub(key) {
-    if (key === histSub) { histChapId = null; histPrepId = null; }
+    if (key === histSub) { histChapId = null; histPrepId = null; histRecapId = null; }
     histSub = key;
     renderHistoireModule();
   }
@@ -43443,7 +43487,7 @@
         <div class="hist-chap-chip tome-chip" onclick="openHistChapitre('${c.id}')">
           <div class="hist-chap-chip-photo" style="${c.photo ? `background-image:url('${histEsc(c.photo)}')` : ''}">${c.photo ? '' : HIST_ICONS.image}</div>
           <div class="tome-chip-body">
-            <div class="tcb-name">${histEsc(c.nom)}</div>
+            <div class="tcb-name" title="${histEsc(c.nom)}"><span>${histEsc(c.nom)}</span></div>
             <div class="tcb-date" title="${histEsc(c.dates || '')}">${histEsc(c.dates) || '&nbsp;'}</div>
           </div>
         </div>`).join('')}</div>`
@@ -43683,6 +43727,69 @@
     closeModal('modalHistPrepa');
     showToast(`Prépa « ${p.nom} » supprimée`);
     histPrepId = null; renderHistPrepas();
+  }
+
+  /* ================= RÉCAP DE SESSION ================= */
+  function renderHistRecaps() {
+    const list = histData.recaps.slice().sort(histByOrder); // ordre de création
+    document.getElementById('histSubContent').innerHTML = `
+      <div class="hist-toolbar">
+        <div class="hist-count">${list.length} récap${list.length > 1 ? 's' : ''}</div>
+        <button class="new-spell-btn" onclick="openHistRecapForm(null)">+ Créer un récap</button>
+      </div>
+      ${list.length ? `<div class="hist-prep-grid">${list.map(r => `
+        <div class="hist-prep-chip" onclick="openHistRecap('${r.id}')">
+          ${HIST_ICONS.recap}
+          <div class="hist-prep-chip-name">${histEsc(r.titre)}</div>
+        </div>`).join('')}</div>`
+        : '<div class="hist-empty">Aucun récap pour le moment.</div>'}
+    `;
+  }
+  function openHistRecap(id) { histRecapId = id; renderHistRecapView(); }
+  function closeHistRecap() { histRecapId = null; renderHistRecaps(); }
+  function renderHistRecapView() {
+    const r = histData.recaps.find(x => x.id === histRecapId);
+    if (!r) { closeHistRecap(); return; }
+    document.getElementById('histSubContent').innerHTML = `
+      <div class="hist-toolbar"><button class="hist-back" onclick="closeHistRecap()">‹ Tous les récaps</button></div>
+      <div class="hist-toolbar">
+        <h2 class="hist-chap-title">${histEsc(r.titre)}</h2>
+        <button class="hist-icon-btn" title="Modifier" onclick="openHistRecapForm('${r.id}')">${HIST_ICONS.edit}</button>
+        <button class="hist-icon-btn danger" title="Supprimer" onclick="deleteHistRecap('${r.id}')">${HIST_ICONS.trash}</button>
+      </div>
+      <div class="hist-recap-text">${histLinkify(r.texte) || '<span style="color:var(--ink-faint)">—</span>'}</div>
+    `;
+  }
+  function openHistRecapForm(id) {
+    histEditRecapId = id;
+    const r = id ? histData.recaps.find(x => x.id === id) : null;
+    document.getElementById('hrfTitle').textContent = r ? 'Modifier le récap' : 'Nouveau récap';
+    document.getElementById('hrfSaveBtn').textContent = r ? 'Enregistrer' : 'Créer';
+    document.getElementById('hrfName').value = r ? (r.titre || '') : '';
+    document.getElementById('hrfTexte').value = r ? (r.texte || '') : '';
+    openModal('modalHistRecap');
+    setTimeout(() => document.getElementById('hrfName').focus(), 50);
+  }
+  function saveHistRecap() {
+    const titre = document.getElementById('hrfName').value.trim();
+    if (!titre) { showToast('Donne un titre au récap'); return; }
+    let r = histEditRecapId ? histData.recaps.find(x => x.id === histEditRecapId) : null;
+    const isNew = !r;
+    if (isNew) { r = { id: histNewId('recap'), ordre: Date.now() }; histData.recaps.push(r); }
+    r.titre = titre;
+    r.texte = document.getElementById('hrfTexte').value;
+    histSave('histoire_recaps', { id: r.id, titre: r.titre, texte: r.texte, ordre: r.ordre });
+    closeModal('modalHistRecap');
+    showToast(isNew ? `Récap « ${titre} » créé` : `Récap « ${titre} » mis à jour`);
+    openHistRecap(r.id);
+  }
+  function deleteHistRecap(id) {
+    const r = histData.recaps.find(x => x.id === id);
+    if (!r || !confirm(`Supprimer définitivement le récap « ${r.titre} » ?`)) return;
+    histData.recaps = histData.recaps.filter(x => x.id !== id);
+    histDelete('histoire_recaps', id);
+    showToast(`Récap « ${r.titre} » supprimé`);
+    closeHistRecap();
   }
 
   /* ================= NOTES (post-it) ================= */
@@ -44531,6 +44638,100 @@
     if (c && currentLoreSubmodule === 'temporalite') renderTemporalite(c);
   }
 
+  /* ===================== LORE › CHRONIQUES (légendes, récits anciens…) ===================== */
+  // Table Supabase : lore_chroniques
+  let chroniquesData = [];
+  let chroOpenId = null, chroEditId = null, chroPendingPhoto = null;
+  async function loadChroniquesFromSupabase() {
+    if (!sb) return;
+    const { data, error } = await sb.from('lore_chroniques').select('*');
+    if (error) { console.error('Chroniques', error); showToast('⚠️ Lore › Chroniques : table introuvable — lance le script SQL'); return; }
+    chroniquesData = data || [];
+  }
+  const chroSorted = () => chroniquesData.slice().sort((a, b) => String(a.titre || '').localeCompare(String(b.titre || ''), 'fr', { sensitivity: 'base' }));
+  function renderChroniques() {
+    const box = document.getElementById('loreSubContent');
+    const list = chroSorted();
+    box.innerHTML = `
+      <div class="hist-toolbar">
+        <div class="hist-count">${list.length} chronique${list.length > 1 ? 's' : ''}</div>
+        <button class="new-spell-btn" onclick="openChroniqueForm(null)">+ Créer une chronique</button>
+      </div>
+      ${list.length ? `<div class="hist-chip-grid">${list.map(c => `
+        <div class="hist-chap-chip tome-chip" onclick="openChronique('${c.id}')">
+          <div class="hist-chap-chip-photo" style="${c.image ? `background-image:url('${histEsc(c.image)}')` : ''}">${c.image ? '' : HIST_ICONS.image}</div>
+          <div class="tome-chip-body" style="min-height:46px;">
+            <div class="tcb-name" title="${histEsc(c.titre)}"><span>${histEsc(c.titre)}</span></div>
+          </div>
+        </div>`).join('')}</div>`
+        : '<div class="hist-empty">Aucune chronique pour le moment.</div>'}
+    `;
+  }
+  function openChronique(id) { chroOpenId = id; renderChroniqueView(); }
+  function closeChronique() { chroOpenId = null; renderChroniques(); }
+  function renderChroniqueView() {
+    const c = chroniquesData.find(x => x.id === chroOpenId);
+    if (!c) { closeChronique(); return; }
+    document.getElementById('loreSubContent').innerHTML = `
+      <div class="hist-toolbar"><button class="hist-back" onclick="closeChronique()">‹ Toutes les chroniques</button></div>
+      <div class="hist-toolbar">
+        <h2 class="hist-chap-title">${histEsc(c.titre)}</h2>
+        <button class="hist-icon-btn" title="Modifier" onclick="openChroniqueForm('${c.id}')">${HIST_ICONS.edit}</button>
+        <button class="hist-icon-btn danger" title="Supprimer" onclick="deleteChronique('${c.id}')">${HIST_ICONS.trash}</button>
+      </div>
+      <div class="chro-view">
+        <div class="chro-view-photo" style="${c.image ? `background-image:url('${histEsc(c.image)}')` : ''}">${c.image ? '' : HIST_ICONS.image}</div>
+        <div class="hist-recap-text">${histLinkify(c.texte) || '<span style="color:var(--ink-faint)">—</span>'}</div>
+      </div>
+    `;
+  }
+  function openChroniqueForm(id) {
+    chroEditId = id; chroPendingPhoto = null;
+    const c = id ? chroniquesData.find(x => x.id === id) : null;
+    document.getElementById('chfTitle').textContent = c ? 'Modifier la chronique' : 'Nouvelle chronique';
+    document.getElementById('chfSaveBtn').textContent = c ? 'Enregistrer' : 'Créer';
+    document.getElementById('chfName').value = c ? (c.titre || '') : '';
+    document.getElementById('chfTexte').value = c ? (c.texte || '') : '';
+    document.getElementById('chfPhotoPreview').style.backgroundImage = c && c.image ? `url('${c.image}')` : '';
+    document.getElementById('chfPhotoPlaceholder').style.display = c && c.image ? 'none' : 'flex';
+    openModal('modalChronique');
+    setTimeout(() => document.getElementById('chfName').focus(), 50);
+  }
+  function onChroniquePhotoSelected(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      chroPendingPhoto = ev.target.result;
+      document.getElementById('chfPhotoPreview').style.backgroundImage = `url('${ev.target.result}')`;
+      document.getElementById('chfPhotoPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
+  function saveChronique() {
+    const titre = document.getElementById('chfName').value.trim();
+    if (!titre) { showToast('Donne un titre à la chronique'); return; }
+    let c = chroEditId ? chroniquesData.find(x => x.id === chroEditId) : null;
+    const isNew = !c;
+    if (isNew) { c = { id: histNewId('chro'), image: null, ordre: Date.now() }; chroniquesData.push(c); }
+    c.titre = titre;
+    c.texte = document.getElementById('chfTexte').value;
+    if (chroPendingPhoto) c.image = chroPendingPhoto;
+    histSave('lore_chroniques', { id: c.id, titre: c.titre, image: c.image, texte: c.texte, ordre: c.ordre });
+    closeModal('modalChronique');
+    showToast(isNew ? `Chronique « ${titre} » créée` : `Chronique « ${titre} » mise à jour`);
+    openChronique(c.id);
+  }
+  function deleteChronique(id) {
+    const c = chroniquesData.find(x => x.id === id);
+    if (!c || !confirm(`Supprimer définitivement la chronique « ${c.titre} » ?`)) return;
+    chroniquesData = chroniquesData.filter(x => x.id !== id);
+    histDelete('lore_chroniques', id);
+    showToast(`Chronique « ${c.titre} » supprimée`);
+    closeChronique();
+  }
+
   const consoleTilesData = [
     { id: 'joueurs', label: 'Joueurs', notifId: 'tileJoueursNotif', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.3c2.6.4 4.5 2.2 4.5 4.7"/></svg>' },
     { id: 'combat', label: 'Combat', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4L11 13"/><path d="M9.2 11.2L12.8 14.8"/><path d="M11 13L8 16"/><circle cx="7" cy="17" r="1.15" fill="currentColor" stroke="none"/></svg>' },
@@ -44632,6 +44833,7 @@
       try { await loadTileOrderFromSupabase(); } catch (e) { console.error('Ordre des modules', e); }
       try { await loadHistLinkIgnore(); } catch (e) { console.error('Liens du Tome', e); }
       try { await loadTempoImage(); } catch (e) { console.error('Temporalité', e); }
+      try { await loadChroniquesFromSupabase(); } catch (e) { console.error('Chroniques', e); }
       if (typeof renderCharChips === 'function') renderCharChips();
       if (typeof renderNotifBadges === 'function') renderNotifBadges();
       if (failCount > 0) {
