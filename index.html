@@ -1852,7 +1852,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (22)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (23)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -44181,6 +44181,36 @@
     { id: 'parametres', label: 'Paramètres', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>' },
   ];
   let consoleTileOrder = consoleTilesData.map(t => t.id);
+  // Ordre des tuiles mémorisé : dans Supabase (table mj_preferences, suivi d'un appareil à l'autre)
+  // et en copie sur l'appareil pour un affichage immédiat au chargement
+  function applyTileOrder(saved) {
+    if (!Array.isArray(saved)) return;
+    const known = consoleTilesData.map(t => t.id);
+    const order = saved.filter(id => known.includes(id));
+    known.forEach(id => { if (!order.includes(id)) order.push(id); }); // nouveaux modules ajoutés à la fin
+    consoleTileOrder = order;
+  }
+  try { applyTileOrder(JSON.parse(localStorage.getItem('arkanTileOrder') || 'null')); } catch (e) {}
+  async function loadTileOrderFromSupabase() {
+    if (!sb) return;
+    const { data, error } = await sb.from('mj_preferences').select('valeur').eq('cle', 'ordre_modules').maybeSingle();
+    if (error) { console.error('mj_preferences', error); return; }
+    if (data && data.valeur) {
+      applyTileOrder(data.valeur);
+      try { localStorage.setItem('arkanTileOrder', JSON.stringify(consoleTileOrder)); } catch (e) {}
+    }
+  }
+  let tileOrderSaveTimer = null;
+  function saveTileOrder() {
+    try { localStorage.setItem('arkanTileOrder', JSON.stringify(consoleTileOrder)); } catch (e) {}
+    clearTimeout(tileOrderSaveTimer);
+    tileOrderSaveTimer = setTimeout(() => {
+      if (!sb) return;
+      sb.from('mj_preferences').upsert({ cle: 'ordre_modules', valeur: consoleTileOrder, maj_le: new Date().toISOString() }).then(({ error }) => {
+        if (error) { console.error('mj_preferences', error); showToast('⚠️ Ordre des modules non enregistré en ligne (' + error.message + ')'); }
+      });
+    }, 600);
+  }
   let reorderModeActive = false;
 
   function toggleReorderMode() {
@@ -44195,6 +44225,7 @@
     const newIdx = idx + direction;
     if (newIdx < 0 || newIdx >= consoleTileOrder.length) return;
     [consoleTileOrder[idx], consoleTileOrder[newIdx]] = [consoleTileOrder[newIdx], consoleTileOrder[idx]];
+    saveTileOrder();
     renderModuleGrid();
   }
 
@@ -44232,6 +44263,7 @@
       await loadCombatsFromSupabase();
       try { await loadHistoireFromSupabase(); } catch (e) { console.error('Histoire', e); }
       try { await loadCartesFromSupabase(); } catch (e) { console.error('Cartes', e); }
+      try { await loadTileOrderFromSupabase(); } catch (e) { console.error('Ordre des modules', e); }
       if (typeof renderCharChips === 'function') renderCharChips();
       if (typeof renderNotifBadges === 'function') renderNotifBadges();
       if (failCount > 0) {
