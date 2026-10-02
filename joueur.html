@@ -3383,45 +3383,64 @@
 </div>
 <script>
   (function() {
+    // Porte d'entrée du joueur : une session Supabase (anonyme) est liée à la fiche
+    // une fois le bon code saisi. Le code n'est jamais envoyé au navigateur.
+    const URL_SB = 'https://tjygwcklwrdqrkcscszp.supabase.co';
+    const KEY_SB = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqeWd3Y2tsd3JkcXJrY3Njc3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjY1NTQsImV4cCI6MjEwNTg0MjU1NH0.7OceM5LYUjAmHwj6Wnq1WkK8AkZA429714oEOLVLvcQ';
+    const sbGate = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(URL_SB, KEY_SB) : null;
+    window._sbArkan = sbGate; // client unique partagé avec le reste de la fiche
     const params = new URLSearchParams(window.location.search);
     const playerId = params.get('j');
     const overlay = document.getElementById('playerGateOverlay');
+    const greet = document.getElementById('gatePlayerGreeting');
+    const sub = document.getElementById('gatePlayerSub');
+    const codeBlock = document.getElementById('gateCodeBlock');
+    const errBox = document.getElementById('gateCodeError');
     if (!playerId) {
       // Pas d'identifiant dans le lien : mode démo, on n'affiche pas la porte d'entrée.
       overlay.style.display = 'none';
       return;
     }
     window._gatePlayerId = playerId;
-    if (localStorage.getItem('playerAuthenticated_' + playerId) === 'yes') {
-      overlay.style.display = 'none';
-      return;
-    }
-    window._gatePlayerCode = null;
-    window._gatePlayerName = null;
-    (async function loadGatePlayer() {
-      if (!window.supabase) { document.getElementById('gatePlayerGreeting').textContent = 'Connexion indisponible'; return; }
-      const SUPABASE_URL = 'https://tjygwcklwrdqrkcscszp.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqeWd3Y2tsd3JkcXJrY3Njc3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjY1NTQsImV4cCI6MjEwNTg0MjU1NH0.7OceM5LYUjAmHwj6Wnq1WkK8AkZA429714oEOLVLvcQ';
-      const sbGate = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      const { data, error } = await sbGate.from('joueurs').select('nom, code').eq('id', playerId).single();
-      if (error || !data) {
-        document.getElementById('gatePlayerGreeting').textContent = 'Joueur introuvable';
-        document.getElementById('gatePlayerSub').textContent = "Vérifie le lien qu'on t'a envoyé.";
-        document.getElementById('gateCodeBlock').style.display = 'none';
+    try { localStorage.removeItem('playerAuthenticated_' + playerId); } catch (e) {}
+    if (!sbGate) { greet.textContent = 'Connexion indisponible'; codeBlock.style.display = 'none'; return; }
+    codeBlock.style.display = 'none';
+    (async function initGate() {
+      // Déjà autorisé sur cet appareil (session du joueur, ou session MJ) ?
+      const { data: sess } = await sbGate.auth.getSession();
+      if (sess && sess.session) {
+        const { data: ok } = await sbGate.rpc('acces_joueur', { p_joueur: playerId });
+        if (ok === true) { overlay.style.display = 'none'; return; }
+      }
+      const { data: nom, error } = await sbGate.rpc('nom_joueur', { p_joueur: playerId });
+      if (error || !nom) {
+        greet.textContent = 'Joueur introuvable';
+        sub.textContent = "Vérifie le lien qu'on t'a envoyé.";
         return;
       }
-      window._gatePlayerCode = data.code;
-      window._gatePlayerName = data.nom;
-      document.getElementById('gatePlayerGreeting').textContent = 'Bonjour ' + data.nom + ' !';
+      greet.textContent = 'Bonjour ' + nom + ' !';
+      codeBlock.style.display = '';
     })();
-    window.checkPlayerGateCode = function() {
+    let busy = false;
+    window.checkPlayerGateCode = async function() {
+      if (busy) return;
       const val = document.getElementById('gateCodeInput').value.trim();
-      if (window._gatePlayerCode && val === window._gatePlayerCode) {
-        localStorage.setItem('playerAuthenticated_' + playerId, 'yes');
-        overlay.style.display = 'none';
-      } else {
-        document.getElementById('gateCodeError').style.display = 'block';
-      }
+      errBox.style.display = 'none';
+      if (!/^\d{4}$/.test(val)) { errBox.textContent = 'Le code fait 4 chiffres.'; errBox.style.display = 'block'; return; }
+      busy = true;
+      try {
+        const { data: sess } = await sbGate.auth.getSession();
+        if (!sess || !sess.session) {
+          const { error: eAnon } = await sbGate.auth.signInAnonymously();
+          if (eAnon) { errBox.textContent = 'Connexion impossible pour le moment.'; errBox.style.display = 'block'; return; }
+        }
+        const { data: res, error } = await sbGate.rpc('connexion_joueur', { p_joueur: playerId, p_code: val });
+        if (!error && res === 'ok') { window.location.reload(); return; }
+        errBox.textContent = res === 'bloque'
+          ? 'Trop d’essais. Réessaie dans 15 minutes.'
+          : 'Code incorrect, réessaie.';
+        errBox.style.display = 'block';
+      } finally { busy = false; }
     };
   })();
 </script>
@@ -4367,9 +4386,9 @@
   /* ================= SUPABASE ================= */
   const SUPABASE_URL = 'https://tjygwcklwrdqrkcscszp.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqeWd3Y2tsd3JkcXJrY3Njc3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjY1NTQsImV4cCI6MjEwNTg0MjU1NH0.7OceM5LYUjAmHwj6Wnq1WkK8AkZA429714oEOLVLvcQ';
-  const sb = (window.supabase && window.supabase.createClient)
+  const sb = window._sbArkan || ((window.supabase && window.supabase.createClient)
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    : null;
+    : null);
 
   /* ================= SHARED UTILITIES ================= */
   window.AppData = window.AppData || {};

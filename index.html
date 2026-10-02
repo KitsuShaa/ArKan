@@ -1724,36 +1724,60 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (12)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (13)</span></div>
     <div style="margin-bottom:12px;">
-      <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Identifiant</label>
-      <input type="text" id="mjLoginUser" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
+      <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
+      <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
     </div>
     <div style="margin-bottom:18px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Mot de passe</label>
-      <input type="password" id="mjLoginPass" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;" onkeydown="if(event.key==='Enter') checkMjLogin()">
+      <input type="password" id="mjLoginPass" autocomplete="current-password" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;" onkeydown="if(event.key==='Enter') checkMjLogin()">
     </div>
-    <div id="mjLoginError" style="display:none; color:#d16a6a; font-size:12.5px; margin-bottom:12px;">Identifiant ou mot de passe incorrect.</div>
-    <button onclick="checkMjLogin()" style="width:100%; padding:11px; border-radius:8px; border:none; background:#c9a24b; color:#14100a; font-weight:600; font-size:14px; cursor:pointer;">Se connecter</button>
+    <div id="mjLoginError" style="display:none; color:#d16a6a; font-size:12.5px; margin-bottom:12px;">E-mail ou mot de passe incorrect.</div>
+    <button id="mjLoginBtn" onclick="checkMjLogin()" style="width:100%; padding:11px; border-radius:8px; border:none; background:#c9a24b; color:#14100a; font-weight:600; font-size:14px; cursor:pointer;">Se connecter</button>
   </div>
 </div>
 <script>
   (function() {
-    const MJ_USER = 'KitsuShaa';
-    const MJ_PASS = 'ArKan2026';
+    // Connexion MJ par un vrai compte Supabase (Authentication > Users).
+    // Plus aucun identifiant ni mot de passe n'est écrit dans ce fichier.
+    const URL_SB = 'https://tjygwcklwrdqrkcscszp.supabase.co';
+    const KEY_SB = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqeWd3Y2tsd3JkcXJrY3Njc3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjY1NTQsImV4cCI6MjEwNTg0MjU1NH0.7OceM5LYUjAmHwj6Wnq1WkK8AkZA429714oEOLVLvcQ';
     const overlay = document.getElementById('mjLoginOverlay');
-    if (localStorage.getItem('mjAuthenticated') === 'yes') {
-      overlay.style.display = 'none';
-    }
-    window.checkMjLogin = function() {
-      const user = document.getElementById('mjLoginUser').value.trim();
+    const errBox = document.getElementById('mjLoginError');
+    const sbAuth = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(URL_SB, KEY_SB) : null;
+    window._sbArkan = sbAuth; // client unique partagé avec le reste de la console
+    try { localStorage.removeItem('mjAuthenticated'); } catch (e) {}
+    function showErr(msg) { errBox.textContent = msg; errBox.style.display = 'block'; }
+    if (!sbAuth) { showErr('Connexion à la base impossible (script Supabase non chargé).'); return; }
+    // Session déjà ouverte sur cet appareil et appartenant au MJ : on entre directement
+    sbAuth.auth.getSession().then(async ({ data }) => {
+      if (!data || !data.session) return;
+      const { data: ok } = await sbAuth.rpc('est_mj');
+      if (ok === true) overlay.style.display = 'none';
+    });
+    window.checkMjLogin = async function() {
+      const email = document.getElementById('mjLoginUser').value.trim();
       const pass = document.getElementById('mjLoginPass').value;
-      if (user === MJ_USER && pass === MJ_PASS) {
-        localStorage.setItem('mjAuthenticated', 'yes');
-        overlay.style.display = 'none';
-      } else {
-        document.getElementById('mjLoginError').style.display = 'block';
+      const btn = document.getElementById('mjLoginBtn');
+      errBox.style.display = 'none';
+      if (!email || !pass) { showErr('Renseigne ton e-mail et ton mot de passe.'); return; }
+      btn.disabled = true; btn.textContent = 'Connexion…';
+      const { error } = await sbAuth.auth.signInWithPassword({ email: email, password: pass });
+      if (error) { btn.disabled = false; btn.textContent = 'Se connecter'; showErr('E-mail ou mot de passe incorrect.'); return; }
+      const { data: ok } = await sbAuth.rpc('est_mj');
+      if (ok !== true) {
+        await sbAuth.auth.signOut();
+        btn.disabled = false; btn.textContent = 'Se connecter';
+        showErr("Ce compte n'est pas enregistré comme MJ.");
+        return;
       }
+      // Rechargement : toute la base est relue avec la session MJ
+      window.location.reload();
+    };
+    window.mjLogout = async function() {
+      await sbAuth.auth.signOut();
+      window.location.reload();
     };
   })();
 </script>
@@ -3322,9 +3346,9 @@
   /* ===================== SUPABASE ===================== */
   const SUPABASE_URL = 'https://tjygwcklwrdqrkcscszp.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqeWd3Y2tsd3JkcXJrY3Njc3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjY1NTQsImV4cCI6MjEwNTg0MjU1NH0.7OceM5LYUjAmHwj6Wnq1WkK8AkZA429714oEOLVLvcQ';
-  const sb = (window.supabase && window.supabase.createClient)
+  const sb = window._sbArkan || ((window.supabase && window.supabase.createClient)
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    : null;
+    : null);
 
   /* ===================== CHARGEMENT LORE DEPUIS SUPABASE ===================== */
   // Remplace les tableaux figés par les vraies données de la base, au démarrage.
@@ -3928,8 +3952,7 @@
   function openPlayerSheet(playerId) {
     const p = players.find(pl => pl.id === playerId);
     if (!p) return;
-    // Même site que la console : on évite au MJ de retaper le code du joueur
-    try { localStorage.setItem('playerAuthenticated_' + p.id, 'yes'); } catch (e) {}
+    // Même site que la console : la session MJ ouvre directement la fiche, sans code
     window.open(playerSheetUrl(p) + '&vue=mj', '_blank', 'noopener');
   }
 
@@ -4327,7 +4350,6 @@
     { key: 'password', label: 'Mot de passe' },
   ];
   let currentParamSub = 'tags';
-  let mjPasswordDemo = 'astelorn-2026';
 
   function renderParametresModule() {
     document.getElementById('paramSubTabs').innerHTML = paramSubTabs.map(s => `
@@ -4385,11 +4407,16 @@
       c.innerHTML = `
         <div class="pcard" style="max-width:420px;">
           <div class="section-title" style="margin-top:0;">Mot de passe d'accès à la console MJ</div>
-          <p class="wizard-hint">Ce mot de passe protégera l'accès à la console une fois reliée à la vraie base — pour l'instant, aucune vérification n'est encore active, ce réglage prépare simplement la valeur.</p>
+          <p class="wizard-hint">C'est le mot de passe de ton compte MJ Supabase, celui demandé sur l'écran de connexion.</p>
           <div class="form-field"><label>Mot de passe actuel</label><input type="password" id="paramPwCurrent"></div>
           <div class="form-field"><label>Nouveau mot de passe</label><input type="password" id="paramPwNew"></div>
           <div class="form-field"><label>Confirmer le nouveau mot de passe</label><input type="password" id="paramPwConfirm"></div>
           <button class="modal-confirm-btn" onclick="saveParamPassword()">Enregistrer</button>
+        </div>
+        <div class="pcard" style="max-width:420px; margin-top:16px;">
+          <div class="section-title" style="margin-top:0;">Session</div>
+          <p class="wizard-hint">Ferme la session MJ sur cet appareil (le mot de passe sera redemandé).</p>
+          <button class="modal-confirm-btn" onclick="mjLogout()">Se déconnecter</button>
         </div>
       `;
     }
@@ -4458,14 +4485,20 @@
     });
   }
 
-  function saveParamPassword() {
+  async function saveParamPassword() {
     const current = document.getElementById('paramPwCurrent').value;
     const next = document.getElementById('paramPwNew').value;
     const confirm = document.getElementById('paramPwConfirm').value;
-    if (current !== mjPasswordDemo) { showToast('Mot de passe actuel incorrect'); return; }
-    if (!next || next.length < 6) { showToast('Le nouveau mot de passe doit faire au moins 6 caractères'); return; }
+    if (!sb) { showToast('Base indisponible'); return; }
+    if (!next || next.length < 8) { showToast('Le nouveau mot de passe doit faire au moins 8 caractères'); return; }
     if (next !== confirm) { showToast('La confirmation ne correspond pas'); return; }
-    mjPasswordDemo = next;
+    const { data: sess } = await sb.auth.getSession();
+    const email = sess && sess.session && sess.session.user && sess.session.user.email;
+    if (!email) { showToast('Session MJ introuvable, reconnecte-toi'); return; }
+    const { error: e1 } = await sb.auth.signInWithPassword({ email: email, password: current });
+    if (e1) { showToast('Mot de passe actuel incorrect'); return; }
+    const { error: e2 } = await sb.auth.updateUser({ password: next });
+    if (e2) { showToast('⚠️ Changement refusé (' + e2.message + ')'); return; }
     document.getElementById('paramPwCurrent').value = '';
     document.getElementById('paramPwNew').value = '';
     document.getElementById('paramPwConfirm').value = '';
