@@ -1717,6 +1717,71 @@
   .of-unit { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-faint); font-size: 13px; pointer-events: none; }
   .of-hint { font-size: 11.5px; color: var(--ink-faint); margin-top: 6px; line-height: 1.45; }
   .of-hint b { color: var(--ink-dim); font-weight: 600; }
+
+  /* ===================== MODULE HISTOIRE ===================== */
+  .hist-subtabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; max-width: 460px; }
+  .hist-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .hist-toolbar .hist-count { font-size: 12px; color: var(--ink-faint); }
+  .hist-toolbar .new-spell-btn { margin-left: auto; }
+  .hist-empty { color: var(--ink-faint); font-size: 13px; padding: 30px 0; text-align: center; }
+  .hist-chip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+  .hist-chap-chip { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); overflow: hidden; cursor: pointer; transition: border-color .15s, transform .15s; }
+  .hist-chap-chip:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .hist-chap-chip-photo { aspect-ratio: 4 / 3; background: var(--bg-elevated) center / cover no-repeat; display: flex; align-items: center; justify-content: center; color: var(--ink-faint); }
+  .hist-chap-chip-photo svg { width: 28px; height: 28px; }
+  .hist-chap-chip-name { padding: 10px 12px; font-family: var(--font-serif); font-size: 14px; color: var(--ink); text-align: center; line-height: 1.3; }
+  .hist-back { background: none; border: none; color: var(--ink-dim); font-size: 13px; cursor: pointer; padding: 4px 0; font-family: var(--font-sans); }
+  .hist-back:hover { color: var(--gold); }
+  .hist-chap-title { font-family: var(--font-serif); font-size: 22px; color: var(--gold); margin: 0; }
+  .hist-chap-head { display: grid; grid-template-columns: 254px minmax(160px, 1fr) minmax(0, 2.4fr); grid-auto-rows: 190px; gap: 14px; margin-bottom: 16px; }
+  .hist-chap-photo svg { width: 34px; height: 34px; }
+  .hist-chap-photo { height: 100%; border-radius: var(--radius-md); background: var(--card) center / cover no-repeat; border: 1px solid var(--card-border); display: flex; align-items: center; justify-content: center; color: var(--ink-faint); }
+  .hist-card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 14px 16px; overflow-y: auto; }
+  .hist-chap-head .hist-card { height: 100%; }
+  .hist-card-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--ink-faint); margin-bottom: 6px; }
+  .hist-card-text { font-size: 13.5px; color: var(--ink); line-height: 1.6; white-space: pre-wrap; font-family: var(--font-serif); }
+  .hist-scenes { overflow-y: auto; padding-right: 8px; display: flex; flex-direction: column; gap: 14px; scrollbar-width: thin; scrollbar-color: var(--gold) transparent; }
+  .hist-scenes::-webkit-scrollbar { width: 8px; }
+  .hist-scenes::-webkit-scrollbar-thumb { background: rgba(201,162,75,.55); border-radius: 8px; }
+  .hist-scene { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 16px 20px; }
+  .hist-scene-head { display: flex; align-items: flex-start; gap: 10px; border-bottom: 1px solid var(--card-border); padding-bottom: 10px; margin-bottom: 12px; }
+  .hist-scene-title { flex: 1; font-family: var(--font-serif); font-size: 16px; color: var(--gold); line-height: 1.35; }
+  .hist-scene-title .hst-sep { color: var(--ink-faint); margin: 0 6px; }
+  .hist-scene-title .hst-meta { color: var(--ink-dim); font-size: 14px; }
+  .hist-scene-text { font-size: 14px; color: var(--ink); line-height: 1.7; white-space: pre-wrap; font-family: var(--font-serif); }
+  .hist-icon-btn { background: var(--bg-elevated); border: 1px solid var(--card-border); color: var(--ink-dim); border-radius: 8px; width: 30px; height: 30px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .hist-icon-btn:hover { color: var(--gold); border-color: var(--gold); }
+  .hist-icon-btn.danger:hover { color: var(--garnet); border-color: var(--garnet); }
+  .hist-icon-btn svg { width: 15px; height: 15px; }
+  .hist-prep-chip { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 20px 12px 14px; text-align: center; cursor: pointer; transition: border-color .15s; }
+  .hist-prep-chip:hover { border-color: var(--gold); }
+  .hist-prep-chip svg { width: 30px; height: 30px; color: var(--gold); margin-bottom: 8px; }
+  .hist-prep-chip-name { font-family: var(--font-serif); font-size: 14px; color: var(--ink); line-height: 1.3; }
+  .hist-prep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .hist-prep-text { width: 100%; resize: none; background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); color: var(--ink); padding: 18px 20px; font-family: var(--font-serif); font-size: 14.5px; line-height: 1.7; }
+  .hist-prep-text:focus { outline: none; border-color: var(--gold); }
+  .hist-save-state { font-size: 11.5px; color: var(--ink-faint); }
+  .hist-notes { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+  .hist-note { width: 220px; height: 220px; border-radius: 4px 4px 14px 4px; box-shadow: 0 6px 14px rgba(0,0,0,.35); display: flex; flex-direction: column; position: relative; transition: transform .15s; }
+  .hist-note:hover { transform: rotate(-.6deg); }
+  .hist-note textarea { flex: 1; background: transparent; border: none; resize: none; padding: 12px 14px 6px; font-family: var(--font-sans); font-size: 13.5px; line-height: 1.5; color: #2a2418; }
+  .hist-note textarea:focus { outline: none; }
+  .hist-note textarea::placeholder { color: rgba(42,36,24,.45); }
+  .hist-note-bar { display: flex; justify-content: flex-end; gap: 4px; padding: 6px 8px 8px; }
+  .hist-note-btn { background: rgba(0,0,0,.08); border: none; width: 26px; height: 26px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: rgba(42,36,24,.75); }
+  .hist-note-btn:hover { background: rgba(0,0,0,.18); color: #2a2418; }
+  .hist-note-btn:disabled { opacity: .3; cursor: not-allowed; }
+  .hist-note-btn svg { width: 14px; height: 14px; }
+  .hist-note.locked .hist-note-lock { background: rgba(0,0,0,.25); color: #2a2418; }
+  .hist-note-palette { position: absolute; bottom: 40px; right: 8px; background: var(--bg-elevated); border: 1px solid var(--card-border); border-radius: 10px; padding: 6px; display: none; gap: 6px; z-index: 5; box-shadow: 0 6px 16px rgba(0,0,0,.4); }
+  .hist-note-palette.open { display: flex; }
+  .hist-note-swatch { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
+  .hist-note-swatch.current { border-color: var(--ink); }
+  @media (max-width: 900px) {
+    .hist-chap-head { grid-template-columns: 1fr; grid-auto-rows: auto; }
+    .hist-chap-photo { height: auto; aspect-ratio: 4 / 3; max-width: 360px; }
+    .hist-chap-head .hist-card { height: auto; max-height: 220px; }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1724,7 +1789,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (14)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (15)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2015,6 +2080,12 @@
     </div>
   </div>
 
+  <!-- ===== MODULE HISTOIRE ===== -->
+  <div class="page" id="page-histoire">
+    <div class="hist-subtabs" id="histSubTabs"></div>
+    <div id="histSubContent"></div>
+  </div>
+
   <!-- ===== MODULE PARAMETRES ===== -->
   <div class="page" id="page-parametres">
     <div class="sub-pill-tabs" id="paramSubTabs" style="margin-bottom:16px;"></div>
@@ -2024,6 +2095,50 @@
 </div>
 
 <!-- ================= MODALS ================= -->
+
+<!-- HISTOIRE : CHAPITRE -->
+<div class="modal-backdrop" id="modalHistChapitre">
+  <div class="modal-box" style="max-width:560px;">
+    <h3 id="hcfTitle">Nouveau chapitre</h3>
+    <div class="form-field"><label>Nom du chapitre</label><input type="text" id="hcfName"></div>
+    <div class="photo-preview-box" id="hcfPhotoPreview" style="aspect-ratio:4/3;" onclick="document.getElementById('hcfPhotoInput').click()">
+      <div class="photo-preview-placeholder" id="hcfPhotoPlaceholder"><span>Image du chapitre</span></div>
+    </div>
+    <input type="file" id="hcfPhotoInput" accept="image/*" style="display:none;" onchange="onHistChapPhotoSelected(event)">
+    <div class="form-field"><label>Date(s)</label><input type="text" id="hcfDates" placeholder="Ex : 12 Florial — 3 Nivéal 1214"></div>
+    <div class="form-field"><label>Récap</label><textarea id="hcfRecap" style="min-height:140px;"></textarea></div>
+    <button class="modal-confirm-btn" id="hcfSaveBtn" onclick="saveHistChapitre()">Créer</button>
+    <button class="modal-cancel-btn" id="hcfDeleteBtn" style="display:none; color:var(--garnet); border:1px solid var(--card-border); border-radius:12px; width:100%; margin-top:8px;" onclick="deleteHistChapitre()">Supprimer le chapitre</button>
+    <button class="modal-cancel-btn" onclick="closeModal('modalHistChapitre')">Annuler</button>
+  </div>
+</div>
+
+<!-- HISTOIRE : SCÈNE -->
+<div class="modal-backdrop" id="modalHistScene">
+  <div class="modal-box" style="max-width:760px;">
+    <h3 id="hsfTitle">Nouvelle scène</h3>
+    <div class="form-field"><label>Nom</label><input type="text" id="hsfName"></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <div class="form-field"><label>Lieu</label><input type="text" id="hsfLieu"></div>
+      <div class="form-field"><label>Date(s)</label><input type="text" id="hsfDates"></div>
+    </div>
+    <div class="form-field"><label>Texte</label><textarea id="hsfTexte" style="min-height:340px; font-family:var(--font-serif); font-size:14px; line-height:1.6;"></textarea></div>
+    <button class="modal-confirm-btn" id="hsfSaveBtn" onclick="saveHistScene()">Créer</button>
+    <button class="modal-cancel-btn" onclick="closeModal('modalHistScene')">Annuler</button>
+  </div>
+</div>
+
+<!-- HISTOIRE : PRÉPA -->
+<div class="modal-backdrop" id="modalHistPrepa">
+  <div class="modal-box" style="max-width:440px;">
+    <h3 id="hpfTitle">Nouvelle prépa</h3>
+    <div class="form-field"><label>Nom de la prépa</label><input type="text" id="hpfName" onkeydown="if(event.key==='Enter') saveHistPrepa()"></div>
+    <button class="modal-confirm-btn" id="hpfSaveBtn" onclick="saveHistPrepa()">Créer</button>
+    <button class="modal-cancel-btn" id="hpfDeleteBtn" style="display:none; color:var(--garnet); border:1px solid var(--card-border); border-radius:12px; width:100%; margin-top:8px;" onclick="deleteHistPrepa()">Supprimer la prépa</button>
+    <button class="modal-cancel-btn" onclick="closeModal('modalHistPrepa')">Annuler</button>
+  </div>
+</div>
+
 
 <div class="modal-backdrop" id="modalEtat">
   <div class="modal-box">
@@ -3700,6 +3815,7 @@
     if (id === 'combat' && typeof renderCombatModule === 'function') renderCombatModule();
     if (id === 'joueurs' && typeof renderPlayerDetail === 'function') renderPlayerDetail();
     if (id === 'lore' && typeof renderLoreModule === 'function') renderLoreModule();
+    if (id === 'histoire' && typeof renderHistoireModule === 'function') renderHistoireModule();
     if (id === 'messagerie' && typeof renderMsgConvList === 'function') renderMsgConvList();
     if (id === 'parametres' && typeof renderParametresModule === 'function') renderParametresModule();
   }
@@ -5267,7 +5383,7 @@
     pnjfPhotoInput: 3 / 4, dfPhotoInput: 3 / 4, kfPhotoInput: 3 / 4, kfClePhotoInput: 3 / 4, cofPhotoInput: 3 / 4,
     anmfPhotoInput: 3 / 4, gmfPhotoInput: 3 / 4, glfPhotoInput: 3 / 4,
     anfPhotoInput: 16 / 10, anfConseilPhotoInput: 16 / 10, gcfPhotoInput: 16 / 10, gcfPhoto2Input: 16 / 10, gcfPhoto3Input: 16 / 10,
-    gvfPhotoInput: 16 / 9, gvfPlanInput: 1,
+    gvfPhotoInput: 16 / 9, gvfPlanInput: 1, hcfPhotoInput: 4 / 3,
   };
   function guessImportRatio(input) {
     const id = input.id || '';
@@ -43038,6 +43154,416 @@
     wrap.innerHTML = html;
   }
 
+  /* ===================== MODULE HISTOIRE (Tome · Prépa de session · Notes) ===================== */
+  // Tables Supabase : histoire_chapitres, histoire_scenes, histoire_prepas, histoire_notes
+  const histData = { chapitres: [], scenes: [], prepas: [], notes: [] };
+  let histSub = 'tome';          // sous-module affiché
+  let histChapId = null;         // chapitre ouvert (null = liste des chips)
+  let histPrepId = null;         // prépa ouverte (null = liste des chips)
+  let histEditChapId = null, histEditSceneId = null, histEditPrepId = null;
+  let histChapPendingPhoto = null;
+  const HIST_NOTE_COLORS = [
+    { key: 'jaune', bg: '#f3dd7a' }, { key: 'rose', bg: '#f2a9bd' }, { key: 'bleu', bg: '#9cc8ec' },
+    { key: 'vert', bg: '#acd9a2' }, { key: 'orange', bg: '#f5bb7c' }, { key: 'violet', bg: '#c7b1ea' },
+  ];
+  const histEsc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const histNewId = p => p + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+  const histByOrder = (a, b) => (a.ordre || 0) - (b.ordre || 0);
+  const HIST_ICONS = {
+    tome: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><path d="M9 7h7M9 11h5"/></svg>',
+    prepa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 3c-6 1-11 6-13 13l-1 5 5-1c7-2 12-7 13-13"/><path d="M7 16c3-1 6-4 8-8"/><path d="M4 21l3-3"/></svg>',
+    notes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v11l-5 5H4z"/><path d="M15 20v-5h5"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>',
+    unlock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 017.5-2"/></svg>',
+    color: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 100 18c1.2 0 2-.8 2-2 0-.6-.2-1-.5-1.4-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2H17a4 4 0 004-4c0-4.1-4-7.3-9-7.3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7" r="1"/></svg>',
+    image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>',
+  };
+
+  /* ---- Chargement / enregistrement ---- */
+  async function loadHistoireFromSupabase() {
+    if (!sb) return;
+    const tables = [['histoire_chapitres', 'chapitres'], ['histoire_scenes', 'scenes'], ['histoire_prepas', 'prepas'], ['histoire_notes', 'notes']];
+    const res = await Promise.all(tables.map(([t]) => sb.from(t).select('*')));
+    let failed = 0;
+    tables.forEach(([t, k], i) => {
+      if (res[i].error) { failed++; console.error('Histoire : table ' + t + ' illisible', res[i].error); return; }
+      histData[k] = (res[i].data || []).sort(histByOrder);
+    });
+    if (failed) showToast('⚠️ Module Histoire : ' + failed + ' table(s) introuvable(s) — lance le script SQL du module');
+  }
+  function histSave(table, row) {
+    if (!sb) { showToast('⚠️ Hors ligne : non sauvegardé'); return Promise.resolve(false); }
+    return sb.from(table).upsert(row).then(({ error }) => {
+      if (error) { console.error('Histoire upsert ' + table, error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); return false; }
+      return true;
+    });
+  }
+  function histDelete(table, id) {
+    if (!sb) return;
+    sb.from(table).delete().eq('id', id).then(({ error }) => { if (error) { console.error(error); showToast('⚠️ Suppression en ligne échouée'); } });
+  }
+
+  /* ---- Cadre du module ---- */
+  const histSubmodules = [
+    { key: 'tome', label: 'Tome', icon: HIST_ICONS.tome },
+    { key: 'prepa', label: 'Prépa de session', icon: HIST_ICONS.prepa },
+    { key: 'notes', label: 'Notes', icon: HIST_ICONS.notes },
+  ];
+  function renderHistoireModule() {
+    document.getElementById('histSubTabs').innerHTML = histSubmodules.map(s => `
+      <div class="lore-sub-chip ${s.key === histSub ? 'active' : ''}" onclick="switchHistSub('${s.key}')">
+        <div class="lsc-icon">${s.icon}</div>
+        <div class="lsc-label">${s.label}</div>
+      </div>`).join('');
+    if (histSub === 'tome') { if (histChapId && histData.chapitres.some(c => c.id === histChapId)) renderHistChapitreView(); else { histChapId = null; renderHistTome(); } }
+    if (histSub === 'prepa') { if (histPrepId && histData.prepas.some(p => p.id === histPrepId)) renderHistPrepaView(); else { histPrepId = null; renderHistPrepas(); } }
+    if (histSub === 'notes') renderHistNotes();
+  }
+  function switchHistSub(key) {
+    if (key === histSub) { histChapId = null; histPrepId = null; }
+    histSub = key;
+    renderHistoireModule();
+  }
+
+  /* ================= TOME ================= */
+  function renderHistTome() {
+    const list = histData.chapitres.slice().sort(histByOrder);
+    document.getElementById('histSubContent').innerHTML = `
+      <div class="hist-toolbar">
+        <div class="hist-count">${list.length} chapitre${list.length > 1 ? 's' : ''}</div>
+        <button class="new-spell-btn" onclick="openHistChapitreForm(null)">+ Créer un chapitre</button>
+      </div>
+      ${list.length ? `<div class="hist-chip-grid">${list.map(c => `
+        <div class="hist-chap-chip" onclick="openHistChapitre('${c.id}')">
+          <div class="hist-chap-chip-photo" style="${c.photo ? `background-image:url('${histEsc(c.photo)}')` : ''}">${c.photo ? '' : HIST_ICONS.image}</div>
+          <div class="hist-chap-chip-name">${histEsc(c.nom)}</div>
+        </div>`).join('')}</div>`
+        : '<div class="hist-empty">Aucun chapitre pour le moment.</div>'}
+    `;
+  }
+  function openHistChapitre(id) { histChapId = id; renderHistChapitreView(); }
+  function closeHistChapitre() { histChapId = null; renderHistTome(); }
+
+  function renderHistChapitreView(scrollToEnd) {
+    const c = histData.chapitres.find(x => x.id === histChapId);
+    if (!c) { closeHistChapitre(); return; }
+    const scenes = histData.scenes.filter(s => s.chapitre_id === c.id).sort(histByOrder);
+    document.getElementById('histSubContent').innerHTML = `
+      <div class="hist-toolbar">
+        <button class="hist-back" onclick="closeHistChapitre()">‹ Tous les chapitres</button>
+      </div>
+      <div class="hist-toolbar">
+        <h2 class="hist-chap-title">${histEsc(c.nom)}</h2>
+        <button class="hist-icon-btn" title="Modifier le chapitre" onclick="openHistChapitreForm('${c.id}')">${HIST_ICONS.edit}</button>
+        <button class="new-spell-btn" onclick="openHistSceneForm(null)">+ Créer une scène</button>
+      </div>
+      <div class="hist-chap-head">
+        <div class="hist-chap-photo" style="${c.photo ? `background-image:url('${histEsc(c.photo)}')` : ''}">${c.photo ? '' : HIST_ICONS.image}</div>
+        <div class="hist-card"><div class="hist-card-label">Date(s)</div><div class="hist-card-text">${histEsc(c.dates) || '<span style="color:var(--ink-faint)">—</span>'}</div></div>
+        <div class="hist-card"><div class="hist-card-label">Récap</div><div class="hist-card-text">${histEsc(c.recap) || '<span style="color:var(--ink-faint)">—</span>'}</div></div>
+      </div>
+      <div class="hist-scenes" id="histScenes">
+        ${scenes.length ? scenes.map(s => `
+          <div class="hist-scene" id="histScene_${s.id}">
+            <div class="hist-scene-head">
+              <div class="hist-scene-title">${histEsc(s.nom)}${s.lieu ? `<span class="hst-sep">—</span><span class="hst-meta">${histEsc(s.lieu)}</span>` : ''}${s.dates ? `<span class="hst-sep">—</span><span class="hst-meta">${histEsc(s.dates)}</span>` : ''}</div>
+              <button class="hist-icon-btn" title="Modifier la scène" onclick="openHistSceneForm('${s.id}')">${HIST_ICONS.edit}</button>
+              <button class="hist-icon-btn danger" title="Supprimer la scène" onclick="deleteHistScene('${s.id}')">${HIST_ICONS.trash}</button>
+            </div>
+            <div class="hist-scene-text">${histEsc(s.texte)}</div>
+          </div>`).join('') : '<div class="hist-empty">Aucune scène dans ce chapitre. Clique sur « + Créer une scène ».</div>'}
+      </div>
+    `;
+    fitHistScenes();
+    if (scrollToEnd) { const box = document.getElementById('histScenes'); if (box) box.scrollTop = box.scrollHeight; }
+  }
+  // La zone des scènes occupe la hauteur restante de l'écran et défile seule (le haut du chapitre reste en place)
+  function fitHistScenes() {
+    const box = document.getElementById('histScenes');
+    if (!box || !box.offsetParent) return;
+    const top = box.getBoundingClientRect().top;
+    box.style.height = Math.max(260, window.innerHeight - top - 24) + 'px';
+  }
+  window.addEventListener('resize', fitHistScenes);
+
+  function openHistChapitreForm(id) {
+    histEditChapId = id;
+    histChapPendingPhoto = null;
+    const c = id ? histData.chapitres.find(x => x.id === id) : null;
+    document.getElementById('hcfTitle').textContent = c ? 'Modifier le chapitre' : 'Nouveau chapitre';
+    document.getElementById('hcfSaveBtn').textContent = c ? 'Enregistrer' : 'Créer';
+    document.getElementById('hcfDeleteBtn').style.display = c ? 'block' : 'none';
+    document.getElementById('hcfName').value = c ? (c.nom || '') : '';
+    document.getElementById('hcfDates').value = c ? (c.dates || '') : '';
+    document.getElementById('hcfRecap').value = c ? (c.recap || '') : '';
+    const prev = document.getElementById('hcfPhotoPreview');
+    prev.style.backgroundImage = c && c.photo ? `url('${c.photo}')` : '';
+    document.getElementById('hcfPhotoPlaceholder').style.display = c && c.photo ? 'none' : 'flex';
+    openModal('modalHistChapitre');
+    setTimeout(() => document.getElementById('hcfName').focus(), 50);
+  }
+  function onHistChapPhotoSelected(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      histChapPendingPhoto = ev.target.result;
+      document.getElementById('hcfPhotoPreview').style.backgroundImage = `url('${ev.target.result}')`;
+      document.getElementById('hcfPhotoPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+  function saveHistChapitre() {
+    const nom = document.getElementById('hcfName').value.trim();
+    if (!nom) { showToast('Donne un nom au chapitre'); return; }
+    let c = histEditChapId ? histData.chapitres.find(x => x.id === histEditChapId) : null;
+    const isNew = !c;
+    if (isNew) {
+      c = { id: histNewId('chap'), photo: null, ordre: Date.now() };
+      histData.chapitres.push(c);
+    }
+    c.nom = nom;
+    c.dates = document.getElementById('hcfDates').value.trim();
+    c.recap = document.getElementById('hcfRecap').value.trim();
+    if (histChapPendingPhoto) c.photo = histChapPendingPhoto;
+    histSave('histoire_chapitres', { id: c.id, nom: c.nom, photo: c.photo, dates: c.dates, recap: c.recap, ordre: c.ordre });
+    closeModal('modalHistChapitre');
+    showToast(isNew ? `Chapitre « ${nom} » créé` : `Chapitre « ${nom} » mis à jour`);
+    if (histChapId) renderHistChapitreView(); else renderHistTome();
+  }
+  function deleteHistChapitre() {
+    const c = histData.chapitres.find(x => x.id === histEditChapId);
+    if (!c) return;
+    const n = histData.scenes.filter(s => s.chapitre_id === c.id).length;
+    if (!confirm(`Supprimer définitivement le chapitre « ${c.nom} »${n ? ` et ses ${n} scène${n > 1 ? 's' : ''}` : ''} ?`)) return;
+    histData.chapitres = histData.chapitres.filter(x => x.id !== c.id);
+    histData.scenes = histData.scenes.filter(s => s.chapitre_id !== c.id);
+    histDelete('histoire_chapitres', c.id); // les scènes partent avec (suppression en cascade)
+    closeModal('modalHistChapitre');
+    showToast(`Chapitre « ${c.nom} » supprimé`);
+    closeHistChapitre();
+  }
+
+  function openHistSceneForm(id) {
+    histEditSceneId = id;
+    const s = id ? histData.scenes.find(x => x.id === id) : null;
+    document.getElementById('hsfTitle').textContent = s ? 'Modifier la scène' : 'Nouvelle scène';
+    document.getElementById('hsfSaveBtn').textContent = s ? 'Enregistrer' : 'Créer';
+    document.getElementById('hsfName').value = s ? (s.nom || '') : '';
+    document.getElementById('hsfLieu').value = s ? (s.lieu || '') : '';
+    document.getElementById('hsfDates').value = s ? (s.dates || '') : '';
+    document.getElementById('hsfTexte').value = s ? (s.texte || '') : '';
+    openModal('modalHistScene');
+    setTimeout(() => document.getElementById('hsfName').focus(), 50);
+  }
+  function saveHistScene() {
+    const nom = document.getElementById('hsfName').value.trim();
+    if (!nom) { showToast('Donne un nom à la scène'); return; }
+    let s = histEditSceneId ? histData.scenes.find(x => x.id === histEditSceneId) : null;
+    const isNew = !s;
+    if (isNew) {
+      s = { id: histNewId('scene'), chapitre_id: histChapId, ordre: Date.now() };
+      histData.scenes.push(s);
+    }
+    s.nom = nom;
+    s.lieu = document.getElementById('hsfLieu').value.trim();
+    s.dates = document.getElementById('hsfDates').value.trim();
+    s.texte = document.getElementById('hsfTexte').value;
+    histSave('histoire_scenes', { id: s.id, chapitre_id: s.chapitre_id, nom: s.nom, lieu: s.lieu, dates: s.dates, texte: s.texte, ordre: s.ordre });
+    closeModal('modalHistScene');
+    showToast(isNew ? `Scène « ${nom} » ajoutée` : `Scène « ${nom} » mise à jour`);
+    if (isNew) renderHistChapitreView(true);
+    else {
+      const box = document.getElementById('histScenes'), pos = box ? box.scrollTop : 0;
+      renderHistChapitreView();
+      const box2 = document.getElementById('histScenes'); if (box2) box2.scrollTop = pos;
+    }
+  }
+  function deleteHistScene(id) {
+    const s = histData.scenes.find(x => x.id === id);
+    if (!s || !confirm(`Supprimer définitivement la scène « ${s.nom} » ?`)) return;
+    const box = document.getElementById('histScenes'), pos = box ? box.scrollTop : 0;
+    histData.scenes = histData.scenes.filter(x => x.id !== id);
+    histDelete('histoire_scenes', id);
+    showToast(`Scène « ${s.nom} » supprimée`);
+    renderHistChapitreView();
+    const box2 = document.getElementById('histScenes'); if (box2) box2.scrollTop = pos;
+  }
+
+  /* ================= PRÉPA DE SESSION ================= */
+  function renderHistPrepas() {
+    const list = histData.prepas.slice().sort(histByOrder);
+    document.getElementById('histSubContent').innerHTML = `
+      <div class="hist-toolbar">
+        <div class="hist-count">${list.length} prépa${list.length > 1 ? 's' : ''}</div>
+        <button class="new-spell-btn" onclick="openHistPrepaForm(null)">+ Créer une prépa</button>
+      </div>
+      ${list.length ? `<div class="hist-prep-grid">${list.map(p => `
+        <div class="hist-prep-chip" onclick="openHistPrepa('${p.id}')">
+          ${HIST_ICONS.prepa}
+          <div class="hist-prep-chip-name">${histEsc(p.nom)}</div>
+        </div>`).join('')}</div>`
+        : '<div class="hist-empty">Aucune prépa pour le moment.</div>'}
+    `;
+  }
+  function openHistPrepa(id) { histPrepId = id; renderHistPrepaView(); }
+  function closeHistPrepa() { histPrepFlush(); histPrepId = null; renderHistPrepas(); }
+  function renderHistPrepaView() {
+    const p = histData.prepas.find(x => x.id === histPrepId);
+    if (!p) { closeHistPrepa(); return; }
+    document.getElementById('histSubContent').innerHTML = `
+      <div class="hist-toolbar"><button class="hist-back" onclick="closeHistPrepa()">‹ Toutes les prépas</button></div>
+      <div class="hist-toolbar">
+        <h2 class="hist-chap-title">${histEsc(p.nom)}</h2>
+        <button class="hist-icon-btn" title="Renommer / supprimer" onclick="openHistPrepaForm('${p.id}')">${HIST_ICONS.edit}</button>
+        <span class="hist-save-state" id="histPrepState" style="margin-left:auto;">Enregistré</span>
+      </div>
+      <textarea class="hist-prep-text" id="histPrepText" placeholder="Écris ta prépa ici…" oninput="onHistPrepInput()" onblur="histPrepFlush()">${histEsc(p.texte)}</textarea>
+    `;
+    const ta = document.getElementById('histPrepText');
+    ta.style.height = Math.max(300, window.innerHeight - ta.getBoundingClientRect().top - 24) + 'px';
+  }
+  let histPrepTimer = null;
+  function onHistPrepInput() {
+    document.getElementById('histPrepState').textContent = 'Modifications…';
+    clearTimeout(histPrepTimer);
+    histPrepTimer = setTimeout(histPrepFlush, 800);
+  }
+  function histPrepFlush() {
+    clearTimeout(histPrepTimer);
+    const ta = document.getElementById('histPrepText');
+    const p = histData.prepas.find(x => x.id === histPrepId);
+    if (!ta || !p || ta.value === (p.texte || '')) return;
+    p.texte = ta.value;
+    histSave('histoire_prepas', { id: p.id, nom: p.nom, texte: p.texte, ordre: p.ordre }).then(ok => {
+      const st = document.getElementById('histPrepState'); if (st) st.textContent = ok ? 'Enregistré' : '⚠️ Non enregistré';
+    });
+  }
+  function openHistPrepaForm(id) {
+    histEditPrepId = id;
+    const p = id ? histData.prepas.find(x => x.id === id) : null;
+    document.getElementById('hpfTitle').textContent = p ? 'Renommer la prépa' : 'Nouvelle prépa';
+    document.getElementById('hpfSaveBtn').textContent = p ? 'Enregistrer' : 'Créer';
+    document.getElementById('hpfDeleteBtn').style.display = p ? 'block' : 'none';
+    document.getElementById('hpfName').value = p ? (p.nom || '') : '';
+    openModal('modalHistPrepa');
+    setTimeout(() => document.getElementById('hpfName').focus(), 50);
+  }
+  function saveHistPrepa() {
+    const nom = document.getElementById('hpfName').value.trim();
+    if (!nom) { showToast('Donne un nom à la prépa'); return; }
+    histPrepFlush();
+    let p = histEditPrepId ? histData.prepas.find(x => x.id === histEditPrepId) : null;
+    const isNew = !p;
+    if (isNew) { p = { id: histNewId('prepa'), texte: '', ordre: Date.now() }; histData.prepas.push(p); }
+    p.nom = nom;
+    histSave('histoire_prepas', { id: p.id, nom: p.nom, texte: p.texte || '', ordre: p.ordre });
+    closeModal('modalHistPrepa');
+    showToast(isNew ? `Prépa « ${nom} » créée` : `Prépa renommée`);
+    if (isNew) openHistPrepa(p.id); else renderHistPrepaView();
+  }
+  function deleteHistPrepa() {
+    const p = histData.prepas.find(x => x.id === histEditPrepId);
+    if (!p || !confirm(`Supprimer définitivement la prépa « ${p.nom} » et tout son texte ?`)) return;
+    clearTimeout(histPrepTimer);
+    histData.prepas = histData.prepas.filter(x => x.id !== p.id);
+    histDelete('histoire_prepas', p.id);
+    closeModal('modalHistPrepa');
+    showToast(`Prépa « ${p.nom} » supprimée`);
+    histPrepId = null; renderHistPrepas();
+  }
+
+  /* ================= NOTES (post-it) ================= */
+  const histNoteTimers = {};
+  function histNoteColor(key) { return (HIST_NOTE_COLORS.find(c => c.key === key) || HIST_NOTE_COLORS[0]).bg; }
+  function renderHistNotes() {
+    const list = histData.notes.slice().sort(histByOrder);
+    document.getElementById('histSubContent').innerHTML = `
+      <div class="hist-toolbar">
+        <div class="hist-count">${list.length} note${list.length > 1 ? 's' : ''}</div>
+        <button class="new-spell-btn" onclick="createHistNote()">+ Créer une note</button>
+      </div>
+      ${list.length ? `<div class="hist-notes">${list.map(n => `
+        <div class="hist-note ${n.verrouille ? 'locked' : ''}" data-note="${n.id}" style="background:${histNoteColor(n.couleur)};">
+          <textarea placeholder="Écris ta note…" ${n.verrouille ? 'readonly' : ''} oninput="onHistNoteInput('${n.id}', this.value)" onblur="histNoteFlush('${n.id}')">${histEsc(n.texte)}</textarea>
+          <div class="hist-note-bar">
+            <button class="hist-note-btn" title="Couleur" onclick="toggleHistNotePalette('${n.id}', event)">${HIST_ICONS.color}</button>
+            <button class="hist-note-btn hist-note-lock" title="${n.verrouille ? 'Déverrouiller' : 'Verrouiller'}" onclick="toggleHistNoteLock('${n.id}')">${n.verrouille ? HIST_ICONS.lock : HIST_ICONS.unlock}</button>
+            <button class="hist-note-btn" title="${n.verrouille ? 'Note verrouillée' : 'Supprimer'}" ${n.verrouille ? 'disabled' : ''} onclick="deleteHistNote('${n.id}')">${HIST_ICONS.trash}</button>
+          </div>
+          <div class="hist-note-palette" id="histPal_${n.id}">
+            ${HIST_NOTE_COLORS.map(c => `<div class="hist-note-swatch ${c.key === (n.couleur || 'jaune') ? 'current' : ''}" style="background:${c.bg};" title="${c.key}" onclick="setHistNoteColor('${n.id}', '${c.key}')"></div>`).join('')}
+          </div>
+        </div>`).join('')}</div>`
+        : '<div class="hist-empty">Aucune note. Clique sur « + Créer une note ».</div>'}
+    `;
+  }
+  function histNoteRow(n) { return { id: n.id, texte: n.texte || '', couleur: n.couleur || 'jaune', verrouille: !!n.verrouille, ordre: n.ordre }; }
+  function createHistNote() {
+    const n = { id: histNewId('note'), texte: '', couleur: 'jaune', verrouille: false, ordre: Date.now() };
+    histData.notes.push(n);
+    histSave('histoire_notes', histNoteRow(n));
+    renderHistNotes();
+    const ta = document.querySelector(`[data-note="${n.id}"] textarea`);
+    if (ta) { ta.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); ta.focus(); }
+  }
+  function onHistNoteInput(id, value) {
+    const n = histData.notes.find(x => x.id === id);
+    if (!n || n.verrouille) return;
+    n.texte = value;
+    clearTimeout(histNoteTimers[id]);
+    histNoteTimers[id] = setTimeout(() => histNoteFlush(id), 700);
+  }
+  function histNoteFlush(id) {
+    if (!histNoteTimers[id]) return;
+    clearTimeout(histNoteTimers[id]); delete histNoteTimers[id];
+    const n = histData.notes.find(x => x.id === id);
+    if (n) histSave('histoire_notes', histNoteRow(n));
+  }
+  function toggleHistNotePalette(id, ev) {
+    if (ev) ev.stopPropagation();
+    document.querySelectorAll('.hist-note-palette.open').forEach(p => { if (p.id !== 'histPal_' + id) p.classList.remove('open'); });
+    const pal = document.getElementById('histPal_' + id);
+    if (pal) pal.classList.toggle('open');
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest || e.target.closest('.hist-note-palette')) return;
+    document.querySelectorAll('.hist-note-palette.open').forEach(p => p.classList.remove('open'));
+  });
+  function setHistNoteColor(id, key) {
+    const n = histData.notes.find(x => x.id === id);
+    if (!n) return;
+    histNoteFlush(id);
+    n.couleur = key;
+    histSave('histoire_notes', histNoteRow(n));
+    renderHistNotes();
+  }
+  function toggleHistNoteLock(id) {
+    const n = histData.notes.find(x => x.id === id);
+    if (!n) return;
+    histNoteFlush(id);
+    n.verrouille = !n.verrouille;
+    histSave('histoire_notes', histNoteRow(n));
+    renderHistNotes();
+    showToast(n.verrouille ? 'Note verrouillée' : 'Note déverrouillée');
+  }
+  function deleteHistNote(id) {
+    const n = histData.notes.find(x => x.id === id);
+    if (!n || n.verrouille) return;
+    const apercu = (n.texte || '').trim().slice(0, 40);
+    if (!confirm(apercu ? `Supprimer la note « ${apercu}${n.texte.trim().length > 40 ? '…' : ''} » ?` : 'Supprimer cette note vide ?')) return;
+    clearTimeout(histNoteTimers[id]); delete histNoteTimers[id];
+    histData.notes = histData.notes.filter(x => x.id !== id);
+    histDelete('histoire_notes', id);
+    renderHistNotes();
+  }
+  // Rien ne se perd si on ferme la page juste après avoir tapé
+  window.addEventListener('beforeunload', () => {
+    try { histPrepFlush(); Object.keys(histNoteTimers).forEach(histNoteFlush); } catch (e) {}
+  });
+
   const consoleTilesData = [
     { id: 'joueurs', label: 'Joueurs', notifId: 'tileJoueursNotif', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.3c2.6.4 4.5 2.2 4.5 4.7"/></svg>' },
     { id: 'combat', label: 'Combat', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4L11 13"/><path d="M9.2 11.2L12.8 14.8"/><path d="M11 13L8 16"/><circle cx="7" cy="17" r="1.15" fill="currentColor" stroke="none"/></svg>' },
@@ -43048,6 +43574,7 @@
     { id: 'niveaux', label: 'Niveaux', notifId: 'tileNiveauxNotif', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>' },
     { id: 'tables', label: 'Tables', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M4 10h16M4 16h16M10 4v16M16 4v16"/></svg>' },
     { id: 'lore', label: 'Lore', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>' },
+    { id: 'histoire', label: 'Histoire', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 3c-6 1-11 6-13 13l-1 5 5-1c7-2 12-7 13-13"/><path d="M7 16c3-1 6-4 8-8"/><path d="M4 21l3-3"/></svg>' },
     { id: 'messagerie', label: 'Messagerie', notifId: 'tileMessagerieNotif', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16v12H8l-4 4z"/></svg>' },
     { id: 'parametres', label: 'Paramètres', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>' },
   ];
@@ -43101,6 +43628,7 @@
       await loadPlayersFromSupabase();
       await loadRollTablesFromSupabase();
       await loadCombatsFromSupabase();
+      try { await loadHistoireFromSupabase(); } catch (e) { console.error('Histoire', e); }
       if (typeof renderCharChips === 'function') renderCharChips();
       if (typeof renderNotifBadges === 'function') renderNotifBadges();
       if (failCount > 0) {
