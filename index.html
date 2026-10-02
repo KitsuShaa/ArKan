@@ -1858,6 +1858,61 @@
   .hlt-name { font-family: var(--font-serif); font-size: 14px; color: var(--ink); }
   .hlt-type { font-size: 11px; color: var(--gold); }
   .hlt-hint { font-size: 10.5px; color: var(--ink-faint); }
+
+  /* ===================== LORE › TEMPORALITÉ ===================== */
+  .tempo-layout { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; }
+  .tempo-portrait { aspect-ratio: 1 / 1.414; border-radius: var(--radius-md); border: 1px solid var(--card-border); background: var(--card) center / contain no-repeat; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; color: var(--ink-faint); overflow: hidden; }
+  .tempo-portrait:hover { border-color: var(--gold); }
+  .tempo-portrait .tp-empty { text-align: center; font-size: 12.5px; line-height: 1.6; padding: 20px; }
+  .tempo-portrait .tp-empty svg { width: 34px; height: 34px; display: block; margin: 0 auto 8px; }
+  .tempo-portrait .tp-change { position: absolute; right: 10px; bottom: 10px; background: rgba(20,20,26,.85); border: 1px solid var(--card-border); color: var(--ink-dim); font-size: 11.5px; padding: 5px 10px; border-radius: 8px; opacity: 0; transition: opacity .15s; }
+  .tempo-portrait:hover .tp-change { opacity: 1; }
+  .tempo-scroll { overflow-y: auto; padding-right: 8px; display: flex; flex-direction: column; gap: 22px; scrollbar-width: thin; scrollbar-color: var(--gold) transparent; }
+  .tempo-block { flex-shrink: 0; border-radius: var(--radius-lg); padding: 22px 26px 18px; background: var(--card); border: 1px solid var(--card-border); }
+  .tempo-block-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; }
+  .tempo-block-title { font-family: var(--font-display); font-size: 21px; letter-spacing: .5px; color: var(--gold); margin: 0; }
+  .tempo-block-range { font-size: 12px; color: var(--ink-faint); }
+  .tempo-avant { border-left: 3px solid rgba(201,162,75,.6); }
+  .tempo-apres { border-left: 3px solid rgba(79,157,157,.75); }
+  .tempo-apres .tempo-block-title { color: #74c2c2; }
+  .tempo-eras { position: relative; padding-left: 28px; display: flex; flex-direction: column; gap: 18px; }
+  .tempo-eras::before { content: ''; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(var(--tl-color, rgba(201,162,75,.5)), transparent); }
+  .tempo-apres .tempo-eras { --tl-color: rgba(79,157,157,.6); }
+  .tempo-avant .tempo-eras::before { background: linear-gradient(transparent, rgba(201,162,75,.55)); }
+  .tempo-apres .tempo-eras::before { background: linear-gradient(rgba(79,157,157,.65), rgba(79,157,157,.15)); }
+  .tempo-era { position: relative; }
+  .tempo-era::before { content: ''; position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg-elevated); border: 2px solid var(--gold); }
+  .tempo-apres .tempo-era::before { border-color: #4f9d9d; }
+  .tempo-era.present::before { background: #4f9d9d; box-shadow: 0 0 0 4px rgba(79,157,157,.2); }
+  .tempo-era-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+  .tempo-era-name { font-family: var(--font-serif); font-size: 17px; color: var(--ink); font-weight: 600; }
+  .tempo-era-name .te-ico { margin-right: 6px; }
+  .tempo-era-dates { font-size: 11.5px; color: var(--gold); background: var(--gold-soft); border-radius: 20px; padding: 2px 10px; }
+  .tempo-apres .tempo-era-dates { color: #74c2c2; background: var(--teal-soft); }
+  .tempo-era-desc { font-family: var(--font-serif); font-style: italic; color: var(--ink-dim); font-size: 14px; line-height: 1.6; margin: 6px 0 6px; }
+  .tempo-list { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.65; color: var(--ink); }
+  .tempo-list li::marker { color: var(--gold); }
+  .tempo-list ul { margin: 2px 0; padding-left: 18px; }
+  .tempo-list strong { color: var(--ink); font-weight: 600; }
+  /* La Fracture : bloc distinct, lueur violette et faille */
+  .tempo-fracture { position: relative; overflow: hidden; border: 1px solid rgba(155,127,196,.7); background:
+      radial-gradient(ellipse at 15% 0%, rgba(155,127,196,.28), transparent 55%),
+      radial-gradient(ellipse at 100% 100%, rgba(79,157,157,.18), transparent 50%),
+      linear-gradient(160deg, #1d1828, #16141f); box-shadow: 0 0 0 1px rgba(155,127,196,.15), 0 0 32px rgba(155,127,196,.18) inset; padding-top: 30px; }
+  .tempo-crack { position: absolute; left: 0; right: 0; top: 0; height: 18px; pointer-events: none; }
+  .tempo-crack path { stroke: #c9b4ff; stroke-width: 1.4; fill: none; filter: drop-shadow(0 0 4px rgba(190,160,255,.9)); }
+  .tempo-fracture .tempo-block-title { color: #c9b4ff; font-size: 24px; text-shadow: 0 0 14px rgba(155,127,196,.55); }
+  .tempo-fracture .tempo-block-range { color: #b6a3dc; }
+  .tempo-fracture-intro { font-family: var(--font-serif); font-style: italic; font-size: 15px; line-height: 1.65; color: #ddd4f0; margin: -6px 0 12px; }
+  .tempo-fracture .tempo-list li::marker { color: #b49be6; }
+  .tempo-apres .tempo-list li::marker { color: #4f9d9d; }
+  .tempo-fracture-key { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .tempo-fracture-key span { font-size: 12.5px; color: #e4dcf6; background: rgba(155,127,196,.18); border: 1px solid rgba(155,127,196,.4); border-radius: 20px; padding: 5px 12px; }
+  .tempo-fracture-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  .tempo-fracture-card { background: rgba(10,8,16,.35); border: 1px solid rgba(155,127,196,.25); border-radius: var(--radius-md); padding: 14px 16px; }
+  .tempo-fracture-card.wide { grid-column: 1 / -1; border-color: rgba(201,180,255,.5); background: rgba(155,127,196,.1); }
+  .tempo-fracture-card h4 { margin: 0 0 8px; font-family: var(--font-serif); font-size: 15px; color: #c9b4ff; font-weight: 600; }
+  @media (max-width: 1000px) { .tempo-layout { grid-template-columns: 1fr; } .tempo-portrait { max-width: 420px; height: auto !important; } .tempo-scroll { height: auto !important; overflow: visible; } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1865,7 +1920,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (24)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (25)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -33653,6 +33708,7 @@
     { key: 'kaorun', label: 'La Secte de Kaorûn', ready: true, icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2 4 3-3-1 4.5 4-1.5-3 4 4 1-4 1 3 4-4-1.5 1 4.5-3-3-2 4-2-4-3 3 1-4.5-4 1.5 3-4-4-1 4-1-3-4 4 1.5-1-4.5 3 3z"/></svg>' },
     { key: 'animaux', label: 'Animaux', ready: true, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10c0-2 2-3 3-1 1-3 4-3 5 0 1-3 4-3 5 0 1-2 3-1 3 1-1 5-4 9-8 9s-7-4-8-9z"/></svg>' },
     { key: 'dieux', label: 'Dieux', ready: true, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5z"/></svg>' },
+    { key: 'temporalite', label: 'Temporalité', ready: true, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 21h12"/><path d="M7 3c0 4 3 6 5 9-2 3-5 5-5 9M17 3c0 4-3 6-5 9 2 3 5 5 5 9"/><path d="M9.5 18.5h5"/></svg>' },
     { key: 'systeme', label: 'Système de jeu', ready: true, icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v16H4z"/><path d="M4 10h16M4 16h16M10 4v16M16 4v16"/></svg>' },
   ];
   let currentLoreSubmodule = 'pnj';
@@ -33709,6 +33765,7 @@
       initPnjFilters();
       renderPnjGrid();
     }
+    if (currentLoreSubmodule === 'temporalite') renderTemporalite(container);
     if (currentLoreSubmodule === 'dieux') {
       container.innerHTML = `
         <div class="spells-toolbar">
@@ -44336,6 +44393,128 @@
     });
   }
 
+  /* ===================== LORE › TEMPORALITÉ ===================== */
+  // Chronologie du monde (contenu repris des documents Avant / La Fracture / Après).
+  // L'image portrait est enregistrée dans Supabase Storage, son adresse dans mj_preferences.
+  let tempoImage = null;
+  const TEMPO_AVANT = [
+    { ico: '🔮', nom: 'Ère Originelle', dates: '~ ??? à -2000', desc: "L'époque mythique où les premiers êtres mortels émergent, guidés par des entités primordiales. Peu de traces concrètes subsistent.",
+      pts: ['Création des premiers langages, magies, cultures.', "Lieux sacrés et ruines antiques d'origine incertaine.", "Mythes du « Grand Chant » à l'origine du monde."] },
+    { ico: '⚔️', nom: 'Ère des Larmes', dates: '-2000 à -1900', desc: "Une guerre cataclysmique éclate contre Kaorûn, une entité destructrice. Aujourd'hui, cette guerre est presque effacée des mémoires. Ses traces sont cryptiques.",
+      pts: ['Coalitions éphémères, armes anciennes oubliées.', 'Kaorûn est vaincu ou banni, mais à un coût immense.', 'Très peu de documents subsistent sur cette époque.'] },
+    { ico: '🌼', nom: "Ère de l'Éveil", dates: '-1900 à -1200', desc: "Renaissance du monde après la guerre. Période de paix, prospérité et grands progrès. L'art, la magie et la science fleurissent.",
+      pts: ['Fondation des grands royaumes.', 'Apogée des écoles magiques.', 'Développement de routes commerciales et diplomatie.'] },
+    { ico: '❌', nom: 'Ère du Voile', dates: '-1200 à -1050', desc: "Une disparition soudaine de la magie frappe le monde. Les civilisations s'effondrent partiellement, incapables de comprendre ce phénomène.",
+      pts: ['Chute des grandes tours arcanes.', 'Religion et philosophie prennent le relais.', 'Technologies rudimentaires émergent.', "Ce n'est pas une ère noire, mais d'adaptation."] },
+    { ico: '🔧', nom: 'Ère des Forges', dates: '-1050 à 0', desc: 'Les peuples apprennent à vivre sans magie. Ils développent artisanat, ingénierie, alchimie, et institutions séculières.',
+      pts: ['Ère de grandes inventions mécaniques.', 'Prospérité commerciale, alliances politiques.', 'Des érudits annoncent cependant un changement à venir…'] },
+  ];
+  const TEMPO_APRES = [
+    { ico: '🌱', nom: 'Ère des Germes', dates: '0 à 300', desc: 'La magie renaît lentement. Les peuples redécouvrent leurs anciens pouvoirs, parfois avec crainte, parfois avec espoir.',
+      pts: ['Redécouverte des artefacts anciens.', 'Nouvelles écoles et courants magiques apparaissent.', 'Naissance de nouvelles religions et philosophies.'] },
+    { ico: '🏛️', nom: 'Ère des Couronnes', dates: '300 à 850', desc: "Une période faste. Les royaumes s'unifient ou prospèrent, les échanges s'intensifient, les villes croissent. L'âge d'or moderne.",
+      pts: ['Progrès dans les arts, la magie et la diplomatie.', 'Apparition de guildes puissantes, académies, universités.', 'Début des grandes explorations.'] },
+    { ico: '🌌', nom: 'Ère des Brumes', dates: '850 à 1200', desc: 'Certains mystères anciens refont surface. Portails scellés, phénomènes inexpliqués, ruines émergeant de nulle part.',
+      pts: ['Le passé revient par fragments.', 'De nouveaux cultes ou prophéties apparaissent.', "Instabilité croissante… mais rien d'encore menaçant."] },
+    { ico: '❓', nom: 'Temps Présent', dates: 'an 1223', present: true, desc: "Le monde est riche, mûr et légèrement inquiet. Des secrets anciens pourraient bouleverser l'équilibre.",
+      pts: ['Des rumeurs parlent de puissances oubliées.', 'Certains pensent que la Fracture fut un début, pas une fin.', "D'autres cherchent à réveiller ce qui n'aurait pas dû l'être…"] },
+  ];
+  const TEMPO_FRACTURE = {
+    intro: "Une rupture mystérieuse dans le tissu du monde. Des lignes d'énergie ancienne resurgissent, ravivant la magie et réveillant des forces oubliées.",
+    cles: ["Les frontières entre mondes s'affaiblissent brièvement", 'La magie revient, transformée', 'Un rééquilibrage planétaire qui redéfinit tout'],
+    sections: [
+      { titre: '📜 Dans les ouvrages historiques', pts: [
+        'La Fracture est généralement décrite comme un **événement énergétique planétaire**, survenu brutalement.',
+        "D'anciens flux magiques, auparavant éteints ou souterrains, **se sont réveillés simultanément** partout dans le monde.",
+        ["Des témoins de l'époque relatent :", ['Une lumière aveuglante dans le ciel pendant trois jours.', "Des failles apparaissant brièvement dans la réalité : visions d'autres plans, distorsions du temps.", "Des zones autrefois mortes magiquement (comme les déserts ou les fonds marins) s'activant de nouveau."]],
+        "Il n'y a **aucune source fiable** sur **ce qui a causé** la Fracture : certains avancent un alignement planétaire rare, d'autres parlent d'un artefact déclenché, ou d'un acte divin."] },
+      { titre: '🕯️ Dans les légendes populaires', pts: [
+        "Dans certaines cultures, la Fracture est vue comme **le cri d'agonie d'un ancien dieu** qui aurait tenté de renaître.",
+        "D'autres racontent que **le monde a « clignoté »** : un très court instant où la réalité s'est arrêtée, et tout aurait pu basculer.",
+        'Des marins affirment avoir vu des terres apparaître dans la mer, puis disparaître.',
+        'Des forêts entières sont apparues en une nuit, contenant des créatures et ruines inconnues.'] },
+      { titre: '🔭 Chez les érudits et mages', pts: [
+        ['La Fracture est souvent étudiée comme un **réalignement du Tissu magique** :', ["Ce serait le moment où **l'Æthyr** (le réseau mystique sous-jacent) aurait été reconnecté à son origine.", 'Certains affirment que **la magie avant la Fracture** était une magie « morte », résiduelle — alors qu\'après, elle serait **vivante, consciente, instable**.']],
+        "D'anciens portails se sont réactivés, notamment vers des **plans inconnus ou oubliés**.",
+        'Des anomalies persistent : lieux où le temps passe plus vite, zones à gravité inversée, enfants nés avec des marques arcaniques…'] },
+      { titre: '🙏 Dans les courants religieux', pts: [
+        'Pour certaines religions, la Fracture est un **jugement divin** : un test, ou une seconde chance.',
+        "D'autres la voient comme **la cicatrice d'un combat céleste**, un moment où les dieux se seraient affrontés au-dessus des cieux.",
+        "Les fidèles de certaines divinités prétendent que **leurs dieux sont revenus à ce moment précis**, après des siècles d'absence."] },
+      { titre: "✨ Conséquences encore visibles aujourd'hui (en 1200)", wide: true, pts: [
+        'Certains individus — très rares — **« résonnent » avec la Fracture** : ils ont des visions, des capacités spontanées, ou entendent des voix sans explication.',
+        'Des zones appelées **« Balafres de la Fracture »** sont considérées instables : magie amplifiée, créatures anormales, portail dormant.',
+        "Des fragments de mémoire ou d'histoire auraient été perdus, ou… **échangés avec autre chose**."] },
+    ],
+  };
+  const tempoFmt = t => histEsc(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  const tempoList = pts => `<ul class="tempo-list">${pts.map(p => Array.isArray(p) ? `<li>${tempoFmt(p[0])}${tempoList(p[1])}</li>` : `<li>${tempoFmt(p)}</li>`).join('')}</ul>`;
+  const tempoEras = eras => `<div class="tempo-eras">${eras.map(e => `
+    <div class="tempo-era ${e.present ? 'present' : ''}">
+      <div class="tempo-era-head"><span class="tempo-era-name"><span class="te-ico">${e.ico}</span>${histEsc(e.nom)}</span><span class="tempo-era-dates">${histEsc(e.dates)}</span></div>
+      <div class="tempo-era-desc">${histEsc(e.desc)}</div>
+      ${tempoList(e.pts)}
+    </div>`).join('')}</div>`;
+
+  function renderTemporalite(container) {
+    const f = TEMPO_FRACTURE;
+    container.innerHTML = `
+      <div class="tempo-layout">
+        <div class="tempo-portrait" id="tempoPortrait" onclick="document.getElementById('tempoFileInput').click()" style="${tempoImage ? `background-image:url('${histEsc(tempoImage)}')` : ''}">
+          ${tempoImage ? '<div class="tp-change">Changer l’image</div>' : `<div class="tp-empty">${HIST_ICONS.image}Clique pour importer l'image<br><span style="font-size:11px;">format portrait, gardée en pleine qualité</span></div>`}
+        </div>
+        <input type="file" id="tempoFileInput" accept="image/*" data-icrop-internal="1" style="display:none;" onchange="onTempoImageSelected(event)">
+        <div class="tempo-scroll" id="tempoScroll">
+          <section class="tempo-block tempo-avant">
+            <div class="tempo-block-head"><h2 class="tempo-block-title">Avant la Fracture</h2><span class="tempo-block-range">des origines à l'an 0</span></div>
+            ${tempoEras(TEMPO_AVANT)}
+          </section>
+          <section class="tempo-block tempo-fracture">
+            <svg class="tempo-crack" viewBox="0 0 1000 18" preserveAspectRatio="none"><path d="M0 9 L120 7 L160 12 L230 4 L290 10 L360 6 L410 14 L470 3 L530 11 L600 6 L640 13 L720 5 L790 10 L850 4 L910 12 L1000 8"/></svg>
+            <div class="tempo-block-head"><h2 class="tempo-block-title">🌠 La Fracture</h2><span class="tempo-block-range">an 0</span></div>
+            <div class="tempo-fracture-intro">${histEsc(f.intro)}</div>
+            <div class="tempo-fracture-key">${f.cles.map(c => `<span>${histEsc(c)}</span>`).join('')}</div>
+            <div class="tempo-fracture-grid">${f.sections.map(s => `
+              <div class="tempo-fracture-card ${s.wide ? 'wide' : ''}"><h4>${histEsc(s.titre)}</h4>${tempoList(s.pts)}</div>`).join('')}
+            </div>
+          </section>
+          <section class="tempo-block tempo-apres">
+            <div class="tempo-block-head"><h2 class="tempo-block-title">Après la Fracture</h2><span class="tempo-block-range">de l'an 0 à aujourd'hui</span></div>
+            ${tempoEras(TEMPO_APRES)}
+          </section>
+        </div>
+      </div>
+    `;
+    tempoFitHeight();
+  }
+  function tempoFitHeight() {
+    const sc = document.getElementById('tempoScroll'), pt = document.getElementById('tempoPortrait');
+    if (!sc || !sc.offsetParent || window.innerWidth <= 1000) return;
+    const h = Math.max(420, window.innerHeight - sc.getBoundingClientRect().top - 24);
+    sc.style.height = h + 'px'; pt.style.height = h + 'px'; pt.style.width = Math.round(h / 1.414) + 'px';
+  }
+  window.addEventListener('resize', tempoFitHeight);
+  async function loadTempoImage() {
+    if (!sb) return;
+    const { data, error } = await sb.from('mj_preferences').select('valeur').eq('cle', 'temporalite_image').maybeSingle();
+    if (!error && data && data.valeur && data.valeur.url) tempoImage = data.valeur.url;
+  }
+  async function onTempoImageSelected(e) {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    showToast('Envoi de l’image…');
+    let url;
+    try { url = await uploadImageBlob(file, 'temporalite'); }
+    catch (err) { console.error(err); showToast('⚠️ Envoi de l’image impossible (' + (err.message || err) + ')'); return; }
+    tempoImage = url;
+    if (sb) sb.from('mj_preferences').upsert({ cle: 'temporalite_image', valeur: { url }, maj_le: new Date().toISOString() }).then(({ error }) => {
+      if (error) showToast('⚠️ Image non enregistrée (' + error.message + ')'); else showToast('Image enregistrée');
+    });
+    const c = document.getElementById('loreSubContent');
+    if (c && currentLoreSubmodule === 'temporalite') renderTemporalite(c);
+  }
+
   const consoleTilesData = [
     { id: 'joueurs', label: 'Joueurs', notifId: 'tileJoueursNotif', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.3c2.6.4 4.5 2.2 4.5 4.7"/></svg>' },
     { id: 'combat', label: 'Combat', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4L11 13"/><path d="M9.2 11.2L12.8 14.8"/><path d="M11 13L8 16"/><circle cx="7" cy="17" r="1.15" fill="currentColor" stroke="none"/></svg>' },
@@ -44436,6 +44615,7 @@
       try { await loadCartesFromSupabase(); } catch (e) { console.error('Cartes', e); }
       try { await loadTileOrderFromSupabase(); } catch (e) { console.error('Ordre des modules', e); }
       try { await loadHistLinkIgnore(); } catch (e) { console.error('Liens du Tome', e); }
+      try { await loadTempoImage(); } catch (e) { console.error('Temporalité', e); }
       if (typeof renderCharChips === 'function') renderCharChips();
       if (typeof renderNotifBadges === 'function') renderNotifBadges();
       if (failCount > 0) {
