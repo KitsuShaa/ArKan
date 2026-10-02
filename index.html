@@ -1920,7 +1920,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (25)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (26)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -36779,7 +36779,7 @@
 
   function orgPnjSlotHtml(kind, slot, roleLabel) {
     if (slot.pnjId) {
-      const p = pnjDatabase.find(x => x.id === slot.pnjId);
+      const p = pnjDatabase.find(x => String(x.id) === String(slot.pnjId));
       if (p) {
         return `
           <div class="org-box clickable org-box-assigned" data-org-kind="${kind}" data-org-id="${slot.id}">
@@ -36859,25 +36859,6 @@
       </div>
     `;
 
-  function orgKindDbAny(kind) {
-    if (kind === 'fondateur') return fondateursDatabase;
-    if (kind === 'conseil') return conseilDatabase;
-    if (kind === 'primarch') return primarchsDatabase;
-    if (kind === 'capitaine') return capitainesDatabase;
-    return [];
-  }
-  function sbSyncOrgSlot(kind, entry) {
-    if (!sb) return;
-    if (kind === 'fondateur') sb.from('fondateurs_astelorn').upsert({ id: entry.id, nom: entry.name, voie: entry.voie, visible: entry.visible, photo: entry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
-    if (kind === 'conseil') sb.from('conseil_astelorn').update({ visible: entry.visible }).eq('id', entry.id).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
-    if (kind === 'primarch') sb.from('primarchs_astelorn').upsert({ id: entry.id, pnj_id: entry.pnjId || null, antenne_id: entry.antenneId || null, visible: entry.visible }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
-    if (kind === 'capitaine') sb.from('capitaines_astelorn').upsert({ id: entry.id, primarch_id: entry.primarchId, voie: entry.voie, pnj_id: entry.pnjId || null, visible: entry.visible }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
-  }
-  function toggleOrgVisibility(kind, id) {
-    const entry = orgKindDbAny(kind).find(x => x.id === id);
-    if (entry) { entry.visible = !entry.visible; sbSyncOrgSlot(kind, entry); }
-    renderAstelornSubContent();
-  }
 
     document.querySelectorAll('#orgChart [data-org-kind]').forEach(box => {
       if (!box.classList.contains('clickable')) return;
@@ -36887,8 +36868,9 @@
         const id = box.dataset.orgId;
         if (kind === 'conseil') openConseilView(id);
         if (kind === 'primarch' || kind === 'capitaine') {
-          const slot = orgSlotDb(kind).find(x => x.id === id);
-          if (slot && slot.pnjId) openPnjView(slot.pnjId);
+          const slot = orgSlotDb(kind).find(x => String(x.id) === String(id));
+          const p = slot && slot.pnjId ? pnjDatabase.find(x => String(x.id) === String(slot.pnjId)) : null;
+          if (p) openPnjView(p.id);
         }
       });
     });
@@ -37008,6 +36990,27 @@
     svg.innerHTML = paths;
   }
 
+  // Accessibles partout (sélecteur de PNJ, retrait, visibilité) — étaient enfermées dans renderOrganigramme
+  function orgKindDbAny(kind) {
+    if (kind === 'fondateur') return fondateursDatabase;
+    if (kind === 'conseil') return conseilDatabase;
+    if (kind === 'primarch') return primarchsDatabase;
+    if (kind === 'capitaine') return capitainesDatabase;
+    return [];
+  }
+  function sbSyncOrgSlot(kind, entry) {
+    if (!sb) return;
+    if (kind === 'fondateur') sb.from('fondateurs_astelorn').upsert({ id: entry.id, nom: entry.name, voie: entry.voie, visible: entry.visible, photo: entry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+    if (kind === 'conseil') sb.from('conseil_astelorn').update({ visible: entry.visible }).eq('id', entry.id).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+    if (kind === 'primarch') sb.from('primarchs_astelorn').upsert({ id: entry.id, pnj_id: entry.pnjId || null, antenne_id: entry.antenneId || null, visible: entry.visible }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+    if (kind === 'capitaine') sb.from('capitaines_astelorn').upsert({ id: entry.id, primarch_id: entry.primarchId, voie: entry.voie, pnj_id: entry.pnjId || null, visible: entry.visible }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+  }
+  function toggleOrgVisibility(kind, id) {
+    const entry = orgKindDbAny(kind).find(x => String(x.id) === String(id));
+    if (entry) { entry.visible = !entry.visible; sbSyncOrgSlot(kind, entry); }
+    renderAstelornSubContent();
+  }
+
   let currentOrgSlotKind = null;
   let currentOrgSlotId = null;
 
@@ -37032,8 +37035,12 @@
     `).join('') || '<p class="guild-placeholder">Aucun PNJ ne correspond.</p>';
     document.querySelectorAll('[data-opk-pnj]').forEach(row => {
       row.addEventListener('click', () => {
-        const slot = orgSlotDb(currentOrgSlotKind).find(x => x.id === currentOrgSlotId);
-        if (slot) { slot.pnjId = row.dataset.opkPnj; sbSyncOrgSlot(currentOrgSlotKind, slot); }
+        // Identifiants comparés en texte : ceux lus dans la page sont des textes, ceux de la base parfois des nombres
+        const slot = orgSlotDb(currentOrgSlotKind).find(x => String(x.id) === String(currentOrgSlotId));
+        const pnj = pnjDatabase.find(x => String(x.id) === String(row.dataset.opkPnj));
+        if (!slot || !pnj) { showToast('⚠️ Case ou PNJ introuvable, recharge la page'); console.error('Organigramme', currentOrgSlotKind, currentOrgSlotId, row.dataset.opkPnj); return; }
+        slot.pnjId = pnj.id; sbSyncOrgSlot(currentOrgSlotKind, slot);
+        showToast(`${pnj.name} placé dans l'organigramme`);
         closeModal('modalOrgPnjPicker');
         renderAstelornSubContent();
       });
@@ -37041,7 +37048,7 @@
   }
 
   function unassignOrgSlot(kind, slotId) {
-    const slot = orgSlotDb(kind).find(x => x.id === slotId);
+    const slot = orgSlotDb(kind).find(x => String(x.id) === String(slotId));
     if (slot) { slot.pnjId = null; sbSyncOrgSlot(kind, slot); }
     renderAstelornSubContent();
   }
