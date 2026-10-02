@@ -1826,16 +1826,16 @@
   .carte-pin-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
   .carte-pin-row { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--ink); }
   .carte-pin-row:hover { background: var(--bg-elevated); }
-  .carte-pin-row .cpr-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .carte-pin-row .cpr-dot { box-shadow: 0 0 0 1px rgba(255,255,255,.25); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
   .carte-pin-row .cpr-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .carte-pin-row .cpr-link { color: var(--gold); font-size: 11px; }
   .carte-mode-btn.active { background: var(--gold); color: #14100a; border-color: var(--gold); }
-  .cpf-types { display: grid; grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 6px; }
+  .cpf-types { display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 6px; }
   .cpf-type { border: 1px solid var(--card-border); background: var(--card); color: var(--ink-dim); border-radius: 9px; padding: 7px 6px; font-size: 11.5px; cursor: pointer; text-align: center; }
   .cpf-type .cpft-ico { display: block; font-size: 17px; margin-bottom: 2px; }
   .cpf-type.active { border-color: var(--gold); background: var(--gold-soft); color: var(--gold); }
   .cpf-colors { display: flex; gap: 8px; flex-wrap: wrap; }
-  .cpf-color { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
+  .cpf-color { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; box-shadow: 0 0 0 1px rgba(255,255,255,.2); cursor: pointer; }
   .cpf-color.active { border-color: var(--ink); box-shadow: 0 0 0 2px var(--bg-elevated) inset; }
   .cpf-lore-results { max-height: 180px; overflow-y: auto; border: 1px solid var(--card-border); border-radius: 9px; margin-top: 6px; display: none; }
   .cpf-lore-results.open { display: block; }
@@ -1852,7 +1852,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (17)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 01/10 (19)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -43688,16 +43688,23 @@
   const cv = { k: 1, x: 0, y: 0, w: 1, h: 1, fit: 1 };   // zoom + position de la carte affichée
   let carteEditId = null, cartePendingFile = null, cartePendingDims = null, cartePendingPreview = null;
   let cartePinEdit = null;       // pin en cours dans le formulaire
+  // Code couleur par défaut de chaque type (modifiable pin par pin dans le formulaire)
   const CARTE_PIN_TYPES = [
-    { key: 'ville', label: 'Ville', ico: '🏰' }, { key: 'village', label: 'Village', ico: '🏡' },
-    { key: 'auberge', label: 'Auberge', ico: '🍺' }, { key: 'commerce', label: 'Commerce', ico: '🛒' },
-    { key: 'temple', label: 'Temple', ico: '⛪' }, { key: 'astelorn', label: 'Astelorn', ico: '🛡️' },
-    { key: 'donjon', label: 'Donjon / ruine', ico: '🗝️' }, { key: 'danger', label: 'Danger', ico: '☠️' },
-    { key: 'camp', label: 'Camp', ico: '⛺' }, { key: 'port', label: 'Port', ico: '⚓' },
-    { key: 'personnage', label: 'Personnage', ico: '👤' }, { key: 'quete', label: 'Quête', ico: '❗' },
-    { key: 'interet', label: "Point d'intérêt", ico: '⭐' }, { key: 'carte', label: 'Autre carte', ico: '🗺️' },
+    { key: 'ville', label: 'Ville / Village', ico: '🏰', color: '#1d1d22' },
+    { key: 'commerce', label: 'Auberge / Commerce', ico: '🍺', color: '#2e6b3c' },
+    { key: 'temple', label: 'Temple', ico: '⛪', color: '#e2bf2f' },
+    { key: 'astelorn', label: 'Astelorn', ico: '🛡️', color: '#6db4ea' },
+    { key: 'donjon', label: 'Donjon', ico: '🗝️', color: '#e47b27' },
+    { key: 'danger', label: 'Danger', ico: '☠️', color: '#cc3238' },
+    { key: 'personnage', label: 'Personnage', ico: '👤', color: '#8d5ac6' },
+    { key: 'interet', label: 'Lieu important', ico: '⭐', color: '#8ed36a' },
+    { key: 'port', label: 'Port', ico: '⚓', color: '#244a96' },
+    { key: 'divers', label: 'Divers', ico: '📌', color: '#7a7680' },
   ];
-  const CARTE_PIN_COLORS = ['#c9a24b', '#a4383f', '#4f9d9d', '#5a9b6f', '#9b7fc4', '#d9824b', '#4a78c2', '#7a7680'];
+  const CARTE_PIN_COLORS = CARTE_PIN_TYPES.map(t => t.color);
+  // Anciens types regroupés (pins déjà posés)
+  const CARTE_TYPE_ALIAS = { village: 'ville', auberge: 'commerce', camp: 'divers', quete: 'divers', carte: 'divers' };
+  const cTypeKey = k => { k = CARTE_TYPE_ALIAS[k] || k; return CARTE_PIN_TYPES.some(t => t.key === k) ? k : 'divers'; };
   // Fiches du lore que l'on peut lier à un pin
   const CARTE_LORE_SOURCES = [
     { key: 'pnj', label: 'PNJ', db: () => pnjDatabase, open: id => openPnjView(id) },
@@ -43713,7 +43720,7 @@
   ];
   const cEsc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const cNewId = p => p + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-  const cPinType = k => CARTE_PIN_TYPES.find(t => t.key === k) || CARTE_PIN_TYPES[CARTE_PIN_TYPES.length - 2];
+  const cPinType = k => CARTE_PIN_TYPES.find(t => t.key === cTypeKey(k));
   function carteLoreSource(key) { return CARTE_LORE_SOURCES.find(s => s.key === key); }
   function carteLoreEntry(type, id) {
     const src = carteLoreSource(type);
@@ -43914,13 +43921,13 @@
 
   /* ---- Pins ---- */
   function carteVisiblePins() {
-    return carteData.pins.filter(p => p.carte_id === carteId && !carteHiddenTypes.has(p.type || 'interet'));
+    return carteData.pins.filter(p => p.carte_id === carteId && !carteHiddenTypes.has(cTypeKey(p.type)));
   }
   function renderCartePins() {
     const layer = document.getElementById('cartePins');
     if (!layer) return;
     layer.innerHTML = carteVisiblePins().map(p => {
-      const t = cPinType(p.type), col = p.couleur || CARTE_PIN_COLORS[0], open = p.id === carteOpenPinId;
+      const t = cPinType(p.type), col = p.couleur || cPinType(p.type).color, open = p.id === carteOpenPinId;
       let bubble = '';
       if (open) {
         const lore = carteLoreEntry(p.lien_type, p.lien_id);
@@ -43960,7 +43967,7 @@
     const side = document.getElementById('carteSide');
     if (!side) return;
     const all = carteData.pins.filter(p => p.carte_id === carteId);
-    const usedTypes = CARTE_PIN_TYPES.filter(t => all.some(p => (p.type || 'interet') === t.key));
+    const usedTypes = CARTE_PIN_TYPES.filter(t => all.some(p => cTypeKey(p.type) === t.key));
     const q = normalizeText(carteSearch);
     const rows = carteVisiblePins().filter(p => !q || normalizeText(p.nom).includes(q)).sort((a, b) => (a.nom || '').localeCompare(b.nom || '', 'fr'));
     side.innerHTML = `
@@ -43979,7 +43986,7 @@
     list.innerHTML = rows.length ? rows.map(p => {
       const t = cPinType(p.type);
       return `<div class="carte-pin-row" onclick="focusCartePin('${p.id}')">
-        <div class="cpr-dot" style="background:${cEsc(p.couleur || CARTE_PIN_COLORS[0])};">${t.ico}</div>
+        <div class="cpr-dot" style="background:${cEsc(p.couleur || cPinType(p.type).color)};">${t.ico}</div>
         <div class="cpr-name">${cEsc(p.nom)}</div>
         ${p.lien_id ? '<span class="cpr-link" title="Fiche du lore liée">📖</span>' : ''}${p.carte_cible_id ? '<span class="cpr-link" title="Ouvre une autre carte">🗺️</span>' : ''}
       </div>`; }).join('')
@@ -43999,7 +44006,7 @@
   /* ---- Formulaire de pin ---- */
   function openCartePinForm(id, pos) {
     const p = id ? carteData.pins.find(x => x.id === id) : null;
-    cartePinEdit = p ? { ...p } : { id: null, carte_id: carteId, x: pos.x, y: pos.y, nom: '', type: 'interet', couleur: CARTE_PIN_COLORS[0], texte: '', lien_type: null, lien_id: null, carte_cible_id: null };
+    cartePinEdit = p ? { ...p, type: cTypeKey(p.type) } : { id: null, carte_id: carteId, x: pos.x, y: pos.y, nom: '', type: 'interet', couleur: cPinType('interet').color, texte: '', lien_type: null, lien_id: null, carte_cible_id: null };
     document.getElementById('cpfTitle').textContent = p ? 'Modifier le pin' : 'Nouveau pin';
     document.getElementById('cpfSaveBtn').textContent = p ? 'Enregistrer' : 'Créer';
     document.getElementById('cpfDeleteBtn').style.display = p ? 'block' : 'none';
@@ -44016,7 +44023,14 @@
   }
   function renderCartePinTypes() {
     document.getElementById('cpfTypes').innerHTML = CARTE_PIN_TYPES.map(t =>
-      `<div class="cpf-type ${t.key === cartePinEdit.type ? 'active' : ''}" onclick="cartePinEdit.type='${t.key}'; renderCartePinTypes()"><span class="cpft-ico">${t.ico}</span>${t.label}</div>`).join('');
+      `<div class="cpf-type ${t.key === cartePinEdit.type ? 'active' : ''}" onclick="pickCartePinType('${t.key}')"><span class="cpft-ico">${t.ico}</span>${t.label}</div>`).join('');
+  }
+  // Changer de type applique sa couleur, sauf si une autre couleur a été choisie à la main
+  function pickCartePinType(key) {
+    const before = cPinType(cartePinEdit.type).color;
+    if (!cartePinEdit.couleur || cartePinEdit.couleur === before) cartePinEdit.couleur = cPinType(key).color;
+    cartePinEdit.type = key;
+    renderCartePinTypes(); renderCartePinColors();
   }
   function renderCartePinColors() {
     document.getElementById('cpfColors').innerHTML = CARTE_PIN_COLORS.map(c =>
@@ -44066,7 +44080,7 @@
     carteSave('cartes_pins', cartePinRow(p));
     closeModal('modalCartePin');
     showToast(e.id ? `Pin « ${nom} » mis à jour` : `Pin « ${nom} » posé`);
-    carteHiddenTypes.delete(p.type);
+    carteHiddenTypes.delete(cTypeKey(p.type));
     renderCartePins(); renderCarteSide();
   }
   function deleteCartePin() {
