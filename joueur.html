@@ -3410,7 +3410,17 @@
       const { data: sess } = await sbGate.auth.getSession();
       if (sess && sess.session) {
         const { data: ok } = await sbGate.rpc('acces_joueur', { p_joueur: playerId });
-        if (ok === true) { overlay.style.display = 'none'; return; }
+        if (ok === true) {
+          overlay.style.display = 'none';
+          // Indique pourquoi aucun code n'a été demandé
+          const { data: mj } = await sbGate.rpc('est_mj');
+          const note = document.createElement('div');
+          note.textContent = mj === true ? 'Ouverte avec ta session MJ — aucun code demandé' : 'Appareil déjà reconnu pour cette fiche';
+          note.style.cssText = "position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:10001;background:#1c1710;color:#c9a24b;border:1px solid rgba(201,162,75,.4);padding:8px 14px;border-radius:8px;font:12.5px 'Inter',sans-serif;pointer-events:none;";
+          document.body.appendChild(note);
+          setTimeout(() => note.remove(), 5000);
+          return;
+        }
       }
       const { data: nom, error } = await sbGate.rpc('nom_joueur', { p_joueur: playerId });
       if (error || !nom) {
@@ -4373,7 +4383,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 01/10 (12)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 01/10 (14)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
