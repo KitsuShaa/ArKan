@@ -1943,9 +1943,9 @@
 </head>
 <body>
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
-  <div style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
+  <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 02/10 (29)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 04/10 (30)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -1956,6 +1956,23 @@
     </div>
     <div id="mjLoginError" style="display:none; color:#d16a6a; font-size:12.5px; margin-bottom:12px;">E-mail ou mot de passe incorrect.</div>
     <button id="mjLoginBtn" onclick="checkMjLogin()" style="width:100%; padding:11px; border-radius:8px; border:none; background:#c9a24b; color:#14100a; font-weight:600; font-size:14px; cursor:pointer;">Se connecter</button>
+    <div style="text-align:center; margin-top:14px;"><a href="#" id="mjForgotLink" onclick="mjForgotPassword(); return false;" style="font-size:12px; color:#9c9080; text-decoration:underline; text-underline-offset:3px;">Mot de passe oublié ?</a></div>
+    <div id="mjLoginInfo" style="display:none; color:#9fbf8a; font-size:12.5px; margin-top:12px; line-height:1.45; text-align:center;"></div>
+  </div>
+  <!-- Choix d'un nouveau mot de passe (après clic sur le lien reçu par e-mail) -->
+  <div id="mjResetBox" style="display:none; width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
+    <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">Nouveau mot de passe</div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Choisis ton nouveau mot de passe MJ.</div>
+    <div style="margin-bottom:12px;">
+      <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Nouveau mot de passe (8 caractères min.)</label>
+      <input type="password" id="mjResetPass1" autocomplete="new-password" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
+    </div>
+    <div style="margin-bottom:18px;">
+      <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">Confirmation</label>
+      <input type="password" id="mjResetPass2" autocomplete="new-password" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;" onkeydown="if(event.key==='Enter') mjSaveNewPassword()">
+    </div>
+    <div id="mjResetError" style="display:none; color:#d16a6a; font-size:12.5px; margin-bottom:12px;"></div>
+    <button id="mjResetBtn" onclick="mjSaveNewPassword()" style="width:100%; padding:11px; border-radius:8px; border:none; background:#c9a24b; color:#14100a; font-weight:600; font-size:14px; cursor:pointer;">Enregistrer et me connecter</button>
   </div>
 </div>
 <script>
@@ -1966,13 +1983,60 @@
     const KEY_SB = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqeWd3Y2tsd3JkcXJrY3Njc3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjY1NTQsImV4cCI6MjEwNTg0MjU1NH0.7OceM5LYUjAmHwj6Wnq1WkK8AkZA429714oEOLVLvcQ';
     const overlay = document.getElementById('mjLoginOverlay');
     const errBox = document.getElementById('mjLoginError');
+    // Retour depuis le lien « mot de passe oublié » (à lire AVANT que Supabase ne nettoie l'adresse)
+    const urlHash = window.location.hash || '';
+    const isRecovery = /type=recovery/.test(urlHash);
+    const recoveryError = /error_code=|error=/.test(urlHash) ? (/otp_expired/.test(urlHash) ? 'Ce lien a expiré ou a déjà servi. Redemande un lien.' : 'Ce lien de réinitialisation n\'est pas valide. Redemande un lien.') : '';
     const sbAuth = (window.supabase && window.supabase.createClient) ? window.supabase.createClient(URL_SB, KEY_SB) : null;
     window._sbArkan = sbAuth; // client unique partagé avec le reste de la console
     try { localStorage.removeItem('mjAuthenticated'); } catch (e) {}
     function showErr(msg) { errBox.textContent = msg; errBox.style.display = 'block'; }
     if (!sbAuth) { showErr('Connexion à la base impossible (script Supabase non chargé).'); return; }
+    const infoBox = document.getElementById('mjLoginInfo');
+    const cleanUrl = () => { try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) {} };
+    if (recoveryError) { showErr(recoveryError); cleanUrl(); }
+    if (isRecovery) {
+      document.getElementById('mjLoginBox').style.display = 'none';
+      document.getElementById('mjResetBox').style.display = 'block';
+      setTimeout(() => document.getElementById('mjResetPass1').focus(), 100);
+    }
+    window.mjForgotPassword = async function() {
+      const email = document.getElementById('mjLoginUser').value.trim();
+      errBox.style.display = 'none'; infoBox.style.display = 'none';
+      if (!email) { showErr('Saisis d\'abord ton e-mail dans le champ ci-dessus.'); document.getElementById('mjLoginUser').focus(); return; }
+      const link = document.getElementById('mjForgotLink');
+      link.style.pointerEvents = 'none'; link.textContent = 'Envoi…';
+      const { error } = await sbAuth.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname });
+      link.style.pointerEvents = ''; link.textContent = 'Mot de passe oublié ?';
+      if (error) {
+        showErr(/rate|seconds|limit/i.test(error.message) ? 'Trop de demandes rapprochées, réessaie dans quelques minutes.' : 'Envoi impossible (' + error.message + ').');
+        return;
+      }
+      infoBox.textContent = 'Si cette adresse correspond à un compte, un e-mail vient d\'être envoyé. Clique sur le lien qu\'il contient pour choisir un nouveau mot de passe.';
+      infoBox.style.display = 'block';
+    };
+    window.mjSaveNewPassword = async function() {
+      const p1 = document.getElementById('mjResetPass1').value;
+      const p2 = document.getElementById('mjResetPass2').value;
+      const err = document.getElementById('mjResetError');
+      const btn = document.getElementById('mjResetBtn');
+      const fail = m => { err.textContent = m; err.style.display = 'block'; btn.disabled = false; btn.textContent = 'Enregistrer et me connecter'; };
+      err.style.display = 'none';
+      if (!p1 || p1.length < 8) return fail('Le mot de passe doit faire au moins 8 caractères.');
+      if (p1 !== p2) return fail('La confirmation ne correspond pas.');
+      btn.disabled = true; btn.textContent = 'Enregistrement…';
+      const { data: sess } = await sbAuth.auth.getSession();
+      if (!sess || !sess.session) return fail('Lien expiré ou déjà utilisé. Redemande un lien depuis l\'écran de connexion.');
+      const { error } = await sbAuth.auth.updateUser({ password: p1 });
+      if (error) return fail(/different|same/i.test(error.message) ? 'Choisis un mot de passe différent de l\'ancien.' : 'Changement refusé (' + error.message + ').');
+      const { data: ok } = await sbAuth.rpc('est_mj');
+      cleanUrl();
+      if (ok !== true) { await sbAuth.auth.signOut(); return fail("Mot de passe changé, mais ce compte n'est pas enregistré comme MJ."); }
+      window.location.reload();
+    };
     // Session déjà ouverte sur cet appareil et appartenant au MJ : on entre directement
     sbAuth.auth.getSession().then(async ({ data }) => {
+      if (isRecovery) return; // on attend le nouveau mot de passe
       if (!data || !data.session) return;
       const { data: ok } = await sbAuth.rpc('est_mj');
       if (ok === true) overlay.style.display = 'none';
