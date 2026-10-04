@@ -1739,6 +1739,8 @@
   .clp-subnow-opt { font-family: var(--font-serif); font-size: 13.5px; color: var(--gold); }
   .clp-subnow-caps { font-size: 12.5px; color: var(--ink); }
   .clp-subnow-go { color: var(--ink-faint); }
+  .clp-subnow-spells { display: block; color: var(--ink-dim); margin: 2px 0; }
+  .clp-subnow-spells b { color: var(--ink); font-weight: 600; }
   .clp-ref { display: inline-block; font-size: 11.5px; color: var(--gold); cursor: pointer; margin-top: 2px; }
   .clp-ref:hover { text-decoration: underline; }
   @media (max-width: 800px) { .clp-level-body { padding-left: 14px; } }
@@ -2011,7 +2013,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 04/10 (34)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 04/10 (35)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -39334,7 +39336,11 @@
       { nom: 'Cercle de la terre', desc: 'Mystiques liés à un territoire et à ses secrets anciens.', caps: [
         [2, 'Sort mineur supplémentaire', 'Vous apprenez un sort mineur de druide supplémentaire.'],
         [2, 'Récupération naturelle', "Une fois par repos long, à la fin d'un repos court, vous récupérez des emplacements dont le total des niveaux vaut au plus la moitié de votre niveau de druide (arrondi au supérieur), aucun de niveau 6 ou plus."],
-        [3, 'Sorts de cercle', 'Selon le terrain choisi (arctique, côte, désert, forêt, montagne, marais, prairie, Outreterre), vous gagnez des sorts supplémentaires aux niveaux 3, 5, 7 et 9.'],
+        [3, 'Terrain de cercle', 'Vous choisissez le terrain auquel vous êtes lié : arctique, côte, désert, forêt, marais, montagne, prairie ou Outreterre. Il détermine vos sorts de cercle, gagnés aux niveaux 3, 5, 7 et 9.'],
+        [3, 'Sorts de cercle', 'Arctique : immobilisation de personne, croissance d’épines · Côte : image miroir, foulée brumeuse · Désert : flou, silence · Forêt : peau d’écorce, pattes d’araignée · Marais : ténèbres, flèche acide de Melf · Montagne : pattes d’araignée, croissance d’épines · Prairie : invisibilité, passage sans trace · Outreterre : pattes d’araignée, toile d’araignée.'],
+        [5, 'Sorts de cercle', 'Arctique : tempête de neige, lenteur · Côte : respiration aquatique, marche sur l’eau · Désert : création de nourriture et d’eau, protection contre l’énergie · Forêt : appel de la foudre, croissance végétale · Marais : marche sur l’eau, nuage puant · Montagne : éclair, fusion dans la pierre · Prairie : lumière du jour, hâte · Outreterre : forme gazeuse, nuage puant.'],
+        [7, 'Sorts de cercle', 'Arctique : liberté de mouvement, tempête de grêle · Côte : contrôle de l’eau, liberté de mouvement · Désert : flétrissement, terrain hallucinatoire · Forêt : divination, liberté de mouvement · Marais : liberté de mouvement, localisation de créature · Montagne : façonnage de la pierre, peau de pierre · Prairie : divination, liberté de mouvement · Outreterre : invisibilité supérieure, façonnage de la pierre.'],
+        [9, 'Sorts de cercle', 'Arctique : communion avec la nature, cône de froid · Côte : invocation d’élémentaire, scrutation · Désert : fléau d’insectes, mur de pierre · Forêt : communion avec la nature, passage par les arbres · Marais : fléau d’insectes, scrutation · Montagne : passe-muraille, mur de pierre · Prairie : rêve, fléau d’insectes · Outreterre : nuage mortel, fléau d’insectes.'],
         [6, 'Traversée des terres', "Le terrain difficile non magique ne vous coûte pas de déplacement supplémentaire, les plantes non magiques ne vous gênent pas, et vous avez un avantage aux JdS contre les plantes magiques."],
         [10, 'Protection naturelle', "Vous ne pouvez pas être charmé ni effrayé par les élémentaires et les fées, et vous êtes immunisé contre le poison et les maladies."],
         [14, 'Sanctuaire naturel', "Les bêtes et créatures végétales doivent réussir un JdS de Sagesse pour vous attaquer."] ] },
@@ -39371,7 +39377,7 @@
         [10, 'Supériorité martiale améliorée', 'Vos dés de supériorité deviennent des d10. Vous apprenez deux nouvelles manœuvres.'],
         [15, 'Implacable', "Si vous n'avez plus de dé de supériorité quand vous lancez l'initiative, vous en récupérez un. Vous gagnez un dé de supériorité."],
         [18, 'Supériorité martiale ultime', 'Vos dés de supériorité deviennent des d12. Vous apprenez deux nouvelles manœuvres.'] ] },
-      { nom: 'Chevalier occultiste', desc: 'Guerrier qui mêle l’épée et la magie des arcanes.', caps: [
+      { nom: 'Chevalier occultiste', desc: 'Guerrier qui mêle l’épée et la magie des arcanes.', tiers: { ecoles: 'abjuration ou évocation', mineurs: 2 }, caps: [
         [3, 'Incantation', "Vous lancez des sorts de magicien (surtout abjuration et évocation), avec votre propre table de sorts connus et d'emplacements."],
         [3, 'Lien avec une arme', "Par un rituel d'1 heure, vous liez jusqu'à deux armes : on ne peut pas vous désarmer et vous les rappelez dans votre main par une action bonus."],
         [7, 'Magie de guerre', 'Quand vous lancez un sort mineur par une action, vous pouvez faire une attaque avec une arme par une action bonus.'],
@@ -39445,16 +39451,19 @@
         [17, 'Discipline élémentaire', 'Vous apprenez une nouvelle discipline élémentaire (vous pouvez aussi en remplacer une).'] ] } ] },
     occultiste: { titre: "Patron d'Outremonde", niveau: 1, options: [
       { nom: "L'Archifée", desc: 'Un seigneur ou une dame des fées, capricieux et puissant.', caps: [
+        [1, 'Sorts du patron', 'Niv. 1 : lueurs féeriques, sommeil · Niv. 3 : apaisement des émotions, force fantasmagorique · Niv. 5 : clignotement, image majeure · Niv. 7 : domination de bête, invisibilité supérieure · Niv. 9 : domination de personne, apparence trompeuse.'],
         [1, 'Présence féerique', "Par une action, les créatures dans un cube de 3 m autour de vous font un JdS de Sagesse ou sont charmées ou effrayées (au choix) jusqu'à la fin de votre prochain tour. Une fois par repos court ou long."],
         [6, 'Échappatoire brumeuse', "Par une réaction quand vous subissez des dégâts, vous devenez invisible et vous téléportez à 18 m. Une fois par repos court ou long."],
         [10, 'Défenses captivantes', "Vous êtes immunisé contre le charme. Par une réaction, vous pouvez retourner une tentative de charme contre son auteur."],
         [14, 'Sombre délire', "Par une action, une créature à 18 m fait un JdS de Sagesse ou est charmée ou effrayée pendant 1 minute, perdue dans un royaume illusoire. Une fois par repos court ou long."] ] },
       { nom: 'Le Fiélon', desc: 'Un démon ou un diable des plans inférieurs.', caps: [
+        [1, 'Sorts du patron', 'Niv. 1 : mains brûlantes, injonction · Niv. 3 : cécité/surdité, rayon ardent · Niv. 5 : boule de feu, nuage puant · Niv. 7 : bouclier de feu, mur de feu · Niv. 9 : colonne de flamme, sanctification.'],
         [1, 'Bénédiction du ténébreux', 'Quand vous réduisez une créature hostile à 0 PV, vous gagnez des PV temporaires égaux à mod. Cha + niveau d’occultiste.'],
         [6, 'Chance du ténébreux', 'Vous ajoutez 1d10 à un test de caractéristique ou à un JdS. Une fois par repos court ou long.'],
         [10, 'Résistance fiélonne', 'Après chaque repos, vous choisissez un type de dégâts contre lequel vous avez la résistance.'],
         [14, 'Traversée des Enfers', "Quand vous touchez une créature, vous pouvez l'envoyer dans les plans inférieurs jusqu'à la fin de votre prochain tour : 10d10 dégâts psychiques si ce n'est pas un fiélon. Une fois par repos long."] ] },
       { nom: 'Le Grand Ancien', desc: 'Une entité insondable venue d’au-delà des étoiles.', caps: [
+        [1, 'Sorts du patron', 'Niv. 1 : murmures dissonants, fou rire de Tasha · Niv. 3 : détection des pensées, force fantasmagorique · Niv. 5 : clairvoyance, communication à distance · Niv. 7 : domination de bête, tentacules noirs d’Evard · Niv. 9 : domination de personne, télékinésie.'],
         [1, "Éveil de l'esprit", 'Vous communiquez par télépathie avec une créature à 9 m qui comprend une langue.'],
         [6, 'Bouclier entropique', "Par une réaction, vous imposez un désavantage à une attaque contre vous ; si elle rate, votre prochaine attaque contre l'attaquant a un avantage. Une fois par repos court ou long."],
         [10, 'Bouclier de pensées', "Vos pensées ne peuvent pas être lues, vous avez la résistance aux dégâts psychiques, et qui vous en inflige subit les mêmes dégâts."],
@@ -39505,7 +39514,7 @@
         [9, 'Expertise en infiltration', 'Vous pouvez vous créer une fausse identité solide (sept jours et 25 po).'],
         [13, 'Imposteur', "Après 3 heures d'étude, vous imitez parfaitement la voix, l'écriture et les manières d'une personne."],
         [17, 'Frappe mortelle', "Quand vous touchez une créature surprise, elle fait un JdS de Constitution ou subit le double des dégâts."] ] },
-      { nom: 'Arnaqueur arcanique', desc: 'Voleurs qui ajoutent illusions et enchantements à leur arsenal.', caps: [
+      { nom: 'Arnaqueur arcanique', desc: 'Voleurs qui ajoutent illusions et enchantements à leur arsenal.', tiers: { ecoles: 'enchantement ou illusion', mineurs: 3 }, caps: [
         [3, 'Incantation', "Vous lancez des sorts de magicien (surtout enchantement et illusion), avec votre propre table de sorts connus et d'emplacements. Vous connaissez main de mage."],
         [3, 'Main de mage escamoteuse', "Votre main de mage est invisible et peut ranger ou prendre un objet dans un contenant porté, ou utiliser des outils de voleur à distance."],
         [9, 'Embuscade magique', 'Si vous êtes caché quand vous lancez un sort, la cible a un désavantage à son JdS.'],
@@ -39514,20 +39523,21 @@
     artificer: { titre: "Spécialité d'artificier", niveau: 3, options: [
       { nom: 'Alchimiste', desc: 'Potions, élixirs et réactifs.', caps: [
         [3, "Maîtrise d'outils", "Vous gagnez la maîtrise des fournitures d'alchimiste."],
-        [3, "Sorts d'alchimiste", "Vous gagnez une liste de sorts supplémentaires aux niveaux 3, 5, 9, 13 et 17."],
+        [3, "Sorts d'alchimiste", 'Niv. 3 : mot de guérison, rayon empoisonné · Niv. 5 : sphère de feu, flèche acide de Melf · Niv. 9 : forme gazeuse, mot de guérison de groupe · Niv. 13 : flétrissement, protection contre la mort · Niv. 17 : nuage mortel, rappel à la vie.'],
         [3, 'Élixir expérimental', "Après un repos long, vous produisez un élixir à l'effet aléatoire (soins, vitesse, résilience, audace, vol ou transformation). Vous pouvez en créer d'autres avec vos emplacements."],
         [5, 'Savant alchimiste', "Vous ajoutez votre mod. d'Intelligence à un jet de soins ou de dégâts (acide, feu, nécrotique, poison) de vos sorts."],
         [9, 'Réactifs revigorants', "Vos élixirs donnent aussi 2d6 + mod. Int PV temporaires, et vous pouvez lancer restauration partielle sans emplacement."],
         [15, 'Maîtrise chimique', "Résistance à l'acide et au poison, immunité contre l'état empoisonné ; vous lancez restauration supérieure et guérison sans emplacement une fois par repos long."] ] },
       { nom: 'Artilleur', desc: 'Canons magiques et explosions maîtrisées.', caps: [
         [3, "Maîtrise d'outils", 'Vous gagnez la maîtrise des outils de sculpteur sur bois.'],
-        [3, "Sorts d'artilleur", "Vous gagnez une liste de sorts supplémentaires aux niveaux 3, 5, 9, 13 et 17."],
+        [3, "Sorts d'artilleur", 'Niv. 3 : bouclier, vague tonnante · Niv. 5 : rayon ardent, fracassement · Niv. 9 : boule de feu, mur de vent · Niv. 13 : tempête de grêle, mur de feu · Niv. 17 : cône de froid, mur de force.'],
         [3, 'Canon occulte', 'Vous créez un petit canon magique : lance-flammes, baliste de force ou protecteur (PV temporaires aux alliés).'],
         [5, 'Arme à feu arcanique', 'Avec une baguette ou un bâton gravé, vos sorts d’artificier infligent 1d8 dégâts supplémentaires.'],
         [9, 'Canon explosif', 'Les dégâts de votre canon augmentent de 1d8, et vous pouvez le faire exploser.'],
         [15, 'Position fortifiée', 'Vous pouvez avoir deux canons, et ils donnent un abri partiel aux alliés proches.'] ] },
       { nom: 'Forgeron de guerre', desc: 'Protecteur accompagné d’un défenseur mécanique.', caps: [
         [3, "Maîtrise d'outils", 'Vous gagnez la maîtrise des outils de forgeron.'],
+        [3, 'Sorts de forgeron de guerre', 'Niv. 3 : héroïsme, bouclier · Niv. 5 : châtiment révélateur, lien de protection · Niv. 9 : aura de vitalité, invocation de projectiles · Niv. 13 : aura de pureté, bouclier de feu · Niv. 17 : châtiment du bannissement, soins de groupe.'],
         [3, 'Prêt pour la bataille', "Vous maîtrisez les armes de guerre et utilisez votre Intelligence pour attaquer avec une arme magique."],
         [3, "Défenseur d'acier", 'Vous construisez un compagnon artificiel qui combat à vos côtés et peut protéger vos alliés.'],
         [5, 'Attaque supplémentaire', "Vous attaquez deux fois au lieu d'une quand vous faites l'action Attaquer."],
@@ -39535,15 +39545,56 @@
         [15, 'Défenseur amélioré', 'Votre décharge passe à 4d6 et votre défenseur gagne +2 à sa CA et une réaction défensive plus puissante.'] ] },
       { nom: 'Armurier', desc: 'Une armure magique qui devient une seconde peau.', caps: [
         [3, "Maîtrise d'outils", 'Vous gagnez la maîtrise des armures lourdes et des outils de forgeron.'],
+        [3, "Sorts d'armurier", 'Niv. 3 : projectile magique, vague tonnante · Niv. 5 : image miroir, fracassement · Niv. 9 : motif hypnotique, éclair · Niv. 13 : bouclier de feu, invisibilité supérieure · Niv. 17 : passe-muraille, mur de force.'],
         [3, 'Armure arcanique', "Votre armure devient votre focaliseur, ne demande pas de Force et remplace les membres manquants."],
         [3, "Modèle d'armure", 'Gardien (gantelets tonnerre, champ défensif) ou Infiltrateur (lance-foudre, discrétion et vitesse).'],
         [5, 'Attaque supplémentaire', "Vous attaquez deux fois au lieu d'une quand vous faites l'action Attaquer."],
         [9, "Modifications d'armure", "Votre armure compte comme plusieurs objets pour vos infusions, ce qui vous permet d'en imprégner davantage."],
         [15, 'Modèle perfectionné', 'Votre modèle gagne un nouvel effet puissant (attraction du Gardien, éclair amélioré de l’Infiltrateur).'] ] } ] },
   };
+  // « Niv. 1 : a, b · Niv. 3 : c, d » → une capacité par niveau, pour qu'elle apparaisse au bon niveau
+  function clpExpandSpellCaps(caps) {
+    const out = [];
+    caps.forEach(c => {
+      const parts = /^Sorts /.test(c.nom) ? String(c.texte || '').split('·').map(x => x.trim().match(/^Niv\. (\d+) : (.+?)\.?$/)) : [];
+      if (parts.length > 1 && parts.every(Boolean)) parts.forEach(m => out.push({ niveau: +m[1], nom: c.nom, texte: m[2].charAt(0).toUpperCase() + m[2].slice(1) + '.' }));
+      else out.push(c);
+    });
+    return out;
+  }
+  // Chevalier occultiste / Arnaqueur arcanique : sorts connus et emplacements gagnés niveau par niveau
+  function clpThirdCasterCaps(t) {
+    const known = { 3: 3, 4: 4, 7: 5, 8: 6, 10: 7, 11: 8, 13: 9, 14: 10, 16: 11, 19: 12, 20: 13 };
+    const slots = { 3: '2', 4: '3', 7: '4/2', 10: '4/3', 13: '4/3/2', 16: '4/3/3', 19: '4/3/3/1' };
+    const free = [3, 8, 14, 20];
+    const out = [];
+    let prevKnown = 0, prevMax = 0;
+    for (let n = 3; n <= 20; n++) {
+      if (!known[n] && !slots[n] && n !== 10) continue;
+      const bits = [];
+      if (n === 3) bits.push(`${t.mineurs} sorts mineurs de magicien${t.mineurs === 3 ? ' (dont main de mage)' : ''}.`);
+      if (n === 10) bits.push('+1 sort mineur de magicien.');
+      if (known[n]) {
+        const d = known[n] - prevKnown;
+        bits.push(n === 3 ? `${known[n]} sorts connus de niveau 1` : `+${d} sort connu (${known[n]} au total)`);
+        bits[bits.length - 1] += n === 3 ? ` : deux en ${t.ecoles}, le troisième de n’importe quelle école.` : (free.includes(n) ? ' : celui-ci peut venir de n’importe quelle école.' : ` : ${t.ecoles}.`);
+        prevKnown = known[n];
+      }
+      if (slots[n]) {
+        const list = slots[n].split('/');
+        bits.push(`Emplacements : ${list.map((v, k) => `${v} de niv. ${k + 1}`).join(', ')}.`);
+        if (list.length > prevMax && prevMax) bits.push(`Nouveau : accès aux sorts de niveau ${list.length}.`);
+        prevMax = list.length;
+      }
+      if (n > 3 && known[n]) bits.push('Vous pouvez remplacer un sort connu.');
+      out.push({ niveau: n, nom: n === 3 ? 'Sorts (départ)' : 'Sorts', texte: bits.join(' ') });
+    }
+    return out;
+  }
   function clpSubDefault(name) {
     const d = SUBCLASS_DEFAULTS[clpNorm(name)];
-    return d ? [{ titre: d.titre, niveau: d.niveau, options: d.options.map(o => ({ nom: o.nom, desc: o.desc, caps: o.caps.map(c => ({ niveau: c[0], nom: c[1], texte: c[2] })) })) }] : [];
+    return d ? [{ titre: d.titre, niveau: d.niveau, options: d.options.map(o => ({ nom: o.nom, desc: o.desc,
+      caps: clpExpandSpellCaps(o.caps.map(c => ({ niveau: c[0], nom: c[1], texte: c[2] }))).concat(o.tiers ? clpThirdCasterCaps(o.tiers) : []) })) }] : [];
   }
   // Progression « brute » au format stocké : { cols:[...], rows:[{ vals:[...], slots:'4/3/2', feats:'A ; B' } ×20] }
   function clpDefaultFor(name) {
@@ -39672,7 +39723,7 @@
       }).join('');
       const subNow = allOpts.map(x => ({ ...x, caps: (x.o.caps || []).filter(c => +c.niveau === n) })).filter(x => x.caps.length);
       const subHtml = subNow.length ? `<div class="clp-subnow"><div class="clp-subnow-title">${histEsc(subNow[0].g.titre)} — selon votre choix</div>${subNow.map(x => `
-        <div class="clp-subnow-row" data-clp-opt="${x.id}"><span class="clp-subnow-opt">${histEsc(x.o.nom)}</span><span class="clp-subnow-caps">${x.caps.map(c => histEsc(c.nom)).join(' · ')}</span><span class="clp-subnow-go">›</span></div>`).join('')}</div>` : '';
+        <div class="clp-subnow-row" data-clp-opt="${x.id}"><span class="clp-subnow-opt">${histEsc(x.o.nom)}</span><span class="clp-subnow-caps">${x.caps.map(c => /^Sorts/i.test(c.nom) ? `<span class="clp-subnow-spells"><b>${histEsc(c.nom)} :</b> ${histEsc(c.texte || '')}</span>` : histEsc(c.nom)).join(' · ')}</span><span class="clp-subnow-go">›</span></div>`).join('')}</div>` : '';
       const magic = clpMagicLines(prog, rows, i);
       const magicHtml = magic.length ? `<div class="clp-magic"><div class="clp-magic-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 16 8"/><path d="M15 4v2M19 8h2M18 5l1.5-1.5M12 3l.5 1.5M20 12l-1.5-.5"/></svg>Sorts</div><ul>${magic.map(l => `<li>${l}</li>`).join('')}</ul></div>` : '';
       return `<div class="clp-level" id="clp-lvl-${n}">
