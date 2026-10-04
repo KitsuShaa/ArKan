@@ -1681,6 +1681,48 @@
   .lv-sub .mve-text { font-size: 12.5px; line-height: 1.55; }
   .lv-sub .mve-text strong { color: var(--ink); font-weight: 600; }
   .continent-extra-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  /* ===== Classes : progression par niveau ===== */
+  .clp-card { overflow: visible; }
+  .clp-table-wrap { overflow-x: auto; }
+  .clp-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .clp-table th { font-family: var(--font-sans); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-faint); padding: 6px 8px; border-bottom: 1px solid var(--card-border); text-align: center; white-space: nowrap; }
+  .clp-table th.clp-slot-head { color: var(--gold); border-bottom: 1px solid rgba(201,162,75,.35); letter-spacing: .3px; }
+  .clp-table td { padding: 6px 8px; border-bottom: 1px solid var(--card-border); text-align: center; color: var(--ink); white-space: nowrap; }
+  .clp-table tbody tr { cursor: pointer; transition: background .12s; }
+  .clp-table tbody tr:hover { background: var(--gold-soft); }
+  .clp-table .clp-left { text-align: left; white-space: normal; }
+  .clp-table .clp-slot { width: 30px; color: var(--ink-dim); }
+  .clp-lvl { font-family: var(--font-serif); color: var(--gold) !important; font-size: 14px; }
+  .clp-pill { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; background: var(--bg-elevated); border: 1px solid var(--card-border); color: var(--ink); }
+  .clp-none, .clp-empty { color: var(--ink-faint); font-style: italic; }
+  .clp-section-title { font-family: var(--font-serif); font-style: italic; font-size: 16px; color: var(--gold); margin: 22px 0 10px; }
+  .clp-levels { display: flex; flex-direction: column; gap: 10px; }
+  .clp-level { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-sm); overflow: hidden; scroll-margin-top: 8px; }
+  .clp-level.flash { animation: clpFlash 1.4s ease; }
+  @keyframes clpFlash { 0%, 40% { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-soft); } 100% { border-color: var(--card-border); box-shadow: none; } }
+  .clp-level-head { display: flex; align-items: stretch; border-bottom: 1px solid var(--card-border); background: var(--bg-elevated); }
+  .clp-level-num { flex-shrink: 0; width: 78px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 0; border-right: 1px solid var(--card-border); font-family: var(--font-serif); font-size: 24px; color: var(--gold); line-height: 1; }
+  .clp-level-num span { font-family: var(--font-sans); font-size: 9px; text-transform: uppercase; letter-spacing: .6px; color: var(--ink-faint); margin-bottom: 4px; }
+  .clp-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 12px; }
+  .clp-stat { display: inline-flex; align-items: baseline; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--card-border); background: var(--card); font-size: 12px; color: var(--ink); }
+  .clp-stat em { font-style: normal; font-size: 10px; text-transform: uppercase; letter-spacing: .3px; color: var(--ink-faint); }
+  .clp-stat b { font-weight: 600; font-size: 9.5px; color: var(--ink-faint); margin-right: 1px; }
+  .clp-stat.up { border-color: rgba(201,162,75,.55); background: var(--gold-soft); color: var(--gold); }
+  .clp-stat.up em, .clp-stat.up b { color: var(--gold); opacity: .8; }
+  .clp-level-body { padding: 12px 14px 12px 92px; display: flex; flex-direction: column; gap: 10px; }
+  .clp-feat-name { font-family: var(--font-serif); font-size: 15px; color: var(--ink); margin-bottom: 3px; }
+  .clp-feat .mve-text { font-size: 12.8px; line-height: 1.6; }
+  .clp-feat .mve-text strong { color: var(--ink); font-weight: 600; }
+  .clp-feat.mini .clp-feat-name { font-size: 14px; margin-bottom: 1px; }
+  .clp-feat.sub .mve-text { font-style: italic; color: var(--ink-faint); }
+  .clp-ref { display: inline-block; font-size: 11.5px; color: var(--gold); cursor: pointer; margin-top: 2px; }
+  .clp-ref:hover { text-decoration: underline; }
+  @media (max-width: 800px) { .clp-level-body { padding-left: 14px; } }
+  .clp-edit { border-collapse: collapse; font-size: 12px; width: 100%; }
+  .clp-edit th { font-size: 10px; text-transform: uppercase; letter-spacing: .3px; color: var(--ink-faint); padding: 4px; text-align: left; white-space: nowrap; }
+  .clp-edit td { padding: 2px 3px; }
+  .clp-edit input { width: 70px; padding: 5px 7px; font-size: 12px; border-radius: 6px; border: 1px solid var(--card-border); background: var(--bg-elevated); color: var(--ink); box-sizing: border-box; }
+  .clp-edit input.wide { width: 100%; min-width: 320px; }
   .dieu-citation {
     font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--gold);
     text-align: center; padding: 12px 18px; margin: 0 0 16px;
@@ -1945,7 +1987,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 04/10 (30)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 04/10 (31)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3302,7 +3344,7 @@
 
 <!-- CLASSE FORM -->
 <div class="modal-backdrop" id="modalClasseForm">
-  <div class="modal-box" style="max-width:540px;">
+  <div class="modal-box" style="max-width:980px;">
     <h3 id="clfTitle">Classe</h3>
     <div class="form-field"><label>Nom</label><input type="text" id="clfName"></div>
     <div class="photo-preview-box" id="clfPhotoPreview" onclick="document.getElementById('clfPhotoInput').click()">
@@ -3330,6 +3372,11 @@
     <div class="section-title" style="margin-top:6px;">Capacités de classe</div>
     <div id="clfFeaturesList"></div>
     <button class="filter-reset-btn" onclick="addStatBlockEntry('clfFeaturesList')">+ Ajouter une capacité</button>
+    <div class="section-title" style="margin-top:18px;">Progression par niveau</div>
+    <div class="mve-text" style="margin-bottom:8px;">Capacités séparées par « ; ». « Nom (précision) » renvoie à la capacité du même nom ; « Nom :: texte » ajoute une explication. Emplacements de sorts : niveau 1/2/3… (ex : 4/3/2).</div>
+    <div class="form-field"><label>Colonnes du tableau (séparées par des virgules)</label><input type="text" id="clfProgCols" placeholder="Ex : Rages, Dégâts de rage" onchange="clpEditorColsChanged()"></div>
+    <div id="clfProgGrid" style="overflow-x:auto; max-height:420px; overflow-y:auto; border:1px solid var(--card-border); border-radius:8px; padding:6px;"></div>
+    <button class="filter-reset-btn" style="margin-top:8px;" onclick="clpEditorLoadDefault()">Charger la progression standard</button>
     <button class="modal-confirm-btn" style="margin-top:16px;" onclick="saveClasseForm()">Enregistrer</button>
     <div style="display:flex; gap:10px; margin-top:8px;">
       <button class="modal-cancel-btn" id="clfDeleteBtn" style="flex:1; color:var(--garnet); border:1px solid var(--card-border); border-radius:12px;" onclick="deleteClasseForm()">Supprimer</button>
@@ -3900,6 +3947,7 @@
           id: r.id, name: r.nom, flavor: r.flavor, features: r.features || [], de_vie: r.de_vie,
           pv_niveau: r.pv_niveau, valeur_haute: r.valeur_haute, historique_conseille: r.historique_conseille,
           armes: r.armes, armures: r.armures, outils: r.outils, jds: r.jds, competences: r.competences, photo: r.photo,
+          progression: r.progression || null,
         }) },
       { table: 'historiques', target: historiquesDatabase, map: r => ({
           id: r.id, name: r.nom, description: r.description, capacites: r.capacites,
@@ -38930,8 +38978,8 @@
     const cl = id ? classesLoreDatabase.find(x => x.id === id) : null;
     document.getElementById('clfTitle').textContent = cl ? cl.name : 'Nouvelle classe';
     document.getElementById('clfName').value = cl ? cl.name : '';
-    document.getElementById('clfDeVie').value = cl ? cl.de_vie : '';
-    document.getElementById('clfPvNiveau').value = cl ? cl.pv_niveau : '';
+    document.getElementById('clfDeVie').value = cl ? clpDv(cl)[0] : '';
+    document.getElementById('clfPvNiveau').value = cl ? clpDv(cl)[1] : '';
     document.getElementById('clfValeurHaute').value = cl ? cl.valeur_haute : '';
     document.getElementById('clfHistoConseille').value = cl ? cl.historique_conseille : '';
     document.getElementById('clfArmes').value = cl ? cl.armes : '';
@@ -38946,6 +38994,7 @@
     else { preview.style.backgroundImage = ''; document.getElementById('clfPhotoPlaceholder').style.display = 'flex'; }
     document.getElementById('clfFeaturesList').innerHTML = '';
     if (cl) (cl.features || []).forEach(f => addStatBlockEntry('clfFeaturesList', f.title, f.text));
+    clpEditorInit(cl);
     openModal('modalClasseForm');
   }
   function onClassePhotoSelected(e) {
@@ -38964,12 +39013,13 @@
       outils: document.getElementById('clfOutils').value.trim(), jds: document.getElementById('clfJds').value.trim(),
       competences: document.getElementById('clfCompetences').value.trim(), flavor: document.getElementById('clfFlavor').value.trim(),
       features: readStatBlockList('clfFeaturesList').map(f => ({ title: f.name, text: f.text })),
+      progression: clpEditorValue(),
     };
     if (classePendingPhoto) data.photo = classePendingPhoto;
     if (currentClasseId) { Object.assign(classesLoreDatabase.find(x => x.id === currentClasseId), data); showToast(`« ${name} » mise à jour`); }
     else { classesLoreDatabase.push({ id: 'classe' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créée`); }
     const clEntry = classesLoreDatabase.find(x => x.id === currentClasseId) || classesLoreDatabase[classesLoreDatabase.length - 1];
-    if (sb) sb.from('classes').upsert({ id: clEntry.id, nom: clEntry.name, flavor: clEntry.flavor, features: clEntry.features || [], de_vie: clEntry.de_vie, pv_niveau: clEntry.pv_niveau, valeur_haute: clEntry.valeur_haute, historique_conseille: clEntry.historique_conseille, armes: clEntry.armes, armures: clEntry.armures, outils: clEntry.outils, jds: clEntry.jds, competences: clEntry.competences, photo: clEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+    if (sb) sb.from('classes').upsert({ id: clEntry.id, nom: clEntry.name, flavor: clEntry.flavor, features: clEntry.features || [], de_vie: clEntry.de_vie, pv_niveau: clEntry.pv_niveau, valeur_haute: clEntry.valeur_haute, historique_conseille: clEntry.historique_conseille, armes: clEntry.armes, armures: clEntry.armures, outils: clEntry.outils, jds: clEntry.jds, competences: clEntry.competences, photo: clEntry.photo, progression: clEntry.progression || null }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalClasseForm');
     renderSystemeContent();
   }
@@ -39110,6 +39160,224 @@
     openModal('modalPnjView');
   }
 
+  /* ===================== CLASSES : PROGRESSION PAR NIVEAU ===================== */
+  // Données standard (règles de base 5e). Stockées dans classes.progression une fois la fiche enregistrée.
+  // Une capacité « Nom (précision) » renvoie à la capacité « Nom » ; « Nom :: texte » ajoute une explication.
+  const CLP_BONUS = n => '+' + (2 + Math.floor((n - 1) / 4));
+  const CLP_SLOTS = {
+    full: ['2','3','4/2','4/3','4/3/2','4/3/3','4/3/3/1','4/3/3/2','4/3/3/3/1','4/3/3/3/2','4/3/3/3/2/1','4/3/3/3/2/1','4/3/3/3/2/1/1','4/3/3/3/2/1/1','4/3/3/3/2/1/1/1','4/3/3/3/2/1/1/1','4/3/3/3/2/1/1/1/1','4/3/3/3/3/1/1/1/1','4/3/3/3/3/2/1/1/1','4/3/3/3/3/2/2/1/1'],
+    half: ['','2','3','3','4/2','4/2','4/3','4/3','4/3/2','4/3/2','4/3/3','4/3/3','4/3/3/1','4/3/3/1','4/3/3/2','4/3/3/2','4/3/3/3/1','4/3/3/3/1','4/3/3/3/2','4/3/3/3/2'],
+    artificer: ['2','2','3','3','4/2','4/2','4/3','4/3','4/3/2','4/3/2','4/3/3','4/3/3','4/3/3/1','4/3/3/1','4/3/3/2','4/3/3/2','4/3/3/3/1','4/3/3/3/1','4/3/3/3/2','4/3/3/3/2'],
+  };
+  const clpSteps = (pairs) => { const out = []; for (let n = 1; n <= 20; n++) { let v = ''; pairs.forEach(([lvl, val]) => { if (n >= lvl) v = val; }); out.push(v); } return out; };
+  const clpRange = (from, f) => Array.from({ length: 20 }, (_, i) => (i + 1 >= from ? String(f(i + 1)) : '—'));
+  const CLP_SUB = 'Capacité de la sous-classe choisie';
+  const CLASS_PROG_DEFAULTS = {
+    'barbare': { cols: ['Rages', 'Dégâts de rage'], vals: [clpSteps([[1,'2'],[3,'3'],[6,'4'],[12,'5'],[17,'6'],[20,'Illimité']]), clpSteps([[1,'+2'],[9,'+3'],[16,'+4']])], slots: null, feats: [
+      'Rage ; Défense sans armure', 'Attaque téméraire ; Sens du danger', 'Voie primitive', 'ASI', 'Attaque supplémentaire ; Déplacement rapide', 'Capacité de voie primitive', 'Instinct sauvage', 'ASI', 'Critique brutal (1 dé)', 'Capacité de voie primitive',
+      'Rage implacable', 'ASI', 'Critique brutal (2 dés)', 'Capacité de voie primitive', 'Rage persistante', 'ASI', 'Critique brutal (3 dés)', 'Puissance indomptable', 'ASI', 'Champion primitif'] },
+    'barde': { cols: ['Inspiration', 'Sorts mineurs', 'Sorts connus'], vals: [clpSteps([[1,'d6'],[5,'d8'],[10,'d10'],[15,'d12']]), clpSteps([[1,'2'],[4,'3'],[10,'4']]), ['4','5','6','7','8','9','10','11','12','14','15','15','16','18','19','19','20','22','22','22']], slots: 'full', feats: [
+      'Incantation ; Inspiration bardique (d6)', 'Touche-à-tout ; Chant reposant (d6)', 'Collège bardique ; Expertise', 'ASI', "Inspiration bardique (d8) ; Source d'inspiration", 'Contre-charme ; Capacité de collège bardique', '', 'ASI', 'Chant reposant (d8)', 'Inspiration bardique (d10) ; Expertise (2 compétences de plus) ; Secrets magiques',
+      '', 'ASI', 'Chant reposant (d10)', 'Secrets magiques (2 sorts de plus) ; Capacité de collège bardique', 'Inspiration bardique (d12)', 'ASI', 'Chant reposant (d12)', 'Secrets magiques (2 sorts de plus)', 'ASI', 'Inspiration supérieure'] },
+    'clerc': { cols: ['Sorts mineurs', 'Conduit divin'], vals: [clpSteps([[1,'3'],[4,'4'],[10,'5']]), clpSteps([[1,'—'],[2,'1/repos'],[6,'2/repos'],[18,'3/repos']])], slots: 'full', feats: [
+      'Incantation ; Domaine divin', 'Conduit divin (1/repos) ; Capacité de domaine divin', '', 'ASI', 'Destruction des morts-vivants (FP 1/2)', 'Conduit divin (2/repos) ; Capacité de domaine divin', '', 'ASI ; Destruction des morts-vivants (FP 1) ; Capacité de domaine divin', '', 'Intervention divine',
+      'Destruction des morts-vivants (FP 2)', 'ASI', '', 'Destruction des morts-vivants (FP 3)', '', 'ASI', 'Destruction des morts-vivants (FP 4) ; Capacité de domaine divin', 'Conduit divin (3/repos)', 'ASI', "Intervention divine améliorée :: Votre appel à l'intervention divine réussit automatiquement, sans jet de dé."] },
+    'druide': { cols: ['Sorts mineurs', 'Forme sauvage (FP max)'], vals: [clpSteps([[1,'2'],[4,'3'],[10,'4']]), clpSteps([[1,'—'],[2,'1/4'],[4,'1/2'],[8,'1']])], slots: 'full', feats: [
+      'Druidique ; Incantation', 'Forme sauvage ; Cercle druidique', '', 'ASI ; Forme sauvage (amélioration) :: Vous pouvez prendre la forme de bêtes de FP 1/2 au maximum, sans vitesse de vol (la nage est autorisée).', '', 'Capacité de cercle druidique', '', 'ASI ; Forme sauvage (amélioration) :: Vous pouvez prendre la forme de bêtes de FP 1 au maximum, y compris celles qui ont une vitesse de vol.', '', 'Capacité de cercle druidique',
+      '', 'ASI', '', 'Capacité de cercle druidique', '', 'ASI', '', 'Jeunesse éternelle ; Incantation animale', 'ASI', 'Archidruide'] },
+    'ensorceleur': { cols: ['Points de sorcellerie', 'Sorts mineurs', 'Sorts connus'], vals: [clpRange(2, n => n), clpSteps([[1,'4'],[4,'5'],[10,'6']]), ['2','3','4','5','6','7','8','9','10','11','12','12','13','13','14','14','15','15','15','15']], slots: 'full', feats: [
+      'Incantation ; Origine magique', 'Source de magie', 'Métamagie', 'ASI', '', "Capacité d'origine magique", '', 'ASI', '', 'Métamagie (nouvelle option) :: Vous apprenez une option de métamagie supplémentaire.',
+      '', 'ASI', '', "Capacité d'origine magique", '', 'ASI', 'Métamagie (nouvelle option) :: Vous apprenez une option de métamagie supplémentaire.', "Capacité d'origine magique", 'ASI', 'Restauration ensorcelée'] },
+    'guerrier': { cols: ['Attaques'], vals: [clpSteps([[1,'1'],[5,'2'],[11,'3'],[20,'4']])], slots: null, feats: [
+      'Style de combat ; Second souffle', 'Fougue (1 utilisation)', 'Archétype martial', 'ASI', 'Attaque supplémentaire', 'ASI', "Capacité d'archétype martial", 'ASI', 'Inflexible (1 utilisation)', "Capacité d'archétype martial",
+      'Attaque supplémentaire (3 attaques)', 'ASI', 'Inflexible (2 utilisations)', 'ASI', "Capacité d'archétype martial", 'ASI', 'Fougue (2 utilisations) ; Inflexible (3 utilisations)', "Capacité d'archétype martial", 'ASI', 'Attaque supplémentaire (4 attaques)'] },
+    'magicien': { cols: ['Sorts mineurs'], vals: [clpSteps([[1,'3'],[4,'4'],[10,'5']])], slots: 'full', feats: [
+      'Incantation ; Restauration arcanique', 'Tradition arcanique', '', 'ASI', '', 'Capacité de tradition arcanique', '', 'ASI', '', 'Capacité de tradition arcanique',
+      '', 'ASI', '', 'Capacité de tradition arcanique', '', 'ASI', '', 'Maîtrise des sorts', 'ASI', 'Sorts de prédilection'] },
+    'moine': { cols: ['Arts martiaux', 'Points de ki', 'Déplacement sans armure'], vals: [clpSteps([[1,'1d4'],[5,'1d6'],[11,'1d8'],[17,'1d10']]), clpRange(2, n => n), clpSteps([[1,'—'],[2,'+3 m'],[6,'+4,5 m'],[10,'+6 m'],[14,'+7,5 m'],[18,'+9 m']])], slots: null, feats: [
+      'Défense sans armure ; Arts martiaux', 'Ki ; Déplacement sans armure', 'Tradition monastique ; Parade de projectiles', 'ASI ; Chute ralentie', 'Attaque supplémentaire ; Frappe étourdissante', 'Frappes de ki ; Capacité de tradition monastique', 'Esquive totale ; Sérénité', 'ASI', "Déplacement sans armure (amélioration) :: Vous pouvez vous déplacer sur les surfaces verticales et à la surface des liquides pendant votre tour, sans tomber pendant le mouvement.", 'Pureté physique',
+      'Capacité de tradition monastique', 'ASI', 'Langue du soleil et de la lune', 'Âme de diamant', 'Jeunesse éternelle', 'ASI', 'Capacité de tradition monastique', "Désertion de l'âme", 'ASI', "Perfection de l'être"] },
+    'occultiste': { cols: ['Sorts mineurs', 'Sorts connus', 'Emplacements', 'Niv. emplacements', 'Manifestations'], vals: [clpSteps([[1,'2'],[4,'3'],[10,'4']]), ['2','3','4','5','6','7','8','9','10','10','11','11','12','12','13','13','14','14','15','15'], clpSteps([[1,'1'],[2,'2'],[11,'3'],[17,'4']]), clpSteps([[1,'1'],[3,'2'],[5,'3'],[7,'4'],[9,'5']]), ['—','2','2','2','3','3','4','4','5','5','5','6','6','6','7','7','7','8','8','8']], slots: null, feats: [
+      "Patron d'Outremonde ; Magie de pacte", 'Manifestations occultes', 'Faveur de pacte', 'ASI', '', "Capacité de patron d'Outremonde", '', 'ASI', '', "Capacité de patron d'Outremonde",
+      'Arcanum mystique (sort de niveau 6)', 'ASI', 'Arcanum mystique (sort de niveau 7)', "Capacité de patron d'Outremonde", 'Arcanum mystique (sort de niveau 8)', 'ASI', 'Arcanum mystique (sort de niveau 9)', '', 'ASI', "Maître de l'occulte"] },
+    'paladin': { cols: [], vals: [], slots: 'half', feats: [
+      'Sens divin ; Imposition des mains', 'Style de combat ; Incantation ; Châtiment divin', 'Santé divine ; Serment sacré', 'ASI', 'Attaque supplémentaire', 'Aura de protection', 'Capacité de serment sacré', 'ASI', '', 'Aura de courage',
+      'Châtiment divin amélioré', 'ASI', '', 'Contact purifiant', 'Capacité de serment sacré', 'ASI', '', 'Aura de protection (amélioration) :: La portée de vos auras passe de 3 à 9 mètres.', 'ASI', 'Capacité de serment sacré'] },
+    'rodeur': { cols: ['Sorts connus'], vals: [['—','2','3','3','4','4','5','5','6','6','7','7','8','8','9','9','10','10','11','11']], slots: 'half', feats: [
+      'Ennemi juré ; Explorateur-né', 'Style de combat ; Incantation', 'Archétype de rôdeur ; Vigilance primitive', 'ASI', 'Attaque supplémentaire', 'Ennemi juré (amélioration) :: Vous choisissez un ennemi juré supplémentaire et apprenez une langue qu’il parle. ; Explorateur-né (amélioration) :: Vous choisissez un terrain de prédilection supplémentaire.', "Capacité d'archétype de rôdeur", 'ASI ; Foulée tellurique', '', 'Explorateur-né (amélioration) :: Vous choisissez un terrain de prédilection supplémentaire. ; Camouflage naturel',
+      "Capacité d'archétype de rôdeur", 'ASI', '', 'Ennemi juré (amélioration) :: Vous choisissez un ennemi juré supplémentaire et apprenez une langue qu’il parle. ; Disparition', "Capacité d'archétype de rôdeur", 'ASI', '', 'Sens sauvages', 'ASI', 'Tueur implacable'] },
+    'roublard': { cols: ['Attaque sournoise'], vals: [clpRange(1, n => Math.ceil(n / 2) + 'd6')], slots: null, feats: [
+      'Expertise ; Attaque sournoise ; Jargon des voleurs', 'Ruse', 'Archétype de roublard', 'ASI', 'Esquive instinctive', 'Expertise (2 compétences de plus) :: Choisissez deux autres compétences maîtrisées (ou les outils de voleur) : votre bonus de maîtrise est doublé pour elles.', 'Esquive totale', 'ASI', "Capacité d'archétype de roublard", 'ASI',
+      'Savoir-faire', 'ASI', "Capacité d'archétype de roublard", 'Perception aveugle', 'Esprit fuyant', 'ASI', "Capacité d'archétype de roublard", 'Insaisissable', 'ASI', 'Coup de chance'] },
+    'artificer': { cols: ['Infusions connues', 'Objets imprégnés', 'Sorts mineurs'], vals: [clpSteps([[1,'—'],[2,'4'],[6,'6'],[10,'8'],[14,'10'],[18,'12']]), clpSteps([[1,'—'],[2,'2'],[6,'3'],[10,'4'],[14,'5'],[18,'6']]), clpSteps([[1,'2'],[10,'3'],[14,'4']])], slots: 'artificer', feats: [
+      'Bricolage magique ; Incantation', "Imprégnation d'objet", "Spécialité d'artificier ; Outil de circonstance", 'ASI', "Capacité de spécialité d'artificier", "Expertise de l'outillage", 'Trait de génie', 'ASI', "Capacité de spécialité d'artificier", 'Adepte des objets magiques',
+      'Objet de stockage de sort', 'ASI', '', 'Érudit des objets magiques', "Capacité de spécialité d'artificier", 'ASI', '', 'Maître des objets magiques', 'ASI', "Âme de l'artifice"] },
+  };
+  const CLASS_DV_DEFAULTS = { ensorceleur: ['1D6 /niv', '1D6 + CON'], magicien: ['1D6 /niv', '1D6 + CON'] };
+  const clpNorm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’`]/g, "'").replace(/\s+/g, ' ').trim();
+  // Progression « brute » au format stocké : { cols:[...], rows:[{ vals:[...], slots:'4/3/2', feats:'A ; B' } ×20] }
+  function clpDefaultFor(name) {
+    const d = CLASS_PROG_DEFAULTS[clpNorm(name)];
+    if (!d) return null;
+    return {
+      cols: d.cols.slice(),
+      rows: Array.from({ length: 20 }, (_, i) => ({
+        vals: d.cols.map((_, c) => d.vals[c][i] || ''),
+        slots: d.slots ? CLP_SLOTS[d.slots][i] : '',
+        feats: (d.feats[i] || '').split(';').map(x => x.trim()).filter(Boolean).map(x => x === 'ASI' ? 'Amélioration de caractéristiques' : x).join(' ; '),
+      })),
+    };
+  }
+  function clpGet(cl) {
+    const p = cl && cl.progression;
+    if (p && Array.isArray(p.rows) && p.rows.length) return p;
+    return clpDefaultFor(cl && cl.name);
+  }
+  function clpDv(cl) {
+    const d = CLASS_DV_DEFAULTS[clpNorm(cl.name)] || [];
+    return [cl.de_vie || d[0] || '', cl.pv_niveau || d[1] || ''];
+  }
+  const clpParseFeat = raw => {
+    const [head, ...rest] = String(raw).split('::');
+    const note = rest.join('::').trim();
+    const name = head.trim();
+    const m = name.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+    return { label: name, base: m ? m[1].trim() : name, detail: m ? m[2].trim() : '', note };
+  };
+  const clpSlotList = s => String(s || '').split(/[\/\s,;]+/).map(x => x.trim()).filter(x => x && x !== '—' && x !== '-');
+
+  function renderClasseProgression(cl, prog) {
+    // capacités de la fiche, regroupées par nom normalisé
+    const featMap = new Map();
+    (cl.features || []).forEach(f => {
+      const k = clpNorm(f.title);
+      if (!k) return;
+      if (featMap.has(k)) featMap.get(k).text += '\n' + (f.text || '');
+      else featMap.set(k, { title: f.title, text: f.text || '' });
+    });
+    const used = new Set(), firstLevel = {};
+    const rows = prog.rows.slice(0, 20);
+    const maxSlot = Math.max(0, ...rows.map(r => clpSlotList(r.slots).length));
+    const cols = prog.cols || [];
+    const anchor = n => `data-clp-go="${n}"`;
+
+    const tableHtml = `
+      <div class="lv-card clp-card">
+        <div class="lv-card-title">Progression</div>
+        <div class="clp-table-wrap"><table class="clp-table">
+          <thead>
+            ${maxSlot ? `<tr><th colspan="${3 + cols.length}"></th><th colspan="${maxSlot}" class="clp-slot-head">Emplacements de sorts par niveau</th></tr>` : ''}
+            <tr><th>Niv.</th><th>Maîtrise</th><th class="clp-left">Capacités</th>${cols.map(c => `<th>${histEsc(c)}</th>`).join('')}${Array.from({ length: maxSlot }, (_, i) => `<th class="clp-slot">${i + 1}</th>`).join('')}</tr>
+          </thead>
+          <tbody>${rows.map((r, i) => {
+            const feats = String(r.feats || '').split(';').map(x => x.trim()).filter(Boolean).map(clpParseFeat);
+            const sl = clpSlotList(r.slots);
+            return `<tr ${anchor(i + 1)}>
+              <td class="clp-lvl">${i + 1}</td><td>${CLP_BONUS(i + 1)}</td>
+              <td class="clp-left">${feats.length ? feats.map(f => `<span class="clp-pill">${histEsc(f.label)}</span>`).join('') : '<span class="clp-none">—</span>'}</td>
+              ${cols.map((_, c) => `<td>${histEsc((r.vals || [])[c] || '—')}</td>`).join('')}
+              ${Array.from({ length: maxSlot }, (_, k) => `<td class="clp-slot">${sl[k] || '—'}</td>`).join('')}
+            </tr>`;
+          }).join('')}</tbody>
+        </table></div>
+      </div>`;
+
+    const levelsHtml = rows.map((r, i) => {
+      const n = i + 1, prev = rows[i - 1];
+      const stat = (label, val, pval) => `<span class="clp-stat${prev && val !== pval ? ' up' : ''}"><em>${histEsc(label)}</em>${histEsc(val || '—')}</span>`;
+      const sl = clpSlotList(r.slots), psl = prev ? clpSlotList(prev.slots) : [];
+      const stats = [
+        stat('Maîtrise', CLP_BONUS(n), prev ? CLP_BONUS(n - 1) : null),
+        ...cols.map((c, k) => stat(c, (r.vals || [])[k], prev ? (prev.vals || [])[k] : null)),
+        sl.length ? `<span class="clp-stat${prev && sl.join('/') !== psl.join('/') ? ' up' : ''}"><em>Emplacements</em>${sl.map((v, k) => `<b>${k + 1}</b>${v}`).join(' ')}</span>` : '',
+      ].join('');
+      const feats = String(r.feats || '').split(';').map(x => x.trim()).filter(Boolean).map(clpParseFeat);
+      const featHtml = feats.map(f => {
+        const k = clpNorm(f.base), src = featMap.get(k) || featMap.get(clpNorm(f.label));
+        const title = `<div class="clp-feat-name">${histEsc(f.label)}</div>`;
+        if (f.note) return `<div class="clp-feat">${title}<div class="mve-text">${histEsc(f.note)}</div>${src && firstLevel[k] ? `<div class="clp-ref" ${anchor(firstLevel[k])}>Détail de la capacité au niveau ${firstLevel[k]} ›</div>` : ''}</div>`;
+        if (src && !firstLevel[k]) { firstLevel[k] = n; used.add(k); return `<div class="clp-feat">${title}<div class="mve-text">${lvRichText(src.text) || '<span class="lv-empty">—</span>'}</div></div>`; }
+        if (src) return `<div class="clp-feat mini">${title}<div class="clp-ref" ${anchor(firstLevel[k])}>Voir la description au niveau ${firstLevel[k]} ›</div></div>`;
+        if (/^capacit[eé] d/i.test(f.label)) return `<div class="clp-feat mini sub">${title}<div class="mve-text">${CLP_SUB}.</div></div>`;
+        return `<div class="clp-feat mini">${title}</div>`;
+      }).join('');
+      return `<div class="clp-level" id="clp-lvl-${n}">
+        <div class="clp-level-head"><div class="clp-level-num"><span>Niveau</span>${n}</div><div class="clp-stats">${stats}</div></div>
+        <div class="clp-level-body">${featHtml || '<div class="clp-empty">Aucune nouvelle capacité à ce niveau.</div>'}</div>
+      </div>`;
+    }).join('');
+
+    const others = [...featMap.entries()].filter(([k]) => !used.has(k)).map(([, f]) => f);
+    return `
+      <div style="margin-top:14px;">${tableHtml}</div>
+      <div class="clp-section-title">Niveau par niveau</div>
+      <div class="clp-levels">${levelsHtml}</div>
+      ${others.length ? `<div class="lv-card" style="margin-top:14px;"><div class="lv-card-title">Autres capacités</div>${lvSubBlocks(others, true)}</div>` : ''}
+    `;
+  }
+  function bindClasseProgression() {
+    document.querySelectorAll('#pnjvBody [data-clp-go]').forEach(el => el.addEventListener('click', () => {
+      const t = document.getElementById('clp-lvl-' + el.dataset.clpGo);
+      if (!t) return;
+      t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash');
+    }));
+  }
+
+  /* ---- Éditeur de progression (formulaire de classe) ---- */
+  let clpEdit = null;
+  function clpEditorInit(cl) {
+    const p = (cl && clpGet(cl)) || { cols: [], rows: [] };
+    clpEdit = JSON.parse(JSON.stringify(p));
+    while (clpEdit.rows.length < 20) clpEdit.rows.push({ vals: [], slots: '', feats: '' });
+    document.getElementById('clfProgCols').value = (clpEdit.cols || []).join(', ');
+    clpEditorRender();
+  }
+  function clpEditorCollect() {
+    if (!clpEdit) return;
+    document.querySelectorAll('#clfProgGrid [data-r]').forEach(inp => {
+      const r = clpEdit.rows[+inp.dataset.r];
+      if (inp.dataset.f === 'v') { r.vals = r.vals || []; r.vals[+inp.dataset.c] = inp.value; }
+      else r[inp.dataset.f] = inp.value;
+    });
+  }
+  function clpEditorColsChanged() {
+    clpEditorCollect();
+    const oldCols = clpEdit.cols || [];
+    const newCols = document.getElementById('clfProgCols').value.split(',').map(x => x.trim()).filter(Boolean);
+    clpEdit.rows.forEach(r => { const old = r.vals || []; r.vals = newCols.map(c => { const k = oldCols.indexOf(c); return k > -1 ? (old[k] || '') : ''; }); });
+    clpEdit.cols = newCols;
+    clpEditorRender();
+  }
+  function clpEditorLoadDefault() {
+    const name = document.getElementById('clfName').value.trim();
+    const d = clpDefaultFor(name);
+    if (!d) { showToast(`Pas de progression standard pour « ${name || '?'} »`); return; }
+    if (!confirm('Remplacer la progression actuelle par la progression standard ?')) return;
+    clpEdit = d;
+    document.getElementById('clfProgCols').value = d.cols.join(', ');
+    clpEditorRender();
+  }
+  function clpEditorRender() {
+    const cols = clpEdit.cols || [];
+    const esc = v => histEsc(v || '');
+    document.getElementById('clfProgGrid').innerHTML = `<table class="clp-edit">
+      <thead><tr><th>Niv.</th>${cols.map(c => `<th>${esc(c)}</th>`).join('')}<th>Emplacements</th><th>Capacités</th></tr></thead>
+      <tbody>${clpEdit.rows.slice(0, 20).map((r, i) => `<tr>
+        <td class="clp-lvl">${i + 1}</td>
+        ${cols.map((_, c) => `<td><input data-r="${i}" data-f="v" data-c="${c}" value="${esc((r.vals || [])[c])}"></td>`).join('')}
+        <td><input data-r="${i}" data-f="slots" value="${esc(r.slots)}" placeholder="4/3/2" style="width:90px;"></td>
+        <td><input data-r="${i}" data-f="feats" value="${esc(r.feats)}" class="wide"></td>
+      </tr>`).join('')}</tbody></table>`;
+  }
+  function clpEditorValue() {
+    clpEditorCollect();
+    if (!clpEdit) return null;
+    const rows = clpEdit.rows.slice(0, 20).map(r => ({ vals: (clpEdit.cols || []).map((_, c) => String((r.vals || [])[c] || '').trim()), slots: String(r.slots || '').trim(), feats: String(r.feats || '').trim() }));
+    if (!(clpEdit.cols || []).length && rows.every(r => !r.slots && !r.feats)) return null;
+    return { cols: clpEdit.cols || [], rows };
+  }
+
   function openClasseView(id) {
     currentClasseId = id;
     const cl = classesLoreDatabase.find(x => x.id === id);
@@ -39120,21 +39388,24 @@
       { label: 'Valeur haute', value: cl.valeur_haute || '—' }, { label: 'Historique conseillé', value: cl.historique_conseille || '—' },
     ];
     useLoreLayout('classe');
+    const prog = clpGet(cl);
+    const [dv, pvn] = clpDv(cl);
     document.getElementById('pnjvBody').innerHTML = `
       <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,1.05fr) minmax(0,2.7fr);">
         <div>${lvPhoto(cl.photo, 'data-classeview-photo="1"', 'lv-portrait')}</div>
         <div class="lv-col lv-fit">
-          <div class="lv-row">${lvInfo('Dé de vie', cl.de_vie)}${lvInfo('PV / niveau', cl.pv_niveau)}</div>
+          <div class="lv-row">${lvInfo('Dé de vie', dv)}${lvInfo('PV / niveau', pvn)}</div>
           <div class="lv-row">${lvInfo('Valeur haute', cl.valeur_haute)}${lvInfo('Historique conseillé', cl.historique_conseille)}</div>
           <div class="lv-card lv-grow">
             <div class="lv-card-title">Maîtrises</div>
             ${[['Armes', cl.armes], ['Armures', cl.armures], ['Outils', cl.outils], ['Jets de sauvegarde', cl.jds], ['Compétences', cl.competences]].map(([k, v]) => `<div class="mve-text" style="margin-bottom:6px;"><strong style="color:var(--ink);">${k} :</strong> ${v || '—'}</div>`).join('')}
           </div>
         </div>
-        <div class="lv-col lv-fit"><div class="lv-card lv-grow"><div class="lv-card-title">Capacités de classe</div>${lvSubBlocks(cl.features, true)}</div></div>
+        <div class="lv-col lv-fit">${prog ? `<div class="lv-card lv-grow"><div class="lv-card-title">Description</div><div class="mve-text">${lvText(cl.flavor)}</div></div>` : `<div class="lv-card lv-grow"><div class="lv-card-title">Capacités de classe</div>${lvSubBlocks(cl.features, true)}</div>`}</div>
       </div>
-      <div style="margin-top:14px;">${lvCard('Description', cl.flavor)}</div>
+      ${prog ? renderClasseProgression(cl, prog) : `<div style="margin-top:14px;">${lvCard('Description', cl.flavor)}</div>`}
     `;
+    if (prog) bindClasseProgression();
     const photoBox = document.querySelector('[data-classeview-photo]');
     if (photoBox && cl.photo) {
       photoBox.style.cursor = 'pointer';
