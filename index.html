@@ -1715,6 +1715,12 @@
   .clp-feat .mve-text strong { color: var(--ink); font-weight: 600; }
   .clp-feat.mini .clp-feat-name { font-size: 14px; margin-bottom: 1px; }
   .clp-feat.sub .mve-text { font-style: italic; color: var(--ink-faint); }
+  .clp-magic { border: 1px solid rgba(201,162,75,.3); background: var(--gold-soft); border-radius: var(--radius-sm); padding: 9px 12px; }
+  .clp-magic-title { display: flex; align-items: center; gap: 6px; font-family: var(--font-sans); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--gold); margin-bottom: 5px; }
+  .clp-magic-title svg { width: 14px; height: 14px; }
+  .clp-magic ul { margin: 0; padding-left: 18px; }
+  .clp-magic li { font-size: 12.8px; line-height: 1.55; color: var(--ink-dim); margin: 2px 0; }
+  .clp-magic li strong { color: var(--ink); font-weight: 600; }
   .clp-ref { display: inline-block; font-size: 11.5px; color: var(--gold); cursor: pointer; margin-top: 2px; }
   .clp-ref:hover { text-decoration: underline; }
   @media (max-width: 800px) { .clp-level-body { padding-left: 14px; } }
@@ -1987,7 +1993,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 04/10 (31)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 04/10 (32)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3374,6 +3380,10 @@
     <button class="filter-reset-btn" onclick="addStatBlockEntry('clfFeaturesList')">+ Ajouter une capacité</button>
     <div class="section-title" style="margin-top:18px;">Progression par niveau</div>
     <div class="mve-text" style="margin-bottom:8px;">Capacités séparées par « ; ». « Nom (précision) » renvoie à la capacité du même nom ; « Nom :: texte » ajoute une explication. Emplacements de sorts : niveau 1/2/3… (ex : 4/3/2).</div>
+    <div class="two-col-fields">
+      <div class="form-field"><label>Apprentissage des sorts</label><select id="clfMagType"><option value="">Pas de sorts</option><option value="connus">Sorts connus (colonne « Sorts connus »)</option><option value="grimoire">Grimoire (+2 sorts par niveau)</option><option value="prepares">Sorts préparés</option></select></div>
+      <div class="form-field"><label>Sorts préparés (formule)</label><input type="text" id="clfMagPrep" placeholder="Ex : SAG + niveau de clerc"></div>
+    </div>
     <div class="form-field"><label>Colonnes du tableau (séparées par des virgules)</label><input type="text" id="clfProgCols" placeholder="Ex : Rages, Dégâts de rage" onchange="clpEditorColsChanged()"></div>
     <div id="clfProgGrid" style="overflow-x:auto; max-height:420px; overflow-y:auto; border:1px solid var(--card-border); border-radius:8px; padding:6px;"></div>
     <button class="filter-reset-btn" style="margin-top:8px;" onclick="clpEditorLoadDefault()">Charger la progression standard</button>
@@ -39176,40 +39186,40 @@
     'barbare': { cols: ['Rages', 'Dégâts de rage'], vals: [clpSteps([[1,'2'],[3,'3'],[6,'4'],[12,'5'],[17,'6'],[20,'Illimité']]), clpSteps([[1,'+2'],[9,'+3'],[16,'+4']])], slots: null, feats: [
       'Rage ; Défense sans armure', 'Attaque téméraire ; Sens du danger', 'Voie primitive', 'ASI', 'Attaque supplémentaire ; Déplacement rapide', 'Capacité de voie primitive', 'Instinct sauvage', 'ASI', 'Critique brutal (1 dé)', 'Capacité de voie primitive',
       'Rage implacable', 'ASI', 'Critique brutal (2 dés)', 'Capacité de voie primitive', 'Rage persistante', 'ASI', 'Critique brutal (3 dés)', 'Puissance indomptable', 'ASI', 'Champion primitif'] },
-    'barde': { cols: ['Inspiration', 'Sorts mineurs', 'Sorts connus'], vals: [clpSteps([[1,'d6'],[5,'d8'],[10,'d10'],[15,'d12']]), clpSteps([[1,'2'],[4,'3'],[10,'4']]), ['4','5','6','7','8','9','10','11','12','14','15','15','16','18','19','19','20','22','22','22']], slots: 'full', feats: [
+    'barde': { magie: { type: 'connus', carac: 'CHA' }, cols: ['Inspiration', 'Sorts mineurs', 'Sorts connus'], vals: [clpSteps([[1,'d6'],[5,'d8'],[10,'d10'],[15,'d12']]), clpSteps([[1,'2'],[4,'3'],[10,'4']]), ['4','5','6','7','8','9','10','11','12','14','15','15','16','18','19','19','20','22','22','22']], slots: 'full', feats: [
       'Incantation ; Inspiration bardique (d6)', 'Touche-à-tout ; Chant reposant (d6)', 'Collège bardique ; Expertise', 'ASI', "Inspiration bardique (d8) ; Source d'inspiration", 'Contre-charme ; Capacité de collège bardique', '', 'ASI', 'Chant reposant (d8)', 'Inspiration bardique (d10) ; Expertise (2 compétences de plus) ; Secrets magiques',
       '', 'ASI', 'Chant reposant (d10)', 'Secrets magiques (2 sorts de plus) ; Capacité de collège bardique', 'Inspiration bardique (d12)', 'ASI', 'Chant reposant (d12)', 'Secrets magiques (2 sorts de plus)', 'ASI', 'Inspiration supérieure'] },
-    'clerc': { cols: ['Sorts mineurs', 'Conduit divin'], vals: [clpSteps([[1,'3'],[4,'4'],[10,'5']]), clpSteps([[1,'—'],[2,'1/repos'],[6,'2/repos'],[18,'3/repos']])], slots: 'full', feats: [
+    'clerc': { magie: { type: 'prepares', prep: 'SAG + niveau de clerc', sub: [1,3,5,7,9], subLabel: 'Sorts de domaine' }, cols: ['Sorts mineurs', 'Conduit divin'], vals: [clpSteps([[1,'3'],[4,'4'],[10,'5']]), clpSteps([[1,'—'],[2,'1/repos'],[6,'2/repos'],[18,'3/repos']])], slots: 'full', feats: [
       'Incantation ; Domaine divin', 'Conduit divin (1/repos) ; Capacité de domaine divin', '', 'ASI', 'Destruction des morts-vivants (FP 1/2)', 'Conduit divin (2/repos) ; Capacité de domaine divin', '', 'ASI ; Destruction des morts-vivants (FP 1) ; Capacité de domaine divin', '', 'Intervention divine',
       'Destruction des morts-vivants (FP 2)', 'ASI', '', 'Destruction des morts-vivants (FP 3)', '', 'ASI', 'Destruction des morts-vivants (FP 4) ; Capacité de domaine divin', 'Conduit divin (3/repos)', 'ASI', "Intervention divine améliorée :: Votre appel à l'intervention divine réussit automatiquement, sans jet de dé."] },
-    'druide': { cols: ['Sorts mineurs', 'Forme sauvage (FP max)'], vals: [clpSteps([[1,'2'],[4,'3'],[10,'4']]), clpSteps([[1,'—'],[2,'1/4'],[4,'1/2'],[8,'1']])], slots: 'full', feats: [
+    'druide': { magie: { type: 'prepares', prep: 'SAG + niveau de druide' }, cols: ['Sorts mineurs', 'Forme sauvage (FP max)'], vals: [clpSteps([[1,'2'],[4,'3'],[10,'4']]), clpSteps([[1,'—'],[2,'1/4'],[4,'1/2'],[8,'1']])], slots: 'full', feats: [
       'Druidique ; Incantation', 'Forme sauvage ; Cercle druidique', '', 'ASI ; Forme sauvage (amélioration) :: Vous pouvez prendre la forme de bêtes de FP 1/2 au maximum, sans vitesse de vol (la nage est autorisée).', '', 'Capacité de cercle druidique', '', 'ASI ; Forme sauvage (amélioration) :: Vous pouvez prendre la forme de bêtes de FP 1 au maximum, y compris celles qui ont une vitesse de vol.', '', 'Capacité de cercle druidique',
       '', 'ASI', '', 'Capacité de cercle druidique', '', 'ASI', '', 'Jeunesse éternelle ; Incantation animale', 'ASI', 'Archidruide'] },
-    'ensorceleur': { cols: ['Points de sorcellerie', 'Sorts mineurs', 'Sorts connus'], vals: [clpRange(2, n => n), clpSteps([[1,'4'],[4,'5'],[10,'6']]), ['2','3','4','5','6','7','8','9','10','11','12','12','13','13','14','14','15','15','15','15']], slots: 'full', feats: [
+    'ensorceleur': { magie: { type: 'connus', carac: 'CHA' }, cols: ['Points de sorcellerie', 'Sorts mineurs', 'Sorts connus'], vals: [clpRange(2, n => n), clpSteps([[1,'4'],[4,'5'],[10,'6']]), ['2','3','4','5','6','7','8','9','10','11','12','12','13','13','14','14','15','15','15','15']], slots: 'full', feats: [
       'Incantation ; Origine magique', 'Source de magie', 'Métamagie', 'ASI', '', "Capacité d'origine magique", '', 'ASI', '', 'Métamagie (nouvelle option) :: Vous apprenez une option de métamagie supplémentaire.',
       '', 'ASI', '', "Capacité d'origine magique", '', 'ASI', 'Métamagie (nouvelle option) :: Vous apprenez une option de métamagie supplémentaire.', "Capacité d'origine magique", 'ASI', 'Restauration ensorcelée'] },
     'guerrier': { cols: ['Attaques'], vals: [clpSteps([[1,'1'],[5,'2'],[11,'3'],[20,'4']])], slots: null, feats: [
       'Style de combat ; Second souffle', 'Fougue (1 utilisation)', 'Archétype martial', 'ASI', 'Attaque supplémentaire', 'ASI', "Capacité d'archétype martial", 'ASI', 'Inflexible (1 utilisation)', "Capacité d'archétype martial",
       'Attaque supplémentaire (3 attaques)', 'ASI', 'Inflexible (2 utilisations)', 'ASI', "Capacité d'archétype martial", 'ASI', 'Fougue (2 utilisations) ; Inflexible (3 utilisations)', "Capacité d'archétype martial", 'ASI', 'Attaque supplémentaire (4 attaques)'] },
-    'magicien': { cols: ['Sorts mineurs'], vals: [clpSteps([[1,'3'],[4,'4'],[10,'5']])], slots: 'full', feats: [
+    'magicien': { magie: { type: 'grimoire', prep: 'INT + niveau de magicien' }, cols: ['Sorts mineurs', 'Sorts au grimoire'], vals: [clpSteps([[1,'3'],[4,'4'],[10,'5']]), clpRange(1, n => 4 + 2 * n)], slots: 'full', feats: [
       'Incantation ; Restauration arcanique', 'Tradition arcanique', '', 'ASI', '', 'Capacité de tradition arcanique', '', 'ASI', '', 'Capacité de tradition arcanique',
       '', 'ASI', '', 'Capacité de tradition arcanique', '', 'ASI', '', 'Maîtrise des sorts', 'ASI', 'Sorts de prédilection'] },
     'moine': { cols: ['Arts martiaux', 'Points de ki', 'Déplacement sans armure'], vals: [clpSteps([[1,'1d4'],[5,'1d6'],[11,'1d8'],[17,'1d10']]), clpRange(2, n => n), clpSteps([[1,'—'],[2,'+3 m'],[6,'+4,5 m'],[10,'+6 m'],[14,'+7,5 m'],[18,'+9 m']])], slots: null, feats: [
       'Défense sans armure ; Arts martiaux', 'Ki ; Déplacement sans armure', 'Tradition monastique ; Parade de projectiles', 'ASI ; Chute ralentie', 'Attaque supplémentaire ; Frappe étourdissante', 'Frappes de ki ; Capacité de tradition monastique', 'Esquive totale ; Sérénité', 'ASI', "Déplacement sans armure (amélioration) :: Vous pouvez vous déplacer sur les surfaces verticales et à la surface des liquides pendant votre tour, sans tomber pendant le mouvement.", 'Pureté physique',
       'Capacité de tradition monastique', 'ASI', 'Langue du soleil et de la lune', 'Âme de diamant', 'Jeunesse éternelle', 'ASI', 'Capacité de tradition monastique', "Désertion de l'âme", 'ASI', "Perfection de l'être"] },
-    'occultiste': { cols: ['Sorts mineurs', 'Sorts connus', 'Emplacements', 'Niv. emplacements', 'Manifestations'], vals: [clpSteps([[1,'2'],[4,'3'],[10,'4']]), ['2','3','4','5','6','7','8','9','10','10','11','11','12','12','13','13','14','14','15','15'], clpSteps([[1,'1'],[2,'2'],[11,'3'],[17,'4']]), clpSteps([[1,'1'],[3,'2'],[5,'3'],[7,'4'],[9,'5']]), ['—','2','2','2','3','3','4','4','5','5','5','6','6','6','7','7','7','8','8','8']], slots: null, feats: [
+    'occultiste': { magie: { type: 'connus', carac: 'CHA' }, cols: ['Sorts mineurs', 'Sorts connus', 'Emplacements', 'Niv. emplacements', 'Manifestations'], vals: [clpSteps([[1,'2'],[4,'3'],[10,'4']]), ['2','3','4','5','6','7','8','9','10','10','11','11','12','12','13','13','14','14','15','15'], clpSteps([[1,'1'],[2,'2'],[11,'3'],[17,'4']]), clpSteps([[1,'1'],[3,'2'],[5,'3'],[7,'4'],[9,'5']]), ['—','2','2','2','3','3','4','4','5','5','5','6','6','6','7','7','7','8','8','8']], slots: null, feats: [
       "Patron d'Outremonde ; Magie de pacte", 'Manifestations occultes', 'Faveur de pacte', 'ASI', '', "Capacité de patron d'Outremonde", '', 'ASI', '', "Capacité de patron d'Outremonde",
       'Arcanum mystique (sort de niveau 6)', 'ASI', 'Arcanum mystique (sort de niveau 7)', "Capacité de patron d'Outremonde", 'Arcanum mystique (sort de niveau 8)', 'ASI', 'Arcanum mystique (sort de niveau 9)', '', 'ASI', "Maître de l'occulte"] },
-    'paladin': { cols: [], vals: [], slots: 'half', feats: [
+    'paladin': { magie: { type: 'prepares', prep: 'CHA + moitié du niveau de paladin (min. 1)', half: true, sub: [3,5,9,13,17], subLabel: 'Sorts de serment' }, cols: [], vals: [], slots: 'half', feats: [
       'Sens divin ; Imposition des mains', 'Style de combat ; Incantation ; Châtiment divin', 'Santé divine ; Serment sacré', 'ASI', 'Attaque supplémentaire', 'Aura de protection', 'Capacité de serment sacré', 'ASI', '', 'Aura de courage',
       'Châtiment divin amélioré', 'ASI', '', 'Contact purifiant', 'Capacité de serment sacré', 'ASI', '', 'Aura de protection (amélioration) :: La portée de vos auras passe de 3 à 9 mètres.', 'ASI', 'Capacité de serment sacré'] },
-    'rodeur': { cols: ['Sorts connus'], vals: [['—','2','3','3','4','4','5','5','6','6','7','7','8','8','9','9','10','10','11','11']], slots: 'half', feats: [
+    'rodeur': { magie: { type: 'connus', carac: 'SAG' }, cols: ['Sorts connus'], vals: [['—','2','3','3','4','4','5','5','6','6','7','7','8','8','9','9','10','10','11','11']], slots: 'half', feats: [
       'Ennemi juré ; Explorateur-né', 'Style de combat ; Incantation', 'Archétype de rôdeur ; Vigilance primitive', 'ASI', 'Attaque supplémentaire', 'Ennemi juré (amélioration) :: Vous choisissez un ennemi juré supplémentaire et apprenez une langue qu’il parle. ; Explorateur-né (amélioration) :: Vous choisissez un terrain de prédilection supplémentaire.', "Capacité d'archétype de rôdeur", 'ASI ; Foulée tellurique', '', 'Explorateur-né (amélioration) :: Vous choisissez un terrain de prédilection supplémentaire. ; Camouflage naturel',
       "Capacité d'archétype de rôdeur", 'ASI', '', 'Ennemi juré (amélioration) :: Vous choisissez un ennemi juré supplémentaire et apprenez une langue qu’il parle. ; Disparition', "Capacité d'archétype de rôdeur", 'ASI', '', 'Sens sauvages', 'ASI', 'Tueur implacable'] },
     'roublard': { cols: ['Attaque sournoise'], vals: [clpRange(1, n => Math.ceil(n / 2) + 'd6')], slots: null, feats: [
       'Expertise ; Attaque sournoise ; Jargon des voleurs', 'Ruse', 'Archétype de roublard', 'ASI', 'Esquive instinctive', 'Expertise (2 compétences de plus) :: Choisissez deux autres compétences maîtrisées (ou les outils de voleur) : votre bonus de maîtrise est doublé pour elles.', 'Esquive totale', 'ASI', "Capacité d'archétype de roublard", 'ASI',
       'Savoir-faire', 'ASI', "Capacité d'archétype de roublard", 'Perception aveugle', 'Esprit fuyant', 'ASI', "Capacité d'archétype de roublard", 'Insaisissable', 'ASI', 'Coup de chance'] },
-    'artificer': { cols: ['Infusions connues', 'Objets imprégnés', 'Sorts mineurs'], vals: [clpSteps([[1,'—'],[2,'4'],[6,'6'],[10,'8'],[14,'10'],[18,'12']]), clpSteps([[1,'—'],[2,'2'],[6,'3'],[10,'4'],[14,'5'],[18,'6']]), clpSteps([[1,'2'],[10,'3'],[14,'4']])], slots: 'artificer', feats: [
+    'artificer': { magie: { type: 'prepares', prep: 'INT + moitié du niveau d’artificier (min. 1)', half: true, sub: [3,5,9,13,17], subLabel: 'Sorts de spécialité' }, cols: ['Infusions connues', 'Objets imprégnés', 'Sorts mineurs'], vals: [clpSteps([[1,'—'],[2,'4'],[6,'6'],[10,'8'],[14,'10'],[18,'12']]), clpSteps([[1,'—'],[2,'2'],[6,'3'],[10,'4'],[14,'5'],[18,'6']]), clpSteps([[1,'2'],[10,'3'],[14,'4']])], slots: 'artificer', feats: [
       'Bricolage magique ; Incantation', "Imprégnation d'objet", "Spécialité d'artificier ; Outil de circonstance", 'ASI', "Capacité de spécialité d'artificier", "Expertise de l'outillage", 'Trait de génie', 'ASI', "Capacité de spécialité d'artificier", 'Adepte des objets magiques',
       'Objet de stockage de sort', 'ASI', '', 'Érudit des objets magiques', "Capacité de spécialité d'artificier", 'ASI', '', 'Maître des objets magiques', 'ASI', "Âme de l'artifice"] },
   };
@@ -39220,6 +39230,7 @@
     const d = CLASS_PROG_DEFAULTS[clpNorm(name)];
     if (!d) return null;
     return {
+      magie: d.magie ? { ...d.magie } : null,
       cols: d.cols.slice(),
       rows: Array.from({ length: 20 }, (_, i) => ({
         vals: d.cols.map((_, c) => d.vals[c][i] || ''),
@@ -39230,7 +39241,10 @@
   }
   function clpGet(cl) {
     const p = cl && cl.progression;
-    if (p && Array.isArray(p.rows) && p.rows.length) return p;
+    if (p && Array.isArray(p.rows) && p.rows.length) {
+      if (p.magie === undefined) { const d = CLASS_PROG_DEFAULTS[clpNorm(cl.name)]; return { ...p, magie: d && d.magie ? { ...d.magie } : null }; }
+      return p;
+    }
     return clpDefaultFor(cl && cl.name);
   }
   function clpDv(cl) {
@@ -39246,6 +39260,41 @@
   };
   const clpSlotList = s => String(s || '').split(/[\/\s,;]+/).map(x => x.trim()).filter(x => x && x !== '—' && x !== '-');
 
+  // Ce que le personnage gagne en magie à un niveau donné (sorts connus, grimoire, préparés, nouveaux niveaux de sorts…)
+  function clpMagicLines(prog, rows, i) {
+    const m = prog.magie;
+    if (!m || !m.type) return [];
+    const n = i + 1, r = rows[i], prev = rows[i - 1];
+    const cols = prog.cols || [];
+    const num = (row, name) => { const k = cols.findIndex(c => clpNorm(c) === clpNorm(name)); return row && k > -1 ? (parseInt((row.vals || [])[k], 10) || 0) : 0; };
+    const lines = [];
+    // niveau de sort maximum accessible
+    const maxLvl = row => { if (!row) return 0; const k = num(row, 'Niv. emplacements'); return k || clpSlotList(row.slots).length; };
+    const ml = maxLvl(r), pml = maxLvl(prev);
+    if (ml && ml > pml) lines.push(pml ? `<strong>Nouveau :</strong> accès aux sorts de <strong>niveau ${ml}</strong>.` : `Vous lancez des sorts de <strong>niveau ${ml}</strong>${ml > 1 ? ' maximum' : ''}.`);
+    const dc = num(r, 'Sorts mineurs') - num(prev, 'Sorts mineurs');
+    if (prev && dc > 0) lines.push(`<strong>+${dc} sort${dc > 1 ? 's' : ''} mineur${dc > 1 ? 's' : ''}</strong> au choix dans la liste de la classe.`);
+    else if (!prev && num(r, 'Sorts mineurs')) lines.push(`<strong>${num(r, 'Sorts mineurs')} sorts mineurs</strong> au choix dans la liste de la classe.`);
+    if (m.type === 'connus') {
+      const k = num(r, 'Sorts connus'), d = k - num(prev, 'Sorts connus');
+      if (k && !num(prev, 'Sorts connus')) lines.push(`<strong>${k} sorts connus</strong> de niveau 1, au choix dans la liste de la classe.`);
+      else if (d > 0) lines.push(`<strong>+${d} sort${d > 1 ? 's' : ''} connu${d > 1 ? 's' : ''}</strong> (${k} au total), d'un niveau pour lequel vous avez des emplacements.`);
+      if (prev && num(prev, 'Sorts connus')) lines.push(`Vous pouvez <strong>remplacer un sort connu</strong> par un autre sort de la liste de classe d'un niveau accessible.`);
+    }
+    if (m.type === 'grimoire') {
+      if (!prev) lines.push(`<strong>Grimoire de départ :</strong> 6 sorts de magicien de niveau 1 au choix. Les sorts trouvés en aventure peuvent aussi y être recopiés (coût en temps et en or).`);
+      else lines.push(`<strong>+2 sorts</strong> ajoutés gratuitement au grimoire, d'un niveau pour lequel vous avez des emplacements.`);
+      if (m.prep) lines.push(`Sorts préparés chaque jour : <strong>${histEsc(m.prep)}</strong>${prev ? ' (+1 par rapport au niveau précédent)' : ''}.`);
+    }
+    if (m.type === 'prepares' && (clpSlotList(r.slots).length || ml)) {
+      const firstCast = !prev || !maxLvl(prev);
+      let gain = '';
+      if (!firstCast) gain = m.half ? (n % 2 === 0 ? ' (+1 par rapport au niveau précédent)' : '') : ' (+1 par rapport au niveau précédent)';
+      lines.push(`Sorts préparés chaque jour : <strong>${histEsc(m.prep || '')}</strong>${gain}, choisis dans toute la liste de la classe.`);
+    }
+    if (m.sub && m.sub.includes(n)) lines.push(`<strong>${histEsc(m.subLabel || 'Sorts de sous-classe')}</strong> : nouveaux sorts toujours préparés, selon la sous-classe choisie (ne comptent pas dans la limite).`);
+    return lines;
+  }
   function renderClasseProgression(cl, prog) {
     // capacités de la fiche, regroupées par nom normalisé
     const featMap = new Map();
@@ -39301,9 +39350,11 @@
         if (/^capacit[eé] d/i.test(f.label)) return `<div class="clp-feat mini sub">${title}<div class="mve-text">${CLP_SUB}.</div></div>`;
         return `<div class="clp-feat mini">${title}</div>`;
       }).join('');
+      const magic = clpMagicLines(prog, rows, i);
+      const magicHtml = magic.length ? `<div class="clp-magic"><div class="clp-magic-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20 16 8"/><path d="M15 4v2M19 8h2M18 5l1.5-1.5M12 3l.5 1.5M20 12l-1.5-.5"/></svg>Sorts</div><ul>${magic.map(l => `<li>${l}</li>`).join('')}</ul></div>` : '';
       return `<div class="clp-level" id="clp-lvl-${n}">
         <div class="clp-level-head"><div class="clp-level-num"><span>Niveau</span>${n}</div><div class="clp-stats">${stats}</div></div>
-        <div class="clp-level-body">${featHtml || '<div class="clp-empty">Aucune nouvelle capacité à ce niveau.</div>'}</div>
+        <div class="clp-level-body">${magicHtml}${featHtml || (magic.length ? '' : '<div class="clp-empty">Aucune nouvelle capacité à ce niveau.</div>')}</div>
       </div>`;
     }).join('');
 
@@ -39331,7 +39382,12 @@
     clpEdit = JSON.parse(JSON.stringify(p));
     while (clpEdit.rows.length < 20) clpEdit.rows.push({ vals: [], slots: '', feats: '' });
     document.getElementById('clfProgCols').value = (clpEdit.cols || []).join(', ');
+    clpEditorSetMagie(clpEdit.magie);
     clpEditorRender();
+  }
+  function clpEditorSetMagie(m) {
+    document.getElementById('clfMagType').value = (m && m.type) || '';
+    document.getElementById('clfMagPrep').value = (m && m.prep) || '';
   }
   function clpEditorCollect() {
     if (!clpEdit) return;
@@ -39356,6 +39412,7 @@
     if (!confirm('Remplacer la progression actuelle par la progression standard ?')) return;
     clpEdit = d;
     document.getElementById('clfProgCols').value = d.cols.join(', ');
+    clpEditorSetMagie(d.magie);
     clpEditorRender();
   }
   function clpEditorRender() {
@@ -39375,7 +39432,9 @@
     if (!clpEdit) return null;
     const rows = clpEdit.rows.slice(0, 20).map(r => ({ vals: (clpEdit.cols || []).map((_, c) => String((r.vals || [])[c] || '').trim()), slots: String(r.slots || '').trim(), feats: String(r.feats || '').trim() }));
     if (!(clpEdit.cols || []).length && rows.every(r => !r.slots && !r.feats)) return null;
-    return { cols: clpEdit.cols || [], rows };
+    const type = document.getElementById('clfMagType').value;
+    const magie = type ? { ...(clpEdit.magie || {}), type, prep: document.getElementById('clfMagPrep').value.trim() } : null;
+    return { magie, cols: clpEdit.cols || [], rows };
   }
 
   function openClasseView(id) {
