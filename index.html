@@ -1790,6 +1790,10 @@
   .capr-item-label { flex: 1; }
   .capr-origin { margin-left: 8px; font-size: 10.5px; color: var(--gold); border: 1px solid rgba(201,162,75,.4); border-radius: 999px; padding: 0 7px; }
   .capr-open { border: 1px solid var(--gold); background: var(--gold-soft); color: var(--gold); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+  .capr-open.ghost { background: transparent; border-color: var(--card-border); color: var(--ink-dim); margin-left: 6px; }
+  .wcap-summary { font-size: 12.5px; color: var(--ink-dim); margin-bottom: 8px; }
+  .wcap-summary strong { color: var(--gold); }
+  .wcap-group { font-family: var(--font-serif); font-style: italic; color: var(--gold); font-size: 14.5px; margin: 12px 0 4px; }
   .capr-status { font-size: 11px; color: var(--ink-faint); white-space: nowrap; } .capr-status.sent { color: var(--gold); }
   .capr-panel { border: 1px solid rgba(201,162,75,.35); border-radius: 10px; padding: 12px 14px; margin: -2px 0 10px; background: var(--card); }
   .capr-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-faint); margin: 10px 0 4px; }
@@ -2077,7 +2081,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 05/10 (38)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 05/10 (39)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3906,7 +3910,9 @@
 
       <!-- STEP 6 : CAPACITÉS (facultatif) -->
       <div class="wizard-step" data-step="6">
-        <div class="section-title" style="margin-top:0;">Capacités <span class="field-hint">(facultatif — tu peux tout laisser vide et revenir plus tard)</span></div>
+        <div class="section-title" style="margin-top:0;">Capacités proposées <span class="field-hint">(d'après la race, l'historique, la classe et le niveau — vérifie chaque ligne, fais les choix, puis valide)</span></div>
+        <div id="wCapProposed"></div>
+        <div class="section-title">Autres capacités <span class="field-hint">(ajoutées à la main — tape quelques lettres pour chercher dans la base)</span></div>
         <div id="wCapacitesList"></div>
         <button class="filter-reset-btn" onclick="addCapaciteBlock()">+ Ajouter une capacité</button>
 
@@ -6349,6 +6355,7 @@
     document.getElementById('wAvantAventure').value = '';
     document.getElementById('wEllipse').value = '';
     document.getElementById('wCapacitesList').innerHTML = '';
+    wizCapReset(editId ? players.find(x => x.id === editId) : null);
     capaciteBlockCount = 0;
 
     renderSkillsWizard();
@@ -6816,6 +6823,7 @@
     document.getElementById('wizardPrevBtn').style.visibility = wizardStep === 1 ? 'hidden' : 'visible';
     document.getElementById('wizardNextBtn').textContent = wizardStep === wizardTotalSteps ? 'Créer le personnage' : 'Suivant';
     document.getElementById('wizardError').textContent = '';
+    if (wizardStep === 6) { wizCap.open = null; wizCapRefresh(); }
     if (wizardStep === 7) { renderAutoRecap(); renderFinalSummary(); }
   }
 
@@ -6923,7 +6931,7 @@
       cha: parseInt(document.getElementById('wCha').value) || 10,
     };
 
-    const saveThrows = [document.getElementById('wSave1').value, document.getElementById('wSave2').value];
+    const saveThrows = [...new Set([document.getElementById('wSave1').value, document.getElementById('wSave2').value, ...wizCap.extraSaves])];
 
     const skills = skillsData.map((sk, i) => ({
       name: sk.name, ability: sk.ability,
@@ -6953,6 +6961,19 @@
       if (div.dataset.hidden) c.hiddenForPlayer = true;
       return c;
     });
+    // Capacités proposées par la base (vérifiées à l'étape 6)
+    if (capBase.length) {
+      wizCapBuild();
+      const pendingCaps = wizCap.items.filter(i => i.status === 'pending').length;
+      let includePending = false;
+      if (pendingCaps) {
+        if (!confirm(`${pendingCaps} capacité${pendingCaps > 1 ? 's' : ''} proposée${pendingCaps > 1 ? 's' : ''} n'${pendingCaps > 1 ? 'ont' : 'a'} pas été vérifiée${pendingCaps > 1 ? 's' : ''}.\n\nOK : les ajouter telles quelles (sans faire leurs choix).\nAnnuler : revenir à l'étape Capacités pour les vérifier.`)) {
+          wizardStep = 6; renderWizardStep(); return;
+        }
+        includePending = true;
+      }
+      capacites.push(...wizCapFinal(includePending));
+    }
 
     const isEditing = !!currentEditingPlayerId;
     const existingPlayer = isEditing ? players.find(pl => pl.id === currentEditingPlayerId) : null;
@@ -6974,7 +6995,8 @@
       speed: (() => { const r = getWizardRacesData().find(x => x.name === document.getElementById('wRace').value); return r ? r.speed : 9; })(),
       origine: document.getElementById('wOrigine').value, avantAventure: document.getElementById('wAvantAventure').value, ellipse: document.getElementById('wEllipse').value,
       maxHp: parseInt(pv) || 1, currentHp: isEditing ? existingPlayer.currentHp : (parseInt(pv) || 1),
-      knownSpellNames: isEditing ? (existingPlayer.knownSpellNames || []) : [],
+      knownSpellNames: [...new Set([...(isEditing ? (existingPlayer.knownSpellNames || []) : []), ...wizCap.spells.map(x => x.name)])],
+      capChoix: wizCap.choix, subclasses: wizCap.subclasses,
       items: isEditing ? existingPlayer.items : undefined, coins: isEditing ? existingPlayer.coins : undefined,
       photo: photoData ? photoData.src : (isEditing ? existingPlayer.photo : null),
     };
@@ -46401,6 +46423,163 @@
       persistLevelUp(p);
       renderLevelUpChecklist(); renderNotifBadges();
     }
+  }
+
+  /* ===================== CRÉATION : capacités proposées depuis la base ===================== */
+  let wizCap = { items: [], subclasses: {}, choix: {}, extraCaps: [], extraSaves: [], spells: [], open: null };
+  function wizCapReset(p) {
+    wizCap = { items: [], subclasses: { ...((p && p.subclasses) || {}) }, choix: JSON.parse(JSON.stringify((p && p.capChoix) || {})),
+      extraCaps: [], extraSaves: [], spells: [], open: null };
+  }
+  function wizPseudoPlayer() {
+    const v = id => (document.getElementById(id) || {}).value || '';
+    const n1 = parseInt(v('wNiveau1'), 10) || 1, n2 = v('wClasse2') ? (parseInt(v('wNiveau2'), 10) || 1) : 0;
+    const ab = {}; [['for', 'wFor'], ['dex', 'wDex'], ['con', 'wCon'], ['int', 'wInt'], ['sag', 'wSag'], ['cha', 'wCha']].forEach(([k, id]) => ab[k] = parseInt(v(id), 10) || 10);
+    return {
+      race: v('wRace'), historique: v('wHistorique'), classe1: v('wClasse1'), niveau1: n1, classe2: v('wClasse2'), niveau2: n2, level: n1 + n2,
+      abilities: ab, capChoix: wizCap.choix, subclasses: wizCap.subclasses,
+      skills: skillsData.map((s, i) => ({ name: s.name, trained: !!(document.getElementById('wSkillT' + i) || {}).checked, expert: !!(document.getElementById('wSkillE' + i) || {}).checked })),
+      languages: languagesData.filter((l, i) => (document.getElementById('wlang_' + i) || {}).checked),
+    };
+  }
+  function wizCapBuild() {
+    const p = wizPseudoPlayer();
+    const prev = new Map(wizCap.items.map(i => [i.baseId, i]));
+    const manual = [...document.querySelectorAll('#wCapacitesList .capacite-block')];
+    const ownedIds = new Set(manual.map(b => b.dataset.baseId).filter(Boolean));
+    const ownedTitles = new Set(manual.map(b => capNorm((b.querySelector('.cb-title') || {}).value)).filter(Boolean));
+    const parent = typeof wizRaceLore === 'function' ? (wizRaceLore(p.race).parent || {}).name : '';
+    const rows = [];
+    const add = (r, group, order) => { if (r.source !== 'Option' && !ownedIds.has(r.id) && !ownedTitles.has(capNorm(r.nom)) && !rows.some(x => x.r.id === r.id)) rows.push({ r, group, order }); };
+    [p.race, parent].filter(Boolean).forEach(n => capRowsFor(n).filter(r => (r.niveau || 1) <= p.level).forEach(r => add(r, 'Race', 0)));
+    if (p.historique) capRowsFor(p.historique).forEach(r => add(r, 'Historique', 1));
+    [[p.classe1, p.niveau1], [p.classe2, p.niveau2]].forEach(([c, n], ci) => {
+      if (!c || !n) return;
+      const sub = wizCap.subclasses[c];
+      capBase.filter(r => r.source === 'Classe' && (r.niveau || 1) <= n && (capNorm(r.origine) === capNorm(c) || (sub && capNorm(r.origine) === capNorm(`${c} · ${sub}`))))
+        .forEach(r => add(r, `${c} — niveau ${r.niveau || 1}`, 10 + ci * 100 + (r.niveau || 1)));
+    });
+    // Une capacité de sous-race qui en remplace une autre (Souffle du drakéïde chromatique…) l'emporte
+    const replaced = new Set(rows.map(x => x.r.remplace).filter(Boolean));
+    wizCap.items = rows.filter(x => !replaced.has(x.r.id)).sort((a, b) => a.order - b.order || String(a.r.origine).length - String(b.r.origine).length || a.r.nom.localeCompare(b.r.nom, 'fr'))
+      .map(x => prev.get(x.r.id) || { kind: 'cap', baseId: x.r.id, label: x.r.nom, origine: x.r.origine, group: x.group, status: 'pending' })
+      .map(it => ({ ...it, group: (rows.find(x => x.r.id === it.baseId) || {}).group || it.group }));
+  }
+  function wizCapRender() {
+    const box = document.getElementById('wCapProposed');
+    if (!box) return;
+    if (!capBase.length) { box.innerHTML = '<div class="capl-empty">Base des capacités indisponible : ajoute les capacités à la main ci-dessous.</div>'; return; }
+    if (!wizCap.items.length) { box.innerHTML = '<div class="capl-empty">Choisis la race, l’historique et la classe aux étapes précédentes pour voir les capacités proposées.</div>'; return; }
+    const p = wizPseudoPlayer();
+    const todo = wizCap.items.filter(i => i.status === 'pending').length;
+    let html = `<div class="wcap-summary">${todo ? `<strong>${todo}</strong> capacité${todo > 1 ? 's' : ''} à vérifier` : 'Tout est vérifié ✓'} · ${wizCap.items.filter(i => i.status === 'accepted').length} validée(s)</div>`;
+    let lastGroup = null;
+    wizCap.items.forEach((it, idx) => {
+      if (it.group !== lastGroup) { html += `<div class="wcap-group">${histEsc(it.group)}</div>`; lastGroup = it.group; }
+      const st = it.status === 'accepted' ? `<span class="capr-status sent">Validée</span><button class="capr-open ghost" onclick="wizCapReopen(${idx})">Modifier</button>`
+        : it.status === 'skipped' ? `<span class="capr-status">Écartée</span><button class="capr-open ghost" onclick="wizCapReopen(${idx})">Reprendre</button>`
+        : `<button class="capr-open" onclick="wizCapToggle(${idx})">${wizCap.open === idx ? 'Fermer' : 'Vérifier ›'}</button>`;
+      const sub = it.origine && it.origine.includes('·') ? `<span class="capr-origin">${histEsc(it.origine.split('·').slice(1).join('·').trim())}</span>` : '';
+      const choice = it.choiceLabel ? `<span class="capr-origin">${histEsc(it.choiceLabel)}</span>` : '';
+      html += `<div class="checklist-item capr-item${it.status !== 'pending' ? ' done' : ''}"><div class="capr-item-label">${histEsc(it.label)}${sub}${choice}</div>${st}</div>`;
+      if (wizCap.open === idx && it.status === 'pending') {
+        html += capReviewHtml(p, it, idx).replace(/capReviewSend\(/g, 'wizCapAccept(').replace(/capReviewSkip\(/g, 'wizCapSkip(').replace('Envoyer à la fiche', 'Valider')
+          .replace('Les sorts imposés sont ajoutés à ses sorts connus', 'Les sorts imposés seront ajoutés à ses sorts connus');
+      }
+    });
+    box.innerHTML = html;
+  }
+  function wizCapRefresh() { wizCapBuild(); wizCapRender(); }
+  function wizCapToggle(idx) { wizCap.open = wizCap.open === idx ? null : idx; wizCapRender(); }
+  function wizCapSkip(idx) { wizCap.items[idx].status = 'skipped'; wizCap.open = null; wizCapRender(); }
+  function wizCapReopen(idx) {
+    const it = wizCap.items[idx];
+    const r = capBase.find(x => x.id === it.baseId);
+    // On défait ce que la validation avait enregistré (choix, options, sorts)
+    if (r && it.picks) {
+      if (r.choix === 'Sous-classe') { delete wizCap.subclasses[capClassOf(r)]; }
+      else if (r.choix) wizCap.choix[r.choix] = (wizCap.choix[r.choix] || []).filter(x => !it.picks.includes(x));
+    }
+    wizCap.extraCaps = wizCap.extraCaps.filter(x => x.from !== it.baseId);
+    wizCap.spells = wizCap.spells.filter(x => x.from !== it.baseId);
+    Object.assign(it, { status: 'pending', picks: null, mpicks: null, text: null, custom: false, choiceLabel: null });
+    wizCap.open = idx;
+    wizCapRefresh();
+    wizCap.open = wizCap.items.findIndex(x => x.baseId === it.baseId);
+    wizCapRender();
+  }
+  function wizApplyMaitrise(type, value) {
+    const n = capNorm(value);
+    const check = id => { const el = document.getElementById(id); if (el) el.checked = true; return !!el; };
+    if (type === 'competence' || type === 'expertise') {
+      const i = skillsData.findIndex(s => capNorm(s.name) === n);
+      if (i > -1) { check('wSkillT' + i); if (type === 'expertise') check('wSkillE' + i); return; }
+    }
+    if (type === 'arme') { for (const cat of weaponCategories) { const i = cat.items.findIndex(w => capNorm(w) === n); if (i > -1) return check(`witem_${cat.key}_${i}`); } }
+    if (type === 'armure') { const i = armorCategories.findIndex(a => capNorm(a) === n); if (i > -1) return check('warmor_' + i); }
+    if (type === 'outil' || type === 'expertise') {
+      for (const cat of toolCategories) { const i = cat.items.findIndex(t => capNorm(t) === n); if (i > -1) return check(`wtool_${cat.key}_${i}`); }
+      const g = generalToolItems.findIndex(t => capNorm(t) === n); if (g > -1) return check('wtoolgen_' + g);
+    }
+    if (type === 'langue') { const i = languagesData.findIndex(l => capNorm(l) === n); if (i > -1) return check('wlang_' + i); }
+    if (type === 'jd') { const cur = [document.getElementById('wSave1').value, document.getElementById('wSave2').value]; if (!cur.includes(value) && !wizCap.extraSaves.includes(value)) wizCap.extraSaves.push(value); }
+  }
+  function wizCapAccept(idx) {
+    const it = wizCap.items[idx];
+    const r = capBase.find(x => x.id === it.baseId);
+    const panel = document.querySelector('#wCapProposed .capr-panel');
+    if (!r || !panel) return;
+    let picks = [];
+    const optBox = panel.querySelector('.capr-opts[data-group]');
+    if (optBox) {
+      picks = [...optBox.querySelectorAll('input:checked')].map(i => i.value);
+      const need = +optBox.dataset.need;
+      if (need && picks.length !== need && optBox.querySelector('input')) { showToast(`Choisis ${need} option${need > 1 ? 's' : ''}`); return; }
+    }
+    const mpicks = [];
+    for (const b of panel.querySelectorAll('.capr-mopts')) {
+      const vals = [...b.querySelectorAll('input:checked')].map(i => i.value);
+      if (vals.length !== +b.dataset.need && b.querySelector('input')) { showToast(`Coche ${b.dataset.need} élément${+b.dataset.need > 1 ? 's' : ''}`); return; }
+      mpicks[+b.dataset.mi] = vals;
+    }
+    const textEl = panel.querySelector('#caprText');
+    const cls = capClassOf(r);
+    const ctx = capCtxFromPlayer(wizPseudoPlayer());
+    it.picks = picks; it.mpicks = mpicks;
+    if (textEl && textEl.value.trim() !== textEl.dataset.orig) { it.text = textEl.value.trim(); it.custom = true; }
+    if (r.choix === 'Sous-classe' && picks[0]) { wizCap.subclasses[cls] = picks[0]; it.choiceLabel = picks[0]; }
+    else if (r.choix && picks.length) {
+      wizCap.choix[r.choix] = [...(wizCap.choix[r.choix] || []), ...picks];
+      const isSimple = !capBase.some(x => x.option_de === r.choix);
+      if (isSimple && picks.length === 1) it.choiceLabel = picks[0];
+      picks.forEach(name => {
+        const o = capBase.find(x => x.option_de === r.choix && x.nom === name);
+        if (o) { wizCap.extraCaps.push({ baseId: o.id, from: r.id }); capParseMaitrises(o.maitrises, ctx, o).forEach(m => { if (!m.count) capFixedValues(m).forEach(v => wizApplyMaitrise(m.type, v)); }); }
+      });
+    }
+    capParseMaitrises(r.maitrises, ctx, r).forEach((m, mi) => (m.count ? (mpicks[mi] || []) : capFixedValues(m)).forEach(v => wizApplyMaitrise(m.type, v)));
+    String(r.sorts || '').split(';').map(x => x.trim()).filter(x => /^Sort(?: mineur)?\s*:/i.test(x)).forEach(x =>
+      x.replace(/^Sort(?: mineur)?\s*:\s*/i, '').split(',').map(n => n.replace(/\(.*?\)/g, '').trim()).filter(Boolean).forEach(n => wizCap.spells.push({ name: capSpellName(n), from: r.id })));
+    it.status = 'accepted';
+    wizCapRefresh();
+    const next = wizCap.items.findIndex(x => x.status === 'pending');
+    wizCap.open = next > -1 ? next : null;
+    wizCapRender();
+  }
+  // Capacités finales à enregistrer sur la fiche
+  function wizCapFinal(includePending) {
+    const ctx = capCtxFromPlayer(wizPseudoPlayer());
+    const out = [];
+    wizCap.items.filter(i => i.status === 'accepted' || (includePending && i.status === 'pending')).forEach(it => {
+      const r = capBase.find(x => x.id === it.baseId);
+      if (!r) return;
+      const inst = capInstanceFromBase(r, ctx);
+      if (it.choiceLabel) { inst.choiceLabel = it.choiceLabel; inst.title = `${r.nom} : ${it.choiceLabel}`; }
+      if (it.custom && it.text) { inst.text = it.text; inst.custom = true; }
+      out.push(inst);
+    });
+    wizCap.extraCaps.forEach(x => { const o = capBase.find(r => r.id === x.baseId); if (o) out.push(capInstanceFromBase(o, ctx)); });
+    return out;
   }
 
   /* ===================== LORE › CHRONIQUES (légendes, récits anciens…) ===================== */
