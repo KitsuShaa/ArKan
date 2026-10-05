@@ -1744,6 +1744,9 @@
   .clp-ref { display: inline-block; font-size: 11.5px; color: var(--gold); cursor: pointer; margin-top: 2px; }
   .clp-ref:hover { text-decoration: underline; }
   @media (max-width: 800px) { .clp-level-body { padding-left: 14px; } }
+  .wlang-hint { font-size: 12px; color: var(--ink-dim); background: var(--gold-soft); border: 1px solid rgba(201,162,75,.3); border-radius: 8px; padding: 7px 10px; margin-bottom: 8px; line-height: 1.5; }
+  .wlang-hint strong { color: var(--ink); } .wlang-hint em { color: var(--gold); font-style: normal; }
+  .wlang-auto { margin-left: 5px; font-size: 9.5px; text-transform: uppercase; letter-spacing: .3px; color: var(--gold); border: 1px solid rgba(201,162,75,.45); border-radius: 999px; padding: 0 5px; }
   .clp-edit { border-collapse: collapse; font-size: 12px; width: 100%; }
   .clp-edit th { font-size: 10px; text-transform: uppercase; letter-spacing: .3px; color: var(--ink-faint); padding: 4px; text-align: left; white-space: nowrap; }
   .clp-edit td { padding: 2px 3px; }
@@ -2013,7 +2016,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 04/10 (35)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 05/10 (36)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -6236,7 +6239,10 @@
     renderWeaponCats();
     renderArmorCats();
     renderToolCats();
+    wizExtendLanguages();
     renderLangCats();
+    wizBindAutoLanguages();
+    if (!editId) setTimeout(() => applyAutoLanguages(true), 0);
     renderSaveThrows();
     updateAutoCalc();
 
@@ -6422,8 +6428,89 @@
     `;
   }
 
+  /* ---- Langues accordées d'office par la race (et la sous-race) et l'historique, lues dans le Lore ---- */
+  const LANG_ALIASES = { 'nain': 'Naine', 'naine': 'Naine', 'elfe': 'Elfique', 'langue des profondeurs': 'Profond', 'profond': 'Profond', 'sylvain': 'Sylvestre' };
+  const langNorm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  function langCanon(raw) {
+    const n = langNorm(raw);
+    if (!n) return null;
+    const found = languagesData.find(l => langNorm(l) === n) || (LANG_ALIASES[n] && languagesData.find(l => l === LANG_ALIASES[n]));
+    return found || (raw.trim().charAt(0).toUpperCase() + raw.trim().slice(1));
+  }
+  // « Commun, elfique + une langue au choix » → { fixed: ['Commun', 'Elfique'], free: 1 }
+  function parseLoreLanguages(txt) {
+    const t = String(txt || '').trim();
+    if (!t || /^(aucune?|—|-)$/i.test(t)) return { fixed: [], free: 0, notes: [] };
+    let free = 0;
+    const NUM = { une: 1, un: 1, deux: 2, trois: 3, quatre: 4 };
+    const rest = t.replace(/(une|un|deux|trois|quatre|\d+)\s+(?:autres?\s+)?(?:langues?\s+)?(?:de\s+(?:votre|ton)\s+)?au\s+choix/gi, (m, n) => { free += NUM[n.toLowerCase()] || parseInt(n, 10) || 1; return ''; });
+    const fixed = [], notes = [];
+    rest.split(/[,+;]|\bet\b/).map(x => x.trim()).filter(x => x && !/^(au choix|langues?)$/i.test(x)).forEach(x => {
+      // Une précision plutôt qu'un nom de langue (« dont 1 exotique », « la langue de la tribu… ») → affichée en rappel
+      if (x.split(/\s+/).length > 3 || /^(dont|la|le|les|l'|une|un|des|basée?s?|sans)\b/i.test(x)) {
+        if (/^(la|l')\s*langue\b/i.test(x)) free += 1;
+        notes.push(x);
+      } else fixed.push(langCanon(x));
+    });
+    return { fixed: fixed.filter(Boolean), free, notes };
+  }
+  function wizRaceLore(name) {
+    const n = langNorm(name);
+    const exact = racesDatabase.find(r => langNorm(r.name) === n);
+    if (exact) return { race: exact, parent: exact };
+    // Sous-race : sa propre ligne + la race parente (la plus longue dont le nom est contenu)
+    const sub = sousracesDatabase.find(r => langNorm(r.name) === n);
+    const parent = racesDatabase.filter(r => n.includes(langNorm(r.name))).sort((a, b) => b.name.length - a.name.length)[0];
+    return { race: sub || null, parent: parent || null };
+  }
+  function wizAutoLanguageSources() {
+    const out = [];
+    const { race, parent } = wizRaceLore(document.getElementById('wRace').value);
+    const rl = parseLoreLanguages((race && race.langues) || (parent && parent.langues) || '');
+    if (rl.fixed.length || rl.free || rl.notes.length) out.push({ label: 'Race', ...rl });
+    const h = historiquesDatabase.find(x => x.name === document.getElementById('wHistorique').value);
+    const hl = parseLoreLanguages(h && h.langues);
+    if (hl.fixed.length || hl.free || hl.notes.length) out.push({ label: 'Historique', ...hl });
+    return out;
+  }
+  // Ajoute à la liste les langues citées dans le Lore qui n'y sont pas encore (Aérien, Aarakocra…)
+  function wizExtendLanguages() {
+    [...racesDatabase, ...sousracesDatabase, ...historiquesDatabase].forEach(r => parseLoreLanguages(r.langues).fixed.forEach(l => { if (!languagesData.includes(l)) languagesData.push(l); }));
+  }
+  function wizBindAutoLanguages() {
+    ['wRace', 'wHistorique'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.dataset.autoLang) { el.dataset.autoLang = '1'; el.addEventListener('change', () => applyAutoLanguages(false)); }
+    });
+  }
+  function applyAutoLanguages(silent) {
+    const srcs = wizAutoLanguageSources();
+    const want = new Map();
+    srcs.forEach(s => s.fixed.forEach(l => { if (!want.has(l)) want.set(l, s.label); }));
+    languagesData.forEach((l, i) => {
+      const el = document.getElementById('wlang_' + i);
+      if (!el) return;
+      const lab = el.closest('label');
+      const badge = lab && lab.querySelector('.wlang-auto');
+      if (badge) badge.remove();
+      if (want.has(l)) {
+        el.checked = true; el.dataset.auto = '1';
+        if (lab) lab.insertAdjacentHTML('beforeend', `<span class="wlang-auto">${want.get(l)}</span>`);
+      } else if (el.dataset.auto === '1') { el.checked = false; delete el.dataset.auto; } // retiré si la race/l'historique a changé
+    });
+    const free = srcs.reduce((n, s) => n + s.free, 0);
+    const hint = document.getElementById('wLangHint');
+    if (hint) {
+      const parts = srcs.map(s => `<strong>${s.label}</strong> : ${[...s.fixed, ...(s.free ? [`${s.free} au choix`] : [])].join(', ')}${s.notes.length ? ` (${histEsc(s.notes.join(', '))})` : ''}`);
+      hint.innerHTML = parts.length ? parts.join(' · ') + (free ? ` — <em>coche ${free} langue${free > 1 ? 's' : ''} de plus</em>` : '') : '';
+      hint.style.display = parts.length ? 'block' : 'none';
+    }
+    if (!silent && want.size) showToast(`Langues cochées d'office : ${[...want.keys()].join(', ')}`);
+  }
+
   function renderLangCats() {
     document.getElementById('wLangBlock').innerHTML = `
+      <div id="wLangHint" class="wlang-hint" style="display:none;"></div>
       <div class="tool-cat-block">
         <div class="wcat-items">
           ${languagesData.map((l, i) => `<label><input type="checkbox" id="wlang_${i}"> ${l}</label>`).join('')}
