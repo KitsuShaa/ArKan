@@ -4383,7 +4383,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 01/10 (14)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 05/10 (15)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -7606,9 +7606,10 @@
       {
         capacities.length = 0;
         (p.capacites || []).forEach((c, i) => {
+          if (c.hiddenForPlayer && !MJ_VIEW) return; // capacité dont le seul effet est une maîtrise : déjà cochée, inutile de l'afficher
           const groupLabel = c.source === 'Race' ? `Race — ${p.race || ''}` : c.source === 'Classe' ? `Classe — ${p.classe1 || ''}` : c.source === 'Historique' ? `Historique — ${p.historique || ''}` : (c.source || 'Autre');
           const usesMax = (c.recharge && c.recharge !== 'aucun' && parseInt(c.uses) > 0) ? parseInt(c.uses) : null;
-          capacities.push({ id: 'cap' + i, name: c.title || 'Capacité', group: groupLabel, desc: c.text || '', inCombat: !!usesMax,
+          capacities.push({ id: 'cap' + i, name: c.title || 'Capacité', group: groupLabel, desc: c.text || '', inCombat: false,
             usesMax, usesLeft: usesMax, recharge: c.recharge || 'aucun' });
         });
         capGroups.length = 0;
@@ -7691,7 +7692,7 @@
       // Capacités : décompte réel
       const capCountEl = document.getElementById('capSubCount');
       if (capCountEl) {
-        const n = (p.capacites || []).length;
+        const n = (p.capacites || []).filter(c => MJ_VIEW || !c.hiddenForPlayer).length;
         capCountEl.textContent = `Race, classe & historique — ${n} active${n > 1 ? 's' : ''}`;
       }
 

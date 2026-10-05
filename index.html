@@ -1744,6 +1744,67 @@
   .clp-ref { display: inline-block; font-size: 11.5px; color: var(--gold); cursor: pointer; margin-top: 2px; }
   .clp-ref:hover { text-decoration: underline; }
   @media (max-width: 800px) { .clp-level-body { padding-left: 14px; } }
+  .cap-ac { position: fixed; z-index: 4000; display: none; max-height: 340px; overflow-y: auto; background: var(--bg-elevated); border: 1px solid var(--card-border); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.35); padding: 4px; }
+  .cap-ac-item { padding: 7px 10px; border-radius: 7px; cursor: pointer; }
+  .cap-ac-item.active, .cap-ac-item:hover { background: var(--gold-soft); }
+  .cap-ac-name { font-size: 13.5px; color: var(--ink); }
+  .cap-ac-meta { font-size: 11px; color: var(--ink-faint); margin-top: 1px; }
+  .cb-base-tag { font-size: 10px; text-transform: uppercase; letter-spacing: .3px; color: var(--gold); border: 1px solid rgba(201,162,75,.45); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+  .capb-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .capb-toolbar input { flex: 1; min-width: 220px; }
+  .capb-toolbar input, .capb-toolbar select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--card); color: var(--ink); font-size: 13px; }
+  .capb-count { font-size: 12px; color: var(--ink-faint); margin-bottom: 8px; }
+  .capb-group { margin-bottom: 14px; }
+  .capb-group-title { font-family: var(--font-serif); font-style: italic; color: var(--gold); font-size: 15px; margin-bottom: 4px; }
+  .capb-row { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; }
+  .capb-row:hover { background: var(--card); border-color: var(--card-border); }
+  .capb-lvl { font-size: 11px; color: var(--ink-faint); }
+  .capb-name { font-size: 13.5px; color: var(--ink); }
+  .capb-tags { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+  .capb-tag { font-size: 9.5px; text-transform: uppercase; letter-spacing: .3px; padding: 1px 6px; border-radius: 999px; background: var(--bg-elevated); border: 1px solid var(--card-border); color: var(--ink-dim); }
+  .capb-preview-head { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-faint); margin-bottom: 8px; }
+  .capb-preview-head select { padding: 5px 8px; border-radius: 7px; border: 1px solid var(--card-border); background: var(--card); color: var(--ink); font-size: 12px; }
+  .capb-uses { margin-top: 8px; font-size: 12px; color: var(--gold); }
+  .capb-fields { margin-top: 14px; display: grid; gap: 8px; }
+  .capb-field { background: var(--card); border: 1px solid var(--card-border); border-radius: 8px; padding: 8px 12px; }
+  .capb-field-label { font-size: 10px; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-faint); margin-bottom: 2px; }
+  .capb-field-val { font-size: 12.5px; color: var(--ink); white-space: pre-wrap; font-family: var(--font-mono, monospace); }
+  .capbf-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 10px; }
+  @media (max-width: 700px) { .capbf-grid { grid-template-columns: 1fr 1fr; } }
+  .capl-box { margin-top: 6px; }
+  .capl-head { font-family: var(--font-serif); color: var(--gold); font-size: 15px; margin: 8px 0 6px; }
+  .capl-hint { font-family: var(--font-sans); font-size: 11px; color: var(--ink-faint); }
+  .capl-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 5px 8px; border-radius: 7px; border: 1px solid var(--card-border); background: var(--card); margin-bottom: 4px; }
+  .capl-lvl { font-size: 11px; color: var(--ink-faint); font-family: var(--font-sans); }
+  .capl-name { font-size: 13px; color: var(--ink); }
+  .capl-btn { border: 1px solid var(--card-border); background: transparent; color: var(--ink-dim); border-radius: 6px; width: 26px; height: 24px; cursor: pointer; }
+  .capl-btn:hover { color: var(--gold); border-color: var(--gold); } .capl-btn.danger:hover { color: var(--garnet); border-color: var(--garnet); }
+  .capl-empty { font-size: 12px; color: var(--ink-faint); font-style: italic; margin-bottom: 6px; }
+  .capl-sub { border: 1px solid var(--card-border); border-radius: 8px; padding: 6px 10px; margin-bottom: 6px; }
+  .capl-sub summary { cursor: pointer; font-size: 13.5px; color: var(--ink); padding: 3px 0; }
+  .clp-optlist { margin-top: 6px; font-size: 12px; color: var(--ink-dim); }
+  .clp-optlist b { color: var(--ink); font-weight: 600; }
+  .clp-opt { display: inline-block; margin: 2px 4px 2px 0; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--card-border); background: var(--bg-elevated); cursor: help; }
+  .capr-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .capr-item.done { opacity: .6; }
+  .capr-item-label { flex: 1; }
+  .capr-origin { margin-left: 8px; font-size: 10.5px; color: var(--gold); border: 1px solid rgba(201,162,75,.4); border-radius: 999px; padding: 0 7px; }
+  .capr-open { border: 1px solid var(--gold); background: var(--gold-soft); color: var(--gold); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+  .capr-status { font-size: 11px; color: var(--ink-faint); white-space: nowrap; } .capr-status.sent { color: var(--gold); }
+  .capr-panel { border: 1px solid rgba(201,162,75,.35); border-radius: 10px; padding: 12px 14px; margin: -2px 0 10px; background: var(--card); }
+  .capr-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-faint); margin: 10px 0 4px; }
+  .capr-label:first-child { margin-top: 0; }
+  .capr-hint { text-transform: none; letter-spacing: 0; font-size: 11px; color: var(--ink-faint); }
+  .capr-text { width: 100%; box-sizing: border-box; min-height: 110px; font-family: var(--font-serif); font-size: 13.5px; line-height: 1.55; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--card-border); background: var(--bg-elevated); color: var(--ink); }
+  .capr-info { font-size: 12.5px; color: var(--ink-dim); line-height: 1.5; }
+  .capr-opts { display: grid; gap: 4px; max-height: 260px; overflow-y: auto; }
+  .capr-mopts { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .capr-opt { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--ink); padding: 5px 8px; border-radius: 7px; border: 1px solid var(--card-border); cursor: pointer; }
+  .capr-opt.small { font-size: 12.5px; padding: 4px 8px; }
+  .capr-opt-desc { display: block; font-size: 11.5px; color: var(--ink-faint); margin-top: 2px; }
+  .capr-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .capr-send { flex: 1; padding: 9px; border-radius: 9px; border: none; background: var(--gold); color: #14100a; font-weight: 600; cursor: pointer; }
+  .capr-skip { padding: 9px 14px; border-radius: 9px; border: 1px solid var(--card-border); background: transparent; color: var(--ink-dim); cursor: pointer; }
   .wlang-hint { font-size: 12px; color: var(--ink-dim); background: var(--gold-soft); border: 1px solid rgba(201,162,75,.3); border-radius: 8px; padding: 7px 10px; margin-bottom: 8px; line-height: 1.5; }
   .wlang-hint strong { color: var(--ink); } .wlang-hint em { color: var(--gold); font-style: normal; }
   .wlang-auto { margin-left: 5px; font-size: 9.5px; text-transform: uppercase; letter-spacing: .3px; color: var(--gold); border: 1px solid rgba(201,162,75,.45); border-radius: 999px; padding: 0 5px; }
@@ -2016,7 +2077,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 05/10 (36)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 05/10 (38)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2480,6 +2541,36 @@
   </div>
 </div>
 
+<!-- LORE › SYSTÈME › CAPACITÉS : FORMULAIRE -->
+<div class="modal-backdrop" id="modalCapBaseForm" style="z-index:260;">
+  <div class="modal-box" style="max-width:820px;">
+    <h3 id="capbfTitle">Nouvelle capacité</h3>
+    <div class="capbf-grid">
+      <div class="form-field" style="grid-column:span 2;"><label>Nom</label><input type="text" id="capbfNom"></div>
+      <div class="form-field"><label>Source</label><select id="capbfSource"><option>Race</option><option>Classe</option><option>Historique</option><option>Don</option><option>Objet</option><option>Option</option><option>Autre</option></select></div>
+      <div class="form-field"><label>Niveau</label><input type="number" min="1" max="20" id="capbfNiveau"></div>
+      <div class="form-field" style="grid-column:span 2;"><label>Origine <span class="field-hint">(race, classe, « Classe · Sous-classe », historique…)</span></label><input type="text" id="capbfOrigine"></div>
+      <div class="form-field"><label>Visible joueur</label><select id="capbfVisible"><option value="oui">Oui</option><option value="non">Non</option></select></div>
+      <div class="form-field"><label>Rechargement</label><select id="capbfRecharge"><option>Aucun</option><option>Repos court</option><option>Repos long</option><option>Repos court ou long</option></select></div>
+      <div class="form-field" style="grid-column:1 / -1;"><label>Description <span class="field-hint">(formules entre { })</span></label><textarea id="capbfDesc" style="min-height:120px;"></textarea></div>
+      <div class="form-field" style="grid-column:span 2;"><label>Utilisations</label><input type="text" id="capbfUses" placeholder="Ex : MAX(1, MOD_CHA) ou PALIER 2:1 | 6:2"></div>
+      <div class="form-field" style="grid-column:span 2;"><label>Maîtrises accordées</label><input type="text" id="capbfMaitrises" placeholder="Ex : Compétence : Perception"></div>
+      <div class="form-field" style="grid-column:span 2;"><label>Sorts accordés</label><input type="text" id="capbfSorts" placeholder="Ex : Sort mineur : lumière ; Carac : SAG"></div>
+      <div class="form-field" style="grid-column:span 2;"><label>Effets sur la fiche</label><input type="text" id="capbfEffets" placeholder="Ex : Vitesse : +3 m"></div>
+      <div class="form-field"><label>Ouvre un choix</label><input type="text" id="capbfChoix"></div>
+      <div class="form-field"><label>Nb de choix</label><input type="text" id="capbfNb"></div>
+      <div class="form-field" style="grid-column:span 2;"><label>Options (liste simple)</label><input type="text" id="capbfOptions"></div>
+      <div class="form-field"><label>Option de</label><input type="text" id="capbfOptionDe"></div>
+      <div class="form-field"><label>Réservé à</label><input type="text" id="capbfReserve"></div>
+      <div class="form-field"><label>Prérequis</label><input type="text" id="capbfPrereq"></div>
+      <div class="form-field"><label>Remplace (ID)</label><input type="text" id="capbfRemplace"></div>
+      <div class="form-field" style="grid-column:1 / -1;"><label>Notes MJ</label><input type="text" id="capbfNotes"></div>
+    </div>
+    <button class="modal-confirm-btn" onclick="saveCapBase()">Enregistrer</button>
+    <button class="modal-cancel-btn" onclick="closeModal('modalCapBaseForm')">Annuler</button>
+  </div>
+</div>
+
 <!-- FENÊTRE DE LECTURE : RÉCAP / CHRONIQUE -->
 <div class="modal-backdrop" id="modalReadView">
   <div class="wizard-box rv-box">
@@ -2592,7 +2683,7 @@
     <div class="modal-sub" id="capaciteTargetName"></div>
     <div class="form-field">
       <label>Nom</label>
-      <input type="text" id="capNom" placeholder="Ex : Frappe sournoise">
+      <input type="text" id="capNom" placeholder="Tape quelques lettres pour chercher dans la base">
     </div>
     <div class="form-field">
       <label>Source</label>
@@ -3335,9 +3426,10 @@
     </div>
     <div class="form-field"><label>Description</label><textarea id="rfDescription" style="min-height:80px;"></textarea></div>
     <div class="form-field"><label>Exemples de noms</label><textarea id="rfNoms" style="min-height:60px;"></textarea></div>
-    <div class="section-title" style="margin-top:6px;">Traits raciaux</div>
+    <div id="rfOldTraits"><div class="section-title" style="margin-top:6px;">Traits raciaux</div>
     <div id="rfTraitsList"></div>
-    <button class="filter-reset-btn" onclick="addStatBlockEntry('rfTraitsList')">+ Ajouter un trait</button>
+    <button class="filter-reset-btn" onclick="addStatBlockEntry('rfTraitsList')">+ Ajouter un trait</button></div>
+    <div id="rfCapLinked" class="capl-box"></div>
     <button class="modal-confirm-btn" style="margin-top:16px;" onclick="saveRaceForm()">Enregistrer</button>
     <div style="display:flex; gap:10px; margin-top:8px;">
       <button class="modal-cancel-btn" id="rfDeleteBtn" style="flex:1; color:var(--garnet); border:1px solid var(--card-border); border-radius:12px;" onclick="deleteRaceForm()">Supprimer</button>
@@ -3360,9 +3452,10 @@
       <div class="form-field"><label>Poids</label><input type="text" id="srfPoids"></div>
     </div>
     <div class="form-field"><label>Origines</label><textarea id="srfOrigines" style="min-height:70px;"></textarea></div>
-    <div class="section-title" style="margin-top:6px;">Traits raciaux</div>
+    <div id="srfOldTraits"><div class="section-title" style="margin-top:6px;">Traits raciaux</div>
     <div id="srfTraitsList"></div>
-    <button class="filter-reset-btn" onclick="addStatBlockEntry('srfTraitsList')">+ Ajouter un trait</button>
+    <button class="filter-reset-btn" onclick="addStatBlockEntry('srfTraitsList')">+ Ajouter un trait</button></div>
+    <div id="srfCapLinked" class="capl-box"></div>
     <button class="modal-confirm-btn" style="margin-top:16px;" onclick="saveSousraceForm()">Enregistrer</button>
     <div style="display:flex; gap:10px; margin-top:8px;">
       <button class="modal-cancel-btn" id="srfDeleteBtn" style="flex:1; color:var(--garnet); border:1px solid var(--card-border); border-radius:12px;" onclick="deleteSousraceForm()">Supprimer</button>
@@ -3398,22 +3491,23 @@
     </div>
     <div class="form-field"><label>Compétences</label><input type="text" id="clfCompetences"></div>
     <div class="form-field"><label>Description</label><textarea id="clfFlavor" style="min-height:70px;"></textarea></div>
-    <div class="section-title" style="margin-top:6px;">Capacités de classe</div>
+    <div id="clfOldFeatures"><div class="section-title" style="margin-top:6px;">Capacités de classe</div>
     <div id="clfFeaturesList"></div>
-    <button class="filter-reset-btn" onclick="addStatBlockEntry('clfFeaturesList')">+ Ajouter une capacité</button>
+    <button class="filter-reset-btn" onclick="addStatBlockEntry('clfFeaturesList')">+ Ajouter une capacité</button></div>
+    <div id="clfCapLinked" class="capl-box"></div>
     <div class="section-title" style="margin-top:18px;">Progression par niveau</div>
     <div class="mve-text" style="margin-bottom:8px;">Capacités séparées par « ; ». « Nom (précision) » renvoie à la capacité du même nom ; « Nom :: texte » ajoute une explication. Emplacements de sorts : niveau 1/2/3… (ex : 4/3/2).</div>
     <div class="two-col-fields">
       <div class="form-field"><label>Apprentissage des sorts</label><select id="clfMagType"><option value="">Pas de sorts</option><option value="connus">Sorts connus (colonne « Sorts connus »)</option><option value="grimoire">Grimoire (+2 sorts par niveau)</option><option value="liste">Liste de classe (niveaux de sorts seulement)</option></select></div>
       <div class="form-field"><label>Sorts de sous-classe aux niveaux</label><input type="text" id="clfMagSub" placeholder="Ex : 1, 3, 5, 7, 9"></div>
     </div>
-    <div class="section-title" style="margin-top:18px;">Sous-classes</div>
+    <div id="clfOldSubs"><div class="section-title" style="margin-top:18px;">Sous-classes</div>
     <div class="two-col-fields">
       <div class="form-field"><label>Nom du choix</label><input type="text" id="clfSubTitre" placeholder="Ex : Cercle druidique"></div>
       <div class="form-field"><label>Choisie au niveau</label><input type="number" min="1" max="20" id="clfSubNiv"></div>
     </div>
     <div class="mve-text" style="margin-bottom:6px;">Une sous-classe par bloc : une ligne « ## Nom », une ligne de description, puis une capacité par ligne « niveau | Nom | texte ».</div>
-    <textarea id="clfSubText" style="min-height:260px; font-family:var(--font-mono, monospace); font-size:12px; line-height:1.5; width:100%; box-sizing:border-box;"></textarea>
+    <textarea id="clfSubText" style="min-height:260px; font-family:var(--font-mono, monospace); font-size:12px; line-height:1.5; width:100%; box-sizing:border-box;"></textarea></div>
     <div class="form-field"><label>Colonnes du tableau (séparées par des virgules)</label><input type="text" id="clfProgCols" placeholder="Ex : Rages, Dégâts de rage" onchange="clpEditorColsChanged()"></div>
     <div id="clfProgGrid" style="overflow-x:auto; max-height:420px; overflow-y:auto; border:1px solid var(--card-border); border-radius:8px; padding:6px;"></div>
     <button class="filter-reset-btn" style="margin-top:8px;" onclick="clpEditorLoadDefault()">Charger la progression standard</button>
@@ -3440,9 +3534,10 @@
       <div class="form-field"><label>Outils</label><input type="text" id="hfOutils"></div>
     </div>
     <div class="form-field"><label>Description</label><textarea id="hfDescription" style="min-height:80px;"></textarea></div>
-    <div class="section-title" style="margin-top:6px;">Capacités acquises</div>
+    <div id="hfOldCaps"><div class="section-title" style="margin-top:6px;">Capacités acquises</div>
     <div id="hfCapacitesList"></div>
-    <button class="filter-reset-btn" onclick="addStatBlockEntry('hfCapacitesList')">+ Ajouter une capacité</button>
+    <button class="filter-reset-btn" onclick="addStatBlockEntry('hfCapacitesList')">+ Ajouter une capacité</button></div>
+    <div id="hfCapLinked" class="capl-box"></div>
     <button class="modal-confirm-btn" style="margin-top:16px;" onclick="saveHistoForm()">Enregistrer</button>
     <div style="display:flex; gap:10px; margin-top:8px;">
       <button class="modal-cancel-btn" id="hfDeleteBtn" style="flex:1; color:var(--garnet); border:1px solid var(--card-border); border-radius:12px;" onclick="deleteHistoForm()">Supprimer</button>
@@ -3635,7 +3730,7 @@
 </div>
 
 <div class="modal-backdrop" id="modalLevelUp">
-  <div class="modal-box" style="max-width:520px;">
+  <div class="modal-box" style="max-width:760px;">
     <h3 id="levelUpTitle">Passage de niveau</h3>
     <div class="modal-sub" id="levelUpSub"></div>
 
@@ -3643,7 +3738,7 @@
     <div id="levelUpChecklistWrap" style="display:none;">
       <div class="section-title" style="margin-top:14px;">Résultat automatique</div>
       <div id="levelUpAutoList"></div>
-      <div class="section-title">À faire manuellement, puis cocher</div>
+      <div class="section-title">À vérifier puis envoyer (ou à faire, puis cocher)</div>
       <div id="levelUpManualList"></div>
     </div>
 
@@ -4487,7 +4582,7 @@
     p.coins = d.coins || {};
     p.wallet = parseInt(p.coins.po) || 0;
     ['states', 'exhaustion', 'xp', 'xpNext', 'level', 'classes', 'classe1', 'niveau1', 'classe2', 'niveau2', 'knownSpellNames',
-     'capacites', 'items', 'themeColor', 'inspiration', 'huntBoard', 'pendingLevelUp', 'levelUpChecklist', 'abilities']
+     'capacites', 'items', 'themeColor', 'inspiration', 'huntBoard', 'pendingLevelUp', 'levelUpChecklist', 'abilities', 'capChoix', 'subclasses', 'race', 'skills', 'saveThrows', 'weaponProfs', 'armorProfs', 'toolProfs', 'languages']
       .forEach(k => { if (d[k] !== undefined) p[k] = d[k]; });
     p.states = p.states || []; p.exhaustion = p.exhaustion || 0;
   }
@@ -4837,6 +4932,7 @@
   }
 
   /* ===================== MODAL: CAPACITÉ ===================== */
+  let capModalPicked = null;
   function openCapaciteModal(playerId) {
     currentActionTargetId = playerId;
     const p = players.find(pl => pl.id === playerId);
@@ -4845,6 +4941,21 @@
     document.getElementById('capDesc').value = '';
     document.getElementById('capUses').value = 1;
     document.getElementById('capRecharge').value = 'aucun';
+    capModalPicked = null;
+    capAttachAutocomplete(document.getElementById('capNom'), {
+      context: () => { const q = players.find(pl => pl.id === currentActionTargetId) || {}; return [q.race, q.classe1, q.classe2, q.historique]; },
+      onPick: row => {
+        const q = players.find(pl => pl.id === currentActionTargetId);
+        const cap = capInstanceFromBase(row, capCtxFromPlayer(q));
+        capModalPicked = { baseId: row.id, hidden: !!cap.hiddenForPlayer, text: cap.text };
+        document.getElementById('capNom').value = cap.title;
+        const src = document.getElementById('capSource');
+        src.value = [...src.options].some(o => o.value === cap.source) ? cap.source : 'Autre';
+        document.getElementById('capDesc').value = cap.text;
+        document.getElementById('capRecharge').value = cap.recharge;
+        document.getElementById('capUses').value = cap.uses || 1;
+      },
+    });
     openModal('modalCapacite');
   }
   function applyCapacite() {
@@ -4855,6 +4966,11 @@
     if (!nom) { showToast('Donne au moins un nom à la capacité'); return; }
     const cap = { source: document.getElementById('capSource').value, title: nom, text: document.getElementById('capDesc').value.trim(), recharge };
     if (recharge !== 'aucun') cap.uses = uses;
+    if (capModalPicked) {
+      cap.baseId = capModalPicked.baseId;
+      if (capModalPicked.hidden) cap.hiddenForPlayer = true;
+      if (cap.text !== capModalPicked.text) cap.custom = true; // texte retouché pour ce personnage
+    }
     sbPatchPlayer(p, d => {
       d.capacites = [...(d.capacites || []), cap];
       p.capacites = d.capacites;
@@ -6317,6 +6433,10 @@
         lastBlock.querySelector('.cb-text').value = c.text || '';
         if (c.recharge) lastBlock.dataset.recharge = c.recharge;
         if (c.uses) lastBlock.dataset.uses = c.uses;
+        if (c.baseId) lastBlock.dataset.baseId = c.baseId;
+        if (c.custom) lastBlock.dataset.custom = '1';
+        if (c.hiddenForPlayer) lastBlock.dataset.hidden = '1';
+        capMarkBlock(lastBlock);
       });
     }
     if (p.photo) {
@@ -6530,15 +6650,19 @@
           <option value="Race">Race</option>
           <option value="Classe">Classe</option>
           <option value="Historique">Historique</option>
+          <option value="Don">Don</option>
           <option value="ASI">ASI</option>
           <option value="Autre">Autre</option>
         </select>
-        <input type="text" class="cb-title" placeholder="Titre de la capacité">
+        <input type="text" class="cb-title" placeholder="Titre de la capacité (tape quelques lettres pour chercher dans la base)">
         <div class="cb-remove" onclick="document.getElementById('${id}').remove()">✕ retirer</div>
       </div>
       <textarea class="cb-text" placeholder="Texte de la capacité..."></textarea>
     `;
     document.getElementById('wCapacitesList').appendChild(div);
+    capAttachAutocomplete(div.querySelector('.cb-title'), { context: capWizardContext, onPick: row => capFillWizardBlock(div, row) });
+    // Modifier le texte à la main = version personnalisée pour ce personnage (la base n'est pas touchée)
+    div.querySelector('.cb-text').addEventListener('input', () => { if (div.dataset.baseId) div.dataset.custom = '1'; });
   }
 
   function computeMod(score) { return Math.floor((parseInt(score || 10) - 10) / 2); }
@@ -6824,6 +6948,9 @@
       const c = { source: div.querySelector('.cb-source').value, title: div.querySelector('.cb-title').value, text: div.querySelector('.cb-text').value };
       if (div.dataset.recharge) c.recharge = div.dataset.recharge;
       if (div.dataset.uses) c.uses = parseInt(div.dataset.uses);
+      if (div.dataset.baseId) c.baseId = div.dataset.baseId;
+      if (div.dataset.custom) c.custom = true;
+      if (div.dataset.hidden) c.hiddenForPlayer = true;
       return c;
     });
 
@@ -39011,6 +39138,7 @@
     else { preview.style.backgroundImage = ''; document.getElementById('rfPhotoPlaceholder').style.display = 'flex'; }
     document.getElementById('rfTraitsList').innerHTML = '';
     if (r) (r.traits || []).forEach(t => addStatBlockEntry('rfTraitsList', t.title, t.text));
+    capLinkedRender('rfCapLinked', r ? r.name : '', 'Race', false, 'rfOldTraits');
     openModal('modalRaceForm');
   }
   function onRacePhotoSelected(e) {
@@ -39062,6 +39190,7 @@
     else { preview.style.backgroundImage = ''; document.getElementById('srfPhotoPlaceholder').style.display = 'flex'; }
     document.getElementById('srfTraitsList').innerHTML = '';
     if (s) (s.traits || []).forEach(t => addStatBlockEntry('srfTraitsList', t.title, t.text));
+    capLinkedRender('srfCapLinked', s ? s.name : '', 'Race', false, 'srfOldTraits');
     openModal('modalSousraceForm');
   }
   function onSousracePhotoSelected(e) {
@@ -39118,6 +39247,8 @@
     else { preview.style.backgroundImage = ''; document.getElementById('clfPhotoPlaceholder').style.display = 'flex'; }
     document.getElementById('clfFeaturesList').innerHTML = '';
     if (cl) (cl.features || []).forEach(f => addStatBlockEntry('clfFeaturesList', f.title, f.text));
+    capLinkedRender('clfCapLinked', cl ? cl.name : '', 'Classe', true, 'clfOldFeatures');
+    document.getElementById('clfOldSubs').style.display = capBase.length ? 'none' : '';
     clpEditorInit(cl);
     openModal('modalClasseForm');
   }
@@ -39175,6 +39306,7 @@
     if (h && h.capacites) {
       const blocks = parseCapacitesText(h.capacites);
       blocks.forEach(c => addStatBlockEntry('hfCapacitesList', c.title, c.text));
+    capLinkedRender('hfCapLinked', h ? h.name : '', 'Historique', false, 'hfOldCaps');
     }
     openModal('modalHistoForm');
   }
@@ -39233,7 +39365,7 @@
         <div>${lvPhoto(r.photo, 'data-raceview-photo="1"', 'lv-portrait')}</div>
         <div class="lv-col lv-fit">${infoBoxes.map(b => lvInfo(b.label, b.value, true)).join('')}</div>
         <div class="lv-col lv-fit">
-          <div class="lv-card lv-grow"><div class="lv-card-title">Traits raciaux</div>${lvSubBlocks(r.traits)}</div>
+          <div class="lv-card lv-grow"><div class="lv-card-title">Traits raciaux</div>${capRowsFor(r.name).length ? lvSubBlocks(capLoreList(capRowsFor(r.name))) : lvSubBlocks(r.traits)}</div>
           ${r.noms ? `<div class="lv-card" style="flex:0 1 auto; max-height:38%;"><div class="lv-card-title">Exemples de noms</div><div class="mve-text">${lvText(r.noms)}</div></div>` : ''}
         </div>
         <div class="lv-col lv-fit">${lvCard('Description', r.description, 'lv-grow')}</div>
@@ -39268,7 +39400,7 @@
           <div class="lv-row">${infoBoxes.map(b => lvInfo(b.label, b.value)).join('')}</div>
           ${lvCard('Origines', s.origines, 'lv-grow')}
         </div>
-        <div class="lv-col lv-fit"><div class="lv-card lv-grow"><div class="lv-card-title">Augmentation de caractéristiques &amp; traits</div>${lvSubBlocks(s.traits, true)}</div></div>
+        <div class="lv-col lv-fit"><div class="lv-card lv-grow"><div class="lv-card-title">Augmentation de caractéristiques &amp; traits</div>${capRowsFor(s.name).length ? lvSubBlocks(capLoreList(capRowsFor(s.name)), true) : lvSubBlocks(s.traits, true)}</div></div>
       </div>
     `;
     const photoBox = document.querySelector('[data-sousraceview-photo]');
@@ -39753,14 +39885,31 @@
   function renderClasseProgression(cl, prog) {
     // capacités de la fiche, regroupées par nom normalisé
     const featMap = new Map();
-    (cl.features || []).forEach(f => {
+    const baseRows = capRowsFor(cl.name);
+    if (baseRows.length) baseRows.forEach(r => { const k = clpNorm(r.nom); if (k && !featMap.has(k)) featMap.set(k, { title: r.nom, text: '', row: r }); });
+    else (cl.features || []).forEach(f => {
       const k = clpNorm(f.title);
       if (!k) return;
       if (featMap.has(k)) featMap.get(k).text += '\n' + (f.text || '');
       else featMap.set(k, { title: f.title, text: f.text || '' });
     });
     const used = new Set(), firstLevel = {};
-    const groups = (prog.choix || []).filter(g => g && (g.options || []).length);
+    let groups = (prog.choix || []).filter(g => g && (g.options || []).length);
+    const subRows = capSubRowsFor(cl.name);
+    if (subRows.length) {
+      const parent = baseRows.find(r => r.choix === 'Sous-classe');
+      const descOf = n => { const o = (groups[0] && groups[0].options || []).find(x => capNorm(x.nom) === capNorm(n)); return o ? o.desc : ''; };
+      const subs = {};
+      subRows.forEach(r => (subs[capSubName(r)] = subs[capSubName(r)] || []).push(r));
+      groups = [{ titre: parent ? parent.nom : (groups[0] && groups[0].titre) || 'Sous-classe', niveau: parent ? parent.niveau : (groups[0] && groups[0].niveau),
+        options: Object.keys(subs).sort((a, b) => a.localeCompare(b, 'fr')).map(n => ({ nom: n, desc: descOf(n),
+          caps: subs[n].map(r => ({ niveau: r.niveau || 1, nom: r.nom, texte: capLoreText(r.description, r, r.niveau || 1) })) })) }];
+    }
+    const capOptsHtml = row => {
+      if (!row || !row.choix || row.choix === 'Sous-classe') return '';
+      const opts = capChoiceOptions(row, cl.name);
+      return opts.length ? `<div class="clp-optlist"><b>${histEsc(row.choix)}${row.nb_choix ? ` (${histEsc(capLoreText('{' + (/^PALIER/i.test(row.nb_choix) ? row.nb_choix : row.nb_choix) + '}', row, null))})` : ''} :</b> ${opts.map(o => `<span class="clp-opt"${o.row ? ` title="${histEsc(capLoreText(o.row.description, o.row, null))}"` : ''}>${histEsc(o.name)}</span>`).join('')}</div>` : '';
+    };
     const allOpts = [];
     groups.forEach((g, gi) => (g.options || []).forEach((o, oi) => allOpts.push({ g, o, id: `clp-opt-${gi}-${oi}` })));
     const rows = prog.rows.slice(0, 20);
@@ -39803,7 +39952,7 @@
         const k = clpNorm(f.base), src = featMap.get(k) || featMap.get(clpNorm(f.label));
         const title = `<div class="clp-feat-name">${histEsc(f.label)}</div>`;
         if (f.note) return `<div class="clp-feat">${title}<div class="mve-text">${histEsc(f.note)}</div>${src && firstLevel[k] ? `<div class="clp-ref" ${anchor(firstLevel[k])}>Détail de la capacité au niveau ${firstLevel[k]} ›</div>` : ''}</div>`;
-        if (src && !firstLevel[k]) { firstLevel[k] = n; used.add(k); return `<div class="clp-feat">${title}<div class="mve-text">${lvRichText(src.text) || '<span class="lv-empty">—</span>'}</div></div>`; }
+        if (src && !firstLevel[k]) { firstLevel[k] = n; used.add(k); const txt = src.row ? capLoreText(src.row.description, src.row, n) : src.text; return `<div class="clp-feat">${title}<div class="mve-text">${lvRichText(txt) || '<span class="lv-empty">—</span>'}</div>${capOptsHtml(src.row)}</div>`; }
         if (src) return `<div class="clp-feat mini">${title}<div class="clp-ref" ${anchor(firstLevel[k])}>Voir la description au niveau ${firstLevel[k]} ›</div></div>`;
         if (/^capacit[eé] d/i.test(f.label)) return allOpts.length ? '' : `<div class="clp-feat mini sub">${title}<div class="mve-text">${CLP_SUB}.</div></div>`;
         return `<div class="clp-feat mini">${title}</div>`;
@@ -39819,7 +39968,7 @@
       </div>`;
     }).join('');
 
-    const others = [...featMap.entries()].filter(([k]) => !used.has(k)).map(([, f]) => f);
+    const others = [...featMap.entries()].filter(([k]) => !used.has(k)).map(([, f]) => f.row ? { title: f.title + (f.row.niveau ? ` <span class="capl-lvl">niv. ${f.row.niveau}</span>` : ''), text: capLoreText(f.row.description, f.row, f.row.niveau || null) } : f);
     const choixHtml = groups.map((g, gi) => `
       <div class="clp-section-title">${histEsc(g.titre)}${g.niveau ? `<span class="clp-section-sub">choix au niveau ${g.niveau}</span>` : ''}</div>
       <div class="clp-choices">${(g.options || []).map((o, oi) => `
@@ -39998,7 +40147,7 @@
         <div class="lv-col lv-fit">
           <div class="lv-row">${infoBoxes.map(b => lvInfo(b.label, b.value)).join('')}</div>
           <div class="lv-row lv-grow">
-            <div class="lv-card"><div class="lv-card-title">Capacités acquises</div>${lvSubBlocks(parseCapacitesText(h.capacites))}</div>
+            <div class="lv-card"><div class="lv-card-title">Capacités acquises</div>${capRowsFor(h.name).length ? lvSubBlocks(capLoreList(capRowsFor(h.name))) : lvSubBlocks(parseCapacitesText(h.capacites))}</div>
             ${lvCard('Description', h.description)}
           </div>
         </div>
@@ -44177,6 +44326,7 @@
 
   function openLevelUpModal(playerId) {
     levelUpTargetId = playerId;
+    capReviewOpen = null;
     const p = players.find(pl => pl.id === playerId);
     if (!p.levelUpChecklist) p.classList = realClassList(p);
     document.getElementById('levelUpTitle').textContent = `${p.name} passe niveau ${p.level + 1}`;
@@ -44246,8 +44396,18 @@
     }
 
     // --- Manuel : nouvelles capacités ---
-    const features = (classFeatureTable[className] && classFeatureTable[className][newLevel]) || [];
+    const useBase = capBase.length > 0;
+    const features = useBase ? [] : ((classFeatureTable[className] && classFeatureTable[className][newLevel]) || []);
     features.forEach(f => checklist.push({ label: f, auto: false, done: false }));
+    const baseItems = useBase ? capLevelItems(p, className, newLevel) : [];
+    if (useBase && (p.capacites || []).some(c => c.baseId && !c.custom)) checklist.push({ label: 'Capacités déjà acquises recalculées pour le nouveau niveau', auto: true, done: true });
+    baseItems.forEach(it => checklist.push(it));
+    if (useBase) {
+      const cl = classesLoreDatabase.find(c => capNorm(c.name) === capNorm(className));
+      const prog = cl && clpGet(cl);
+      const magic = prog ? clpMagicLines(prog, prog.rows, newLevel - 1).map(l => l.replace(/<[^>]+>/g, '')) : [];
+      if (magic.length) checklist.push({ label: 'Sorts — ' + magic.join(' · '), auto: false, done: false });
+    }
 
     // --- Manuel : ASI ---
     const asiLevels = asiLevelsMap[className] || asiLevelsMap.default;
@@ -44255,12 +44415,12 @@
       checklist.push({ label: 'Amélioration de caractéristique (ASI) — répartir +2 ou +1/+1', auto: false, done: false });
     }
 
-    // --- Manuel : sous-classe ---
-    if (subclassLevelMap[className] === newLevel) {
+    // --- Manuel : sous-classe (géré par la capacité de la base qui ouvre le choix) ---
+    if (!useBase && subclassLevelMap[className] === newLevel) {
       checklist.push({ label: 'Choix de sous-classe à faire', auto: false, done: false });
     }
 
-    if (!features.length && !asiLevels.includes(newLevel) && subclassLevelMap[className] !== newLevel) {
+    if (!features.length && !baseItems.length && !asiLevels.includes(newLevel) && (useBase || subclassLevelMap[className] !== newLevel)) {
       checklist.push({ label: 'Aucune nouveauté à ce niveau — rien à ajouter à la main', auto: false, done: false });
     }
 
@@ -44273,6 +44433,7 @@
       d.level = p.level; d.classes = p.classes; d.maxHp = p.maxHp;
       d.xpNext = p.level < 20 ? XP_TABLE[p.level + 1] : XP_TABLE[20];
       d.pendingHeal = [...(d.pendingHeal || []), { pid: 'h' + Date.now(), amount: gained }];
+      if (capBase.length) { capRefreshOwned(d, p); p.capacites = d.capacites; }
     });
     document.getElementById('levelUpSub').textContent = `${className} niveau ${newLevel}`;
     renderCharChips();
@@ -44298,6 +44459,12 @@
 
     document.getElementById('levelUpManualList').innerHTML = manualItems.map((it, i) => {
       const realIndex = p.levelUpChecklist.indexOf(it);
+      if (it.kind) {
+        const status = it.sent ? '<span class="capr-status sent">Envoyé</span>' : it.skipped ? '<span class="capr-status">Écarté</span>' : `<button class="capr-open" onclick="capReviewToggle(${realIndex})">${capReviewOpen === realIndex ? 'Fermer' : 'Vérifier ›'}</button>`;
+        const origin = it.origine && it.origine.includes('·') ? `<span class="capr-origin">${histEsc(it.origine.split('·').slice(1).join('·').trim())}</span>` : '';
+        return `<div class="checklist-item capr-item${it.done ? ' done' : ''}"><div class="capr-item-label">${histEsc(it.label)}${origin}</div>${status}</div>
+          ${capReviewOpen === realIndex && !it.done ? capReviewHtml(p, it, realIndex) : ''}`;
+      }
       return `
         <div class="checklist-item">
           <div class="ci-check ${it.done ? 'checked' : ''}" data-idx="${realIndex}">
@@ -45606,6 +45773,636 @@
     if (c && currentLoreSubmodule === 'temporalite') renderTemporalite(c);
   }
 
+  /* ===================== BASE DES CAPACITÉS (table capacites_base) ===================== */
+  let capBase = [];
+  async function loadCapBaseFromSupabase() {
+    if (!sb) return;
+    const { data, error } = await sb.from('capacites_base').select('*').order('nom');
+    if (error) { console.warn('Capacités', error); return; }
+    capBase = data || [];
+  }
+  const capNorm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const CAP_ABBR = { FOR: 'for', DEX: 'dex', CON: 'con', INT: 'int', SAG: 'sag', CHA: 'cha' };
+  const CAP_RECHARGE = { 'Aucun': 'aucun', 'Repos court': 'repos_court', 'Repos long': 'repos_long', 'Repos court ou long': 'repos_court_ou_long' };
+  const capClassOf = row => String(row.origine || '').split('·')[0].trim();
+
+  // Contexte de calcul : niveaux, maîtrise, caractéristiques, choix déjà faits
+  function capCtx({ level, classes, abilities, choix }) {
+    const niv = Math.max(1, parseInt(level, 10) || 1);
+    return { niv, classes: classes || {}, maitrise: 2 + Math.floor((niv - 1) / 4), ab: abilities || {}, choix: choix || {} };
+  }
+  function capCtxFromPlayer(p) {
+    const classes = {};
+    if (p.classe1) classes[capNorm(p.classe1)] = parseInt(p.niveau1, 10) || 1;
+    if (p.classe2) classes[capNorm(p.classe2)] = parseInt(p.niveau2, 10) || 0;
+    return capCtx({ level: p.level, classes, abilities: p.abilities, choix: p.capChoix });
+  }
+  function capCtxFromWizard() {
+    const v = id => (document.getElementById(id) || {}).value || '';
+    const classes = {};
+    if (v('wClasse1')) classes[capNorm(v('wClasse1'))] = parseInt(v('wNiveau1'), 10) || 1;
+    if (v('wClasse2')) classes[capNorm(v('wClasse2'))] = parseInt(v('wNiveau2'), 10) || 0;
+    const level = Object.values(classes).reduce((a, b) => a + b, 0) || 1;
+    const ab = {}; [['for', 'wFor'], ['dex', 'wDex'], ['con', 'wCon'], ['int', 'wInt'], ['sag', 'wSag'], ['cha', 'wCha']].forEach(([k, id]) => ab[k] = parseInt(v(id), 10) || 10);
+    return capCtx({ level, classes, abilities: ab });
+  }
+  const CAP_SAMPLE_CTX = () => capCtx({ level: 5, classes: {}, abilities: { for: 14, dex: 14, con: 14, int: 14, sag: 14, cha: 14 } });
+  const capMod = (ctx, k) => Math.floor(((parseInt(ctx.ab[k], 10) || 10) - 10) / 2);
+  const capLevelFor = (ctx, row) => {
+    if (row && row.source === 'Classe') { const l = ctx.classes[capNorm(capClassOf(row))]; if (l) return l; }
+    return ctx.niv;
+  };
+  function capPalier(spec, lvl) {
+    let val = null;
+    String(spec).split('|').forEach(part => { const m = part.match(/^\s*(\d+)\s*:\s*(.*?)\s*$/); if (m && lvl >= +m[1]) val = m[2]; });
+    return val;
+  }
+  // Calcul d'une expression (MOD_CON + MAITRISE, MAX(1, MOD_CHA), ARRONDI_SUP(NIV_CLASSE / 2)…)
+  function capExpr(expr, ctx, row) {
+    let e = String(expr).replace(/ARRONDI_SUP/g, 'Math.ceil').replace(/ARRONDI_INF/g, 'Math.floor').replace(/\bMIN\b/g, 'Math.min').replace(/\bMAX\b/g, 'Math.max')
+      .replace(/\bNIV_CLASSE\b/g, capLevelFor(ctx, row)).replace(/\bNIV\b/g, ctx.niv).replace(/\bMAITRISE\b/g, ctx.maitrise)
+      .replace(/\bMOD_(FOR|DEX|CON|INT|SAG|CHA)\b/g, (m, k) => `(${capMod(ctx, CAP_ABBR[k])})`)
+      .replace(/\b(FOR|DEX|CON|INT|SAG|CHA)\b/g, (m, k) => parseInt(ctx.ab[CAP_ABBR[k]], 10) || 10);
+    if (/[^\d\s+\-*/().,]/.test(e.replace(/Math\.(ceil|floor|min|max)/g, ''))) return null;
+    try { const v = Function(`"use strict"; return (${e});`)(); return Number.isFinite(v) ? Math.floor(v * 100) / 100 : null; } catch (err) { return null; }
+  }
+  function capChoiceValue(name, ctx) {
+    const opt = ctx.choix[name] || ctx.choix[capNorm(name)];
+    if (!opt) return null;
+    const src = capBase.find(r => r.choix === name && r.options);
+    const props = {};
+    if (src) String(src.options).split('|').forEach(part => {
+      const [n, rest] = part.split('=');
+      if (rest && capNorm(n) === capNorm(opt)) rest.split(/,\s*(?=[^,:]+:)/).forEach(p => { const [k, ...v] = p.split(':'); props[capNorm(k)] = v.join(':').trim(); });
+    });
+    return { name: opt, props };
+  }
+  // Remplace toutes les formules {…} d'un texte
+  function capEval(text, ctx, row) {
+    if (!text) return '';
+    return String(text).replace(/\{([^{}]+)\}/g, (all, f) => {
+      f = f.trim();
+      let m;
+      if ((m = f.match(/^PALIER\s+(.+)$/i))) return capPalier(m[1], capLevelFor(ctx, row)) ?? '—';
+      if ((m = f.match(/^DD\s*:\s*(FOR|DEX|CON|INT|SAG|CHA)$/i))) return 8 + ctx.maitrise + capMod(ctx, CAP_ABBR[m[1].toUpperCase()]);
+      if ((m = f.match(/^ATT\s*:\s*(FOR|DEX|CON|INT|SAG|CHA)$/i))) { const v = ctx.maitrise + capMod(ctx, CAP_ABBR[m[1].toUpperCase()]); return v >= 0 ? '+' + v : String(v); }
+      if ((m = f.match(/^CHOIX\s+([^.]+?)(?:\.(.+))?$/i))) {
+        const c = capChoiceValue(m[1].trim(), ctx);
+        if (!c) return `[${m[1].trim()} à choisir]`;
+        return m[2] ? (c.props[capNorm(m[2])] ?? `[${m[2]}]`) : c.name;
+      }
+      const v = capExpr(f, ctx, row);
+      return v === null ? all : String(v).replace('.', ',');
+    }).replace(/(\d*)d(\d+)\b/g, '$1D$2');
+  }
+  // Nombre d'utilisations (nombre, formule ou PALIER) → entier, ou null si illimité
+  function capUsesValue(spec, ctx, row) {
+    if (spec === null || spec === undefined || String(spec).trim() === '') return null;
+    let s = String(spec).trim();
+    const m = s.match(/^PALIER\s+(.+)$/i);
+    if (m) s = capPalier(m[1], capLevelFor(ctx, row)) ?? '0';
+    if (/illimit/i.test(s)) return null;
+    const v = /^\d+$/.test(s) ? +s : capExpr(s, ctx, row);
+    return v === null ? null : Math.max(0, Math.floor(v));
+  }
+  // Capacité prête à être posée sur une fiche (texte calculé + références pour le recalcul futur)
+  function capInstanceFromBase(row, ctx) {
+    const uses = capUsesValue(row.utilisations, ctx, row);
+    const recharge = CAP_RECHARGE[row.rechargement] || 'aucun';
+    const cap = { baseId: row.id, source: row.source === 'Option' ? 'Classe' : (row.source || 'Autre'), title: row.nom, text: capEval(row.description, ctx, row), recharge };
+    if (recharge !== 'aucun' && uses) cap.uses = uses;
+    if (row.visible_joueur === false) cap.hiddenForPlayer = true;
+    return cap;
+  }
+
+  /* ---- Autocomplétion sur un champ « nom de capacité » ---- */
+  function capAttachAutocomplete(input, { context, onPick }) {
+    if (!input || input.dataset.capAc) return;
+    input.dataset.capAc = '1';
+    input.setAttribute('autocomplete', 'off');
+    const box = document.createElement('div');
+    box.className = 'cap-ac';
+    document.body.appendChild(box);
+    let items = [], idx = -1;
+    const close = () => { box.style.display = 'none'; idx = -1; };
+    const place = () => { const r = input.getBoundingClientRect(); box.style.left = r.left + 'px'; box.style.top = (r.bottom + 4) + 'px'; box.style.width = Math.max(r.width, 320) + 'px'; };
+    const render = () => {
+      box.innerHTML = items.map((r, i) => `<div class="cap-ac-item${i === idx ? ' active' : ''}" data-i="${i}">
+        <div class="cap-ac-name">${histEsc(r.nom)}</div>
+        <div class="cap-ac-meta">${histEsc(r.origine || r.source || '')}${r.niveau ? ` · niv. ${r.niveau}` : ''}</div></div>`).join('');
+      box.querySelectorAll('.cap-ac-item').forEach(el => el.addEventListener('mousedown', e => { e.preventDefault(); pick(+el.dataset.i); }));
+    };
+    const pick = i => { const r = items[i]; if (!r) return; close(); onPick(r); };
+    input.addEventListener('input', () => {
+      const q = capNorm(input.value);
+      if (q.length < 2 || !capBase.length) return close();
+      const ctxNames = (context ? context() : []).map(capNorm).filter(Boolean);
+      const score = r => {
+        const o = capNorm(r.origine), n = capNorm(r.nom);
+        let s = n.startsWith(q) ? 0 : n.includes(q) ? 1 : 2;
+        if (ctxNames.some(c => o === c || o.startsWith(c + ' ·') || o.startsWith(c))) s -= 3;
+        return s;
+      };
+      items = capBase.filter(r => capNorm(r.nom).includes(q) || capNorm(r.origine).includes(q))
+        .sort((a, b) => score(a) - score(b) || (a.niveau || 0) - (b.niveau || 0) || a.nom.localeCompare(b.nom, 'fr')).slice(0, 12);
+      idx = items.length ? 0 : -1;
+      if (!items.length) return close();
+      place(); render(); box.style.display = 'block';
+    });
+    input.addEventListener('keydown', e => {
+      if (box.style.display !== 'block') return;
+      if (e.key === 'ArrowDown') { idx = Math.min(items.length - 1, idx + 1); render(); e.preventDefault(); }
+      else if (e.key === 'ArrowUp') { idx = Math.max(0, idx - 1); render(); e.preventDefault(); }
+      else if (e.key === 'Enter') { pick(idx); e.preventDefault(); }
+      else if (e.key === 'Escape') close();
+    });
+    input.addEventListener('blur', () => setTimeout(close, 120));
+    window.addEventListener('scroll', () => { if (box.style.display === 'block') place(); }, true);
+  }
+  function capWizardContext() {
+    const v = id => (document.getElementById(id) || {}).value || '';
+    const race = v('wRace');
+    const parent = typeof wizRaceLore === 'function' ? (wizRaceLore(race).parent || {}).name : '';
+    return [race, parent, v('wClasse1'), v('wClasse2'), v('wHistorique')];
+  }
+  function capFillWizardBlock(block, row) {
+    const cap = capInstanceFromBase(row, capCtxFromWizard());
+    const sel = block.querySelector('.cb-source');
+    sel.value = [...sel.options].some(o => o.value === cap.source) ? cap.source : 'Autre';
+    block.querySelector('.cb-title').value = cap.title;
+    block.querySelector('.cb-text').value = cap.text;
+    block.dataset.baseId = row.id;
+    if (cap.recharge !== 'aucun') block.dataset.recharge = cap.recharge; else delete block.dataset.recharge;
+    if (cap.uses) block.dataset.uses = cap.uses; else delete block.dataset.uses;
+    if (cap.hiddenForPlayer) block.dataset.hidden = '1'; else delete block.dataset.hidden;
+    capMarkBlock(block);
+  }
+  function capMarkBlock(block) {
+    let tag = block.querySelector('.cb-base-tag');
+    if (!block.dataset.baseId) { if (tag) tag.remove(); return; }
+    if (!tag) { tag = document.createElement('span'); tag.className = 'cb-base-tag'; block.querySelector('.cb-header').insertBefore(tag, block.querySelector('.cb-remove')); }
+    const bits = ['Base'];
+    if (block.dataset.uses) bits.push(`${block.dataset.uses} util.`);
+    if (block.dataset.hidden) bits.push('masquée joueur');
+    tag.textContent = bits.join(' · ');
+  }
+
+  /* ---- Lore › Système de jeu › Capacités ---- */
+  let capFilter = { q: '', source: '', origine: '' };
+  function renderCapBaseList(container) {
+    const sources = [...new Set(capBase.map(r => r.source).filter(Boolean))].sort();
+    const origines = [...new Set(capBase.filter(r => !capFilter.source || r.source === capFilter.source).map(r => r.origine).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+    container.innerHTML = `
+      <div class="capb-toolbar">
+        <input type="text" id="capbSearch" placeholder="Rechercher une capacité…" value="${histEsc(capFilter.q)}">
+        <select id="capbSource"><option value="">Toutes les sources</option>${sources.map(s => `<option ${s === capFilter.source ? 'selected' : ''}>${histEsc(s)}</option>`).join('')}</select>
+        <select id="capbOrigine"><option value="">Toutes les origines</option>${origines.map(s => `<option ${s === capFilter.origine ? 'selected' : ''}>${histEsc(s)}</option>`).join('')}</select>
+      </div>
+      <div id="capbList"></div>`;
+    const draw = () => {
+      const q = capNorm(capFilter.q);
+      const list = capBase.filter(r => (!capFilter.source || r.source === capFilter.source) && (!capFilter.origine || r.origine === capFilter.origine)
+        && (!q || capNorm(r.nom).includes(q) || capNorm(r.origine).includes(q) || capNorm(r.description).includes(q)))
+        .sort((a, b) => String(a.origine).localeCompare(String(b.origine), 'fr') || (a.niveau || 0) - (b.niveau || 0) || a.nom.localeCompare(b.nom, 'fr'));
+      const groups = {};
+      list.forEach(r => (groups[r.origine || '—'] = groups[r.origine || '—'] || []).push(r));
+      const tags = r => [r.utilisations ? 'Util.' : '', r.choix ? 'Choix' : '', r.maitrises ? 'Maîtrises' : '', r.sorts ? 'Sorts' : '', r.effets ? 'Effets' : '', r.visible_joueur === false ? 'Masquée' : '']
+        .filter(Boolean).map(t => `<span class="capb-tag">${t}</span>`).join('');
+      document.getElementById('capbList').innerHTML = !capBase.length
+        ? '<div class="hist-empty">La base est vide : lance le script SQL d’import dans Supabase, puis recharge la page.</div>'
+        : `<div class="capb-count">${list.length} capacité${list.length > 1 ? 's' : ''}</div>` + Object.entries(groups).map(([o, rs]) => `
+          <div class="capb-group"><div class="capb-group-title">${histEsc(o)}</div>
+            ${rs.map(r => `<div class="capb-row" data-capb="${histEsc(r.id)}">
+              <span class="capb-lvl">${r.niveau ? 'Niv. ' + r.niveau : ''}</span>
+              <span class="capb-name">${histEsc(r.nom)}</span>
+              <span class="capb-tags">${tags(r)}</span></div>`).join('')}
+          </div>`).join('');
+      document.querySelectorAll('[data-capb]').forEach(el => el.addEventListener('click', () => openCapBaseView(el.dataset.capb)));
+    };
+    document.getElementById('capbSearch').addEventListener('input', e => { capFilter.q = e.target.value; draw(); });
+    document.getElementById('capbSource').addEventListener('change', e => { capFilter.source = e.target.value; capFilter.origine = ''; renderCapBaseList(container); });
+    document.getElementById('capbOrigine').addEventListener('change', e => { capFilter.origine = e.target.value; draw(); });
+    draw();
+  }
+  function openCapBaseView(id) {
+    const r = capBase.find(x => x.id === id);
+    if (!r) return;
+    const body = () => {
+      const sel = document.getElementById('capbPreviewFor');
+      const p = sel && sel.value ? players.find(x => x.id === sel.value) : null;
+      const ctx = p ? capCtxFromPlayer(p) : CAP_SAMPLE_CTX();
+      const uses = capUsesValue(r.utilisations, ctx, r);
+      document.getElementById('capbPreview').innerHTML = `
+        <div class="rv-text" style="font-size:13.5px;">${histEsc(capEval(r.description, ctx, r)) || '—'}</div>
+        ${r.utilisations || (r.rechargement && r.rechargement !== 'Aucun') ? `<div class="capb-uses">${uses !== null ? uses + ' utilisation' + (uses > 1 ? 's' : '') : 'Illimité'}${r.rechargement && r.rechargement !== 'Aucun' ? ' · ' + histEsc(r.rechargement.toLowerCase()) : ''}</div>` : ''}`;
+    };
+    const field = (label, v) => v ? `<div class="capb-field"><div class="capb-field-label">${label}</div><div class="capb-field-val">${histEsc(v)}</div></div>` : '';
+    openReadView({
+      titre: r.nom,
+      pills: [{ text: r.origine || r.source, gold: true }, { text: r.niveau ? 'Niveau ' + r.niveau : '' }, { text: r.visible_joueur === false ? 'Masquée côté joueur' : '' }],
+      body: `
+        <div class="capb-preview-head">Aperçu pour
+          <select id="capbPreviewFor"><option value="">Exemple (niveau 5, caractéristiques à 14)</option>${players.map(p => `<option value="${p.id}">${histEsc(p.name)} (niv. ${p.level || 1})</option>`).join('')}</select>
+        </div>
+        <div id="capbPreview"></div>
+        <div class="capb-fields">
+          ${field('Description (avec formules)', r.description)}
+          ${field('Utilisations', r.utilisations)}${field('Rechargement', r.rechargement !== 'Aucun' ? r.rechargement : '')}
+          ${field('Maîtrises accordées', r.maitrises)}${field('Sorts accordés', r.sorts)}${field('Effets sur la fiche', r.effets)}
+          ${field('Ouvre un choix', r.choix ? `${r.choix}${r.nb_choix ? ' (' + r.nb_choix + ')' : ''}` : '')}${field('Options', r.options)}
+          ${field('Option de', r.option_de)}${field('Réservé à', r.reserve_a)}${field('Prérequis', r.prerequis)}${field('Remplace', r.remplace)}${field('Notes MJ', r.notes_mj)}
+        </div>`,
+      onEdit: () => { closeModal('modalReadView'); openCapBaseForm(r.id); },
+      onDelete: () => deleteCapBase(r.id),
+    });
+    document.getElementById('capbPreviewFor').addEventListener('change', body);
+    body();
+  }
+  const CAPB_FIELDS = [['capbfNom', 'nom'], ['capbfSource', 'source'], ['capbfOrigine', 'origine'], ['capbfNiveau', 'niveau'], ['capbfDesc', 'description'],
+    ['capbfUses', 'utilisations'], ['capbfRecharge', 'rechargement'], ['capbfMaitrises', 'maitrises'], ['capbfSorts', 'sorts'], ['capbfEffets', 'effets'],
+    ['capbfChoix', 'choix'], ['capbfNb', 'nb_choix'], ['capbfOptions', 'options'], ['capbfOptionDe', 'option_de'], ['capbfReserve', 'reserve_a'],
+    ['capbfPrereq', 'prerequis'], ['capbfRemplace', 'remplace'], ['capbfNotes', 'notes_mj']];
+  let capbEditId = null;
+  function openCapBaseForm(id, preset) {
+    capbEditId = id;
+    const r = id ? capBase.find(x => x.id === id) : null;
+    document.getElementById('capbfTitle').textContent = r ? 'Modifier la capacité' : 'Nouvelle capacité';
+    CAPB_FIELDS.forEach(([el, k]) => { document.getElementById(el).value = r ? (r[k] ?? '') : ((preset || {})[k] ?? (k === 'rechargement' ? 'Aucun' : k === 'source' ? 'Classe' : '')); });
+    document.getElementById('capbfVisible').value = r && r.visible_joueur === false ? 'non' : 'oui';
+    openModal('modalCapBaseForm');
+    setTimeout(() => document.getElementById('capbfNom').focus(), 50);
+  }
+  function saveCapBase() {
+    const data = {};
+    CAPB_FIELDS.forEach(([el, k]) => { const v = document.getElementById(el).value.trim(); data[k] = v === '' ? null : v; });
+    if (!data.nom) { showToast('Donne un nom à la capacité'); return; }
+    data.niveau = data.niveau ? parseInt(data.niveau, 10) || null : null;
+    data.visible_joueur = document.getElementById('capbfVisible').value !== 'non';
+    let r = capbEditId ? capBase.find(x => x.id === capbEditId) : null;
+    if (!r) {
+      const base = capNorm(`${data.source}-${data.origine || ''}-${data.nom}`).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      let k = base, n = 2; while (capBase.some(x => x.id === k)) k = `${base}-${n++}`;
+      r = { id: k }; capBase.push(r);
+    }
+    Object.assign(r, data);
+    if (sb) sb.from('capacites_base').upsert({ ...r, maj: new Date().toISOString() }).then(({ error }) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+    closeModal('modalCapBaseForm');
+    showToast(`Capacité « ${r.nom} » enregistrée`);
+    capLinkedRefresh();
+  }
+  function deleteCapBase(id) {
+    const r = capBase.find(x => x.id === id);
+    if (!r || !confirm(`Supprimer « ${r.nom} » de la base ? Les personnages qui l'ont déjà la gardent.`)) return;
+    capBase = capBase.filter(x => x.id !== id);
+    if (sb) sb.from('capacites_base').delete().eq('id', id).then(({ error }) => { if (error) showToast('⚠️ Suppression en ligne échouée'); });
+    closeModal('modalReadView');
+    showToast(`« ${r.nom} » supprimée de la base`);
+    capLinkedRefresh();
+  }
+
+  /* ===================== BASE DES CAPACITÉS ↔ LORE ===================== */
+  const capRowsFor = name => { const n = capNorm(name); return n ? capBase.filter(r => capNorm(r.origine) === n) : []; };
+  const capSubRowsFor = cls => { const n = capNorm(cls); return capBase.filter(r => capNorm(capClassOf(r)) === n && String(r.origine || '').includes('·')); };
+  const capSubName = r => String(r.origine || '').split('·').slice(1).join('·').trim();
+  const CAP_ABBR_TXT = { FOR: 'For', DEX: 'Dex', CON: 'Con', INT: 'Int', SAG: 'Sag', CHA: 'Cha' };
+  // Texte pour le Lore : les valeurs liées au niveau sont calculées (au niveau donné, ou en échelle complète),
+  // celles qui dépendent des caractéristiques restent lisibles (« mod. Cha »).
+  function capLoreText(text, row, level) {
+    if (!text) return '';
+    const lvl = level || null, maitrise = lvl ? 2 + Math.floor((lvl - 1) / 4) : null;
+    const human = e => {
+      let t = String(e).trim();
+      const m = t.match(/^MAX\(\s*1\s*,\s*(.+)\)$/i);
+      if (m) return `${human(m[1])} (min. 1)`;
+      return t.replace(/\bARRONDI_SUP\b/g, 'arrondi sup.').replace(/\bARRONDI_INF\b/g, 'arrondi inf.').replace(/\bMAX\b/g, 'max').replace(/\bMIN\b/g, 'min')
+        .replace(/\bNIV_CLASSE\b/g, lvl || 'niveau de classe').replace(/\bNIV\b/g, lvl || 'niveau').replace(/\bMAITRISE\b/g, maitrise ? maitrise : 'maîtrise')
+        .replace(/\bMOD_(FOR|DEX|CON|INT|SAG|CHA)\b/g, (x, k) => 'mod. ' + CAP_ABBR_TXT[k]).replace(/\*/g, '×');
+    };
+    return String(text).replace(/\{([^{}]+)\}/g, (all, f) => {
+      f = f.trim(); let m;
+      if ((m = f.match(/^PALIER\s+(.+)$/i))) {
+        if (lvl) return capPalier(m[1], lvl) ?? '—';
+        const steps = m[1].split('|').map(s => s.split(':').map(x => x.trim())).filter(s => s.length > 1);
+        return steps.length ? `${steps[0][1]}${steps.length > 1 ? ' (' + steps.slice(1).map(([l, v]) => `${v} au niv. ${l}`).join(', ') + ')' : ''}` : '—';
+      }
+      if ((m = f.match(/^DD\s*:\s*(\w+)$/i))) return `${maitrise ? 8 + maitrise : '8 + maîtrise'} + mod. ${CAP_ABBR_TXT[m[1].toUpperCase()] || m[1]}`;
+      if ((m = f.match(/^ATT\s*:\s*(\w+)$/i))) return `${maitrise ? '+' + maitrise : 'maîtrise'} + mod. ${CAP_ABBR_TXT[m[1].toUpperCase()] || m[1]}`;
+      if ((m = f.match(/^CHOIX\s+([^.]+?)(?:\.(.+))?$/i))) return m[2] ? `[${m[2].trim()} selon ${m[1].trim()}]` : `[${m[1].trim()}]`;
+      if (/MOD_|\b(FOR|DEX|CON|INT|SAG|CHA)\b/.test(f) || !lvl && /NIV|MAITRISE/.test(f)) return human(f);
+      const v = capExpr(f, capCtx({ level: lvl, classes: row && row.source === 'Classe' ? { [capNorm(capClassOf(row))]: lvl } : {} }), row);
+      return v === null ? human(f) : String(v).replace('.', ',');
+    }).replace(/(\d*)d(\d+)\b/g, '$1D$2');
+  }
+  // Options d'un choix (lignes « Option de » ou liste simple)
+  function capChoiceOptions(row, className) {
+    if (!row || !row.choix) return [];
+    if (row.choix === 'Sous-classe') return [...new Set(capSubRowsFor(capClassOf(row)).map(capSubName))].map(n => ({ name: n, sub: true }));
+    const rows = capBase.filter(r => r.option_de === row.choix && (!r.reserve_a || !className || r.reserve_a.split(',').some(c => capNorm(c) === capNorm(className))));
+    if (rows.length) return rows.map(r => ({ name: r.nom, row: r }));
+    return String(row.options || '').split('|').map(p => p.split('=')[0].trim()).filter(Boolean).map(n => ({ name: n }));
+  }
+  function capLoreList(rows, level) {
+    return rows.slice().sort((a, b) => (a.niveau || 0) - (b.niveau || 0)).map(r => {
+      const opts = r.choix && r.choix !== 'Sous-classe' ? capChoiceOptions(r) : [];
+      return { title: histEsc(r.nom) + (r.niveau > 1 ? ` <span class="capl-lvl">niv. ${r.niveau}</span>` : ''),
+        text: capLoreText(r.description, r, level) + (opts.length ? `\nOptions : ${opts.map(o => o.name).join(', ')}.` : '') };
+    });
+  }
+
+  /* ---- Éditeur lié dans les formulaires du Lore ---- */
+  let capLinkedCtx = null; // { containerId, origine, source, withSubs }
+  function capLinkedRender(containerId, origine, source, withSubs, oldBlockId) {
+    const box = document.getElementById(containerId);
+    const old = oldBlockId ? document.getElementById(oldBlockId) : null;
+    if (!box) return;
+    if (!capBase.length) { box.style.display = 'none'; if (old) old.style.display = ''; return; }
+    if (old) old.style.display = 'none';
+    box.style.display = '';
+    capLinkedCtx = { containerId, origine, source, withSubs, oldBlockId };
+    if (!origine) { box.innerHTML = '<div class="capl-empty">Enregistre d’abord la fiche (avec son nom) pour lui ajouter des capacités.</div>'; return; }
+    const line = r => `<div class="capl-row"><span class="capl-lvl">${r.niveau ? 'Niv. ' + r.niveau : ''}</span><span class="capl-name">${histEsc(r.nom)}</span>
+      <button class="capl-btn" title="Modifier" onclick="openCapBaseForm('${r.id}')">✎</button><button class="capl-btn danger" title="Supprimer" onclick="deleteCapBase('${r.id}')">✕</button></div>`;
+    const own = capRowsFor(origine).sort((a, b) => (a.niveau || 0) - (b.niveau || 0) || a.nom.localeCompare(b.nom, 'fr'));
+    let html = `<div class="capl-head">Capacités <span class="capl-hint">(base des capacités — elles servent aussi à la création et au passage de niveau)</span></div>
+      ${own.map(line).join('') || '<div class="capl-empty">Aucune capacité.</div>'}
+      <button class="filter-reset-btn" onclick="openCapBaseForm(null, { source: '${source}', origine: ${JSON.stringify(origine).replace(/"/g, '&quot;')} })">+ Ajouter une capacité</button>`;
+    if (withSubs) {
+      const subs = {};
+      capSubRowsFor(origine).forEach(r => (subs[capSubName(r)] = subs[capSubName(r)] || []).push(r));
+      html += `<div class="capl-head" style="margin-top:14px;">Sous-classes</div>` + Object.entries(subs).sort((a, b) => a[0].localeCompare(b[0], 'fr')).map(([n, rs]) => `
+        <details class="capl-sub"><summary>${histEsc(n)} <span class="capl-hint">${rs.length} capacité${rs.length > 1 ? 's' : ''}</span></summary>
+          ${rs.sort((a, b) => (a.niveau || 0) - (b.niveau || 0)).map(line).join('')}
+          <button class="filter-reset-btn" onclick="openCapBaseForm(null, { source: 'Classe', origine: ${JSON.stringify(origine + ' · ' + n).replace(/"/g, '&quot;')} })">+ Ajouter à ${histEsc(n)}</button>
+        </details>`).join('') +
+        `<button class="filter-reset-btn" onclick="capNewSubclass()">+ Nouvelle sous-classe</button>`;
+    }
+    box.innerHTML = html;
+  }
+  function capNewSubclass() {
+    if (!capLinkedCtx) return;
+    const n = prompt('Nom de la nouvelle sous-classe :');
+    if (n && n.trim()) openCapBaseForm(null, { source: 'Classe', origine: `${capLinkedCtx.origine} · ${n.trim()}` });
+  }
+  function capLinkedRefresh() {
+    if (capLinkedCtx && document.getElementById(capLinkedCtx.containerId) && document.getElementById(capLinkedCtx.containerId).offsetParent !== null) {
+      const c = capLinkedCtx; capLinkedRender(c.containerId, c.origine, c.source, c.withSubs, c.oldBlockId);
+    }
+  }
+
+  /* ===================== PASSAGE DE NIVEAU : capacités et choix depuis la base ===================== */
+  const CAP_SKILLS = () => skillsData.map(s => s.name);
+  const CAP_ABILITIES = ['Force', 'Dextérité', 'Constitution', 'Intelligence', 'Sagesse', 'Charisme'];
+  const CAP_ALL_WEAPONS = () => weaponCategories.flatMap(c => c.items);
+  const CAP_ALL_TOOLS = () => [...toolCategories.flatMap(c => c.items), ...generalToolItems];
+  function capParseMaitrises(spec, ctx, row) {
+    // « Compétence (2 au choix) : toutes ; Langue : Draconique » → [{ type, count, values, choice }]
+    return String(spec || '').split(';').map(x => x.trim()).filter(Boolean).map(part => {
+      const m = part.match(/^([^(:]+?)\s*(?:\((.+?)\s*au choix\))?\s*:\s*(.+)$/i);
+      if (!m) return null;
+      const type = capNorm(m[1]).replace(/s$/, '');
+      let count = m[2] ? m[2].trim() : null;
+      if (count) count = /^PALIER/i.test(count) ? parseInt(capPalier(count.replace(/^PALIER\s*/i, ''), capLevelFor(ctx, row)), 10) || 0 : parseInt(count, 10) || 1;
+      return { type, label: m[1].trim(), count, values: m[3].split(',').map(v => v.trim()).filter(Boolean) };
+    }).filter(Boolean);
+  }
+  function capCandidates(entry, d) {
+    const v0 = capNorm(entry.values[0] || '');
+    const pick = list => entry.values.length === 1 && /^(toutes?|tous)$/.test(v0) ? list : list.filter(x => entry.values.some(v => capNorm(v) === capNorm(x) || capNorm(x).includes(capNorm(v))));
+    if (entry.type === 'competence') return pick(CAP_SKILLS());
+    if (entry.type === 'expertise') {
+      if (/maitrisee/.test(v0)) return (d.skills || []).filter(s => s.trained && !s.expert).map(s => s.name).concat(entry.values.some(v => /outils de voleur/i.test(v)) ? ['Outils de voleur'] : []);
+      return pick(CAP_SKILLS());
+    }
+    if (entry.type === 'langue') return pick(languagesData).filter(l => !(d.languages || []).includes(l));
+    if (entry.type === 'outil') return /artisan/i.test(entry.values.join(' ')) ? toolCategories[0].items : pick(CAP_ALL_TOOLS());
+    if (entry.type === 'arme') return pick(CAP_ALL_WEAPONS());
+    if (entry.type === 'jd') return pick(CAP_ABILITIES);
+    return entry.values;
+  }
+  function capFixedValues(entry) {
+    const v = entry.values.map(capNorm);
+    if (entry.type === 'arme') {
+      const out = [];
+      if (v.some(x => x.includes('armes courantes'))) weaponCategories.filter(c => c.key.startsWith('courantes')).forEach(c => out.push(...c.items));
+      if (v.some(x => x.includes('armes de guerre'))) weaponCategories.filter(c => c.key.startsWith('guerre')).forEach(c => out.push(...c.items));
+      CAP_ALL_WEAPONS().forEach(w => { if (v.includes(capNorm(w))) out.push(w); });
+      return [...new Set(out)];
+    }
+    if (entry.type === 'armure') return armorCategories.filter(a => v.some(x => capNorm(a).startsWith(x.replace(/s$/, '')) || x.startsWith(capNorm(a).replace(/s$/, ''))));
+    if (entry.type === 'jd') return /^(tous|toutes)$/.test(v[0]) ? CAP_ABILITIES : CAP_ABILITIES.filter(a => v.includes(capNorm(a)));
+    if (entry.type === 'outil') return CAP_ALL_TOOLS().filter(t => v.some(x => capNorm(t) === x || x.includes(capNorm(t))));
+    if (entry.type === 'competence') return CAP_SKILLS().filter(s => v.includes(capNorm(s)));
+    if (entry.type === 'langue') return entry.values.map(x => (typeof langCanon === 'function' ? langCanon(x) : x));
+    return entry.values;
+  }
+  function capApplyMaitrise(d, type, value) {
+    if (type === 'competence' || type === 'expertise') {
+      d.skills = d.skills && d.skills.length ? d.skills : skillsData.map(s => ({ name: s.name, ability: s.ability, trained: false, expert: false }));
+      const s = d.skills.find(x => capNorm(x.name) === capNorm(value));
+      if (s) { s.trained = true; if (type === 'expertise') s.expert = true; return; }
+      if (type === 'expertise') { d.toolProfs = [...new Set([...(d.toolProfs || []), value])]; d.toolExpertise = [...new Set([...(d.toolExpertise || []), value])]; }
+      return;
+    }
+    const key = { arme: 'weaponProfs', armure: 'armorProfs', outil: 'toolProfs', langue: 'languages', jd: 'saveThrows' }[type];
+    if (key) d[key] = [...new Set([...(d[key] || []), value])];
+  }
+  // Ce que le niveau apporte (lignes de la base), sans rien envoyer
+  function capLevelItems(p, className, classLevel) {
+    const items = [];
+    const sub = (p.subclasses || {})[className];
+    const parentRace = typeof wizRaceLore === 'function' ? (wizRaceLore(p.race || '').parent || {}).name : '';
+    const owned = new Set((p.capacites || []).map(c => c.baseId).filter(Boolean));
+    const replaced = new Set(capBase.filter(r => r.remplace).map(r => r.remplace));
+    const pushRow = r => { if (!owned.has(r.id) && !items.some(i => i.baseId === r.id)) items.push({ kind: 'cap', baseId: r.id, label: r.nom, origine: r.origine, done: false }); };
+    capBase.filter(r => r.source === 'Classe' && r.niveau === classLevel && (capNorm(r.origine) === capNorm(className) || (sub && capNorm(r.origine) === capNorm(`${className} · ${sub}`)))).forEach(pushRow);
+    const raceNames = [p.race, parentRace].filter(Boolean).map(capNorm);
+    capBase.filter(r => r.source === 'Race' && r.niveau === p.level && r.niveau > 1 && raceNames.includes(capNorm(r.origine)) && !replaced.has(r.id)).forEach(pushRow);
+    // Choix qui s'agrandissent avec le niveau (Métamagie, Manifestations, Ennemi juré…)
+    const ctx = capCtxFromPlayer(p);
+    (p.capacites || []).forEach(c => {
+      const r = capBase.find(x => x.id === c.baseId);
+      if (!r || !r.choix || r.choix === 'Sous-classe' || !r.nb_choix) return;
+      const total = capUsesValue(r.nb_choix, ctx, r) || 0;
+      const have = ((p.capChoix || {})[r.choix] || []).length;
+      if (total > have) items.push({ kind: 'more', baseId: r.id, label: `${r.choix} : ${total - have} de plus à choisir`, done: false });
+    });
+    // Sorts accordés « Dès niv. N » par une capacité déjà possédée
+    (p.capacites || []).forEach(c => {
+      const r = capBase.find(x => x.id === c.baseId);
+      if (!r || !r.sorts) return;
+      const lvl = r.source === 'Classe' ? classLevel : p.level;
+      if (r.source === 'Classe' && capNorm(capClassOf(r)) !== capNorm(className)) return;
+      String(r.sorts).split(';').forEach(part => {
+        const m = part.match(/Dès niv\.\s*(\d+)\s*—\s*(.+)$/);
+        if (m && +m[1] === lvl) items.push({ kind: 'spell', baseId: r.id, label: `${r.nom} : ${m[2].trim()}`, spells: m[2].trim(), done: false });
+      });
+    });
+    return items;
+  }
+  // Recalcule les capacités déjà posées (formules), sauf celles personnalisées
+  function capRefreshOwned(d, p) {
+    const ctx = capCtxFromPlayer({ ...p, ...d });
+    let n = 0;
+    (d.capacites || []).forEach(c => {
+      if (!c.baseId || c.custom) return;
+      const r = capBase.find(x => x.id === c.baseId);
+      if (!r) return;
+      const inst = capInstanceFromBase(r, ctx);
+      const title = c.choiceLabel ? `${r.nom} : ${c.choiceLabel}` : inst.title;
+      if (c.text !== inst.text || c.uses !== inst.uses || c.title !== title) n++;
+      c.text = inst.text; c.title = title;
+      if (inst.uses) c.uses = inst.uses; else delete c.uses;
+      c.recharge = inst.recharge;
+    });
+    return n;
+  }
+
+  /* ---- Panneau de vérification d'une ligne ---- */
+  let capReviewOpen = null;
+  function capReviewHtml(p, item, idx) {
+    const r = capBase.find(x => x.id === item.baseId);
+    if (!r) return '<div class="capr-panel">Capacité introuvable dans la base.</div>';
+    const cls = capClassOf(r);
+    const ctx = capCtxFromPlayer(p);
+    const d = p;
+    let html = '<div class="capr-panel">';
+    if (item.kind === 'spell') {
+      html += `<div class="capr-label">Sorts à ajouter</div><div class="capr-info">${histEsc(item.spells)}</div>`;
+    } else {
+      const inst = capInstanceFromBase(r, ctx);
+      if (item.kind === 'cap') {
+        html += `<div class="capr-label">Texte envoyé au joueur <span class="capr-hint">(modifiable pour ce personnage uniquement)</span></div>
+          <textarea class="capr-text" id="caprText" data-orig="${histEsc(inst.text)}">${histEsc(inst.text)}</textarea>
+          <div class="capr-info">${inst.uses ? `${inst.uses} utilisation${inst.uses > 1 ? 's' : ''} · ${histEsc(r.rechargement.toLowerCase())}` : (r.rechargement && r.rechargement !== 'Aucun' ? histEsc(r.rechargement) : 'Utilisation libre')}${r.visible_joueur === false ? ' · <em>masquée côté joueur (maîtrise seule)</em>' : ''}</div>`;
+      }
+      // Choix
+      if (r.choix) {
+        const opts = capChoiceOptions(r, cls);
+        const have = (p.capChoix || {})[r.choix] || [];
+        let need = 1;
+        if (r.choix !== 'Sous-classe' && r.nb_choix) need = Math.max(0, (capUsesValue(r.nb_choix, ctx, r) || 1) - have.length);
+        const free = opts.filter(o => !have.includes(o.name));
+        const prereq = o => o.row && o.row.prerequis ? ` <span class="capr-hint">(${histEsc(o.row.prerequis)})</span>` : '';
+        html += `<div class="capr-label">${r.choix === 'Sous-classe' ? 'Sous-classe' : histEsc(r.choix)} — ${need} à choisir${have.length ? ` <span class="capr-hint">(déjà : ${histEsc(have.join(', '))})</span>` : ''}</div>
+          <div class="capr-opts" data-need="${need}" data-group="${histEsc(r.choix)}">${free.map(o => `<label class="capr-opt"><input type="${need === 1 ? 'radio' : 'checkbox'}" name="caprOpt" value="${histEsc(o.name)}"> <span>${histEsc(o.name)}${prereq(o)}${o.row ? `<span class="capr-opt-desc">${histEsc(capEval(o.row.description, ctx, o.row))}</span>` : ''}</span></label>`).join('') || '<div class="capr-hint">Aucune option disponible.</div>'}</div>`;
+      }
+      // Maîtrises
+      const ms = item.kind === 'cap' ? capParseMaitrises(r.maitrises, ctx, r) : [];
+      ms.forEach((m, mi) => {
+        if (!m.count) { const vals = capFixedValues(m); if (vals.length) html += `<div class="capr-label">${histEsc(m.label)} cochée${vals.length > 1 ? 's' : ''} d'office</div><div class="capr-info">${histEsc(vals.join(', '))}</div>`; return; }
+        const cands = capCandidates(m, d);
+        html += `<div class="capr-label">${histEsc(m.label)} — ${m.count} au choix</div><div class="capr-opts capr-mopts" data-mi="${mi}" data-need="${m.count}">${cands.map(c => `<label class="capr-opt small"><input type="checkbox" value="${histEsc(c)}"> <span>${histEsc(c)}</span></label>`).join('')}</div>`;
+      });
+      // Sorts accordés (hors « Dès niv. » à venir)
+      if (item.kind === 'cap' && r.sorts) {
+        const now = String(r.sorts).split(';').map(x => x.trim()).filter(x => x && !/^Dès niv\./.test(x) && !/^Carac/i.test(x));
+        if (now.length) html += `<div class="capr-label">Sorts</div><div class="capr-info">${now.map(histEsc).join('<br>')}<br><span class="capr-hint">Les sorts imposés sont ajoutés à ses sorts connus ; ceux « au choix » sont à choisir dans son module Sorts.</span></div>`;
+      }
+      if (item.kind === 'cap' && r.effets) html += `<div class="capr-label">Effet sur la fiche — à vérifier</div><div class="capr-info">${histEsc(capEval(r.effets, ctx, r))}</div>`;
+    }
+    html += `<div class="capr-actions"><button class="capr-send" onclick="capReviewSend(${idx})">Envoyer à la fiche</button><button class="capr-skip" onclick="capReviewSkip(${idx})">Écarter</button></div></div>`;
+    return html;
+  }
+  function capReviewToggle(idx) { capReviewOpen = capReviewOpen === idx ? null : idx; renderLevelUpChecklist(); }
+  function capReviewSkip(idx) {
+    const p = players.find(pl => pl.id === levelUpTargetId);
+    p.levelUpChecklist[idx].done = true; p.levelUpChecklist[idx].skipped = true;
+    capReviewOpen = null;
+    capChecklistAfterChange(p);
+  }
+  function capReviewSend(idx) {
+    const p = players.find(pl => pl.id === levelUpTargetId);
+    const item = p.levelUpChecklist[idx];
+    const r = capBase.find(x => x.id === item.baseId);
+    if (!r) return;
+    const panel = document.querySelector('.capr-panel');
+    // Choix
+    let picks = [];
+    const optBox = panel.querySelector('.capr-opts[data-group]');
+    if (optBox) {
+      picks = [...optBox.querySelectorAll('input:checked')].map(i => i.value);
+      const need = +optBox.dataset.need;
+      if (need && picks.length !== need && optBox.querySelector('input')) { showToast(`Choisis ${need} option${need > 1 ? 's' : ''}`); return; }
+    }
+    const mpicks = [];
+    for (const box of panel.querySelectorAll('.capr-mopts')) {
+      const vals = [...box.querySelectorAll('input:checked')].map(i => i.value);
+      if (vals.length !== +box.dataset.need && box.querySelector('input')) { showToast(`Coche ${box.dataset.need} élément${+box.dataset.need > 1 ? 's' : ''}`); return; }
+      mpicks[+box.dataset.mi] = vals;
+    }
+    const textEl = panel.querySelector('#caprText');
+    const cls = capClassOf(r);
+    const newItems = [];
+    sbPatchPlayer(p, d => {
+      d.capChoix = d.capChoix || {};
+      d.capacites = d.capacites || [];
+      const ctx = () => capCtxFromPlayer({ ...p, ...d });
+      if (item.kind === 'spell') {
+        const names = item.spells.replace(/^Sort(?: mineur)?\s*:\s*/i, '').split(',').map(x => x.replace(/\(.*?\)/g, '').trim()).filter(Boolean);
+        d.knownSpellNames = [...new Set([...(d.knownSpellNames || []), ...names.map(capSpellName)])];
+        return;
+      }
+      if (r.choix === 'Sous-classe' && picks[0]) {
+        d.subclasses = { ...(d.subclasses || {}), [cls]: picks[0] };
+      } else if (r.choix && picks.length) {
+        d.capChoix[r.choix] = [...(d.capChoix[r.choix] || []), ...picks];
+      }
+      if (item.kind === 'cap') {
+        const inst = capInstanceFromBase(r, ctx());
+        const simple = r.choix && r.choix !== 'Sous-classe' && !capBase.some(x => x.option_de === r.choix) && picks.length === 1;
+        if (simple) { inst.choiceLabel = picks[0]; inst.title = `${r.nom} : ${picks[0]}`; }
+        if (r.choix === 'Sous-classe' && picks[0]) inst.title = `${r.nom} : ${picks[0]}`, inst.choiceLabel = picks[0];
+        if (textEl && textEl.value.trim() !== textEl.dataset.orig) { inst.text = textEl.value.trim(); inst.custom = true; }
+        d.capacites.push(inst);
+        // Maîtrises
+        capParseMaitrises(r.maitrises, ctx(), r).forEach((m, mi) => (m.count ? (mpicks[mi] || []) : capFixedValues(m)).forEach(v => capApplyMaitrise(d, m.type, v)));
+        // Sorts imposés
+        String(r.sorts || '').split(';').map(x => x.trim()).filter(x => /^Sort(?: mineur)?\s*:/i.test(x)).forEach(x => {
+          const names = x.replace(/^Sort(?: mineur)?\s*:\s*/i, '').split(',').map(n => n.replace(/\(.*?\)/g, '').trim()).filter(Boolean);
+          d.knownSpellNames = [...new Set([...(d.knownSpellNames || []), ...names.map(capSpellName)])];
+        });
+      }
+      // Options-capacités choisies (styles de combat, métamagies…) : chacune devient une capacité
+      picks.forEach(name => {
+        const o = capBase.find(x => x.option_de === r.choix && x.nom === name);
+        if (o) {
+          d.capacites.push(capInstanceFromBase(o, ctx()));
+          capParseMaitrises(o.maitrises, ctx(), o).forEach(m => { if (!m.count) capFixedValues(m).forEach(v => capApplyMaitrise(d, m.type, v)); });
+        }
+      });
+      // Sous-classe choisie : ses capacités jusqu'au niveau actuel deviennent des lignes à vérifier
+      if (r.choix === 'Sous-classe' && picks[0]) {
+        const lvl = (realClassList({ ...p, ...d }).find(c => capNorm(c.name) === capNorm(cls)) || {}).level || 1;
+        capBase.filter(x => capNorm(x.origine) === capNorm(`${cls} · ${picks[0]}`) && (x.niveau || 1) <= lvl)
+          .forEach(x => newItems.push({ kind: 'cap', baseId: x.id, label: x.nom, origine: x.origine, done: false }));
+      }
+      ['capacites', 'capChoix', 'subclasses', 'skills', 'weaponProfs', 'armorProfs', 'toolProfs', 'languages', 'saveThrows', 'knownSpellNames'].forEach(k => { if (d[k] !== undefined) p[k] = d[k]; });
+    }, `Envoyé à ${p.name} : ${item.label}`, true).then(ok => {
+      if (!ok) return;
+      item.done = true; item.sent = true;
+      p.levelUpChecklist.splice(idx + 1, 0, ...newItems);
+      capReviewOpen = newItems.length ? idx + 1 : null;
+      capChecklistAfterChange(p);
+    });
+  }
+  function capSpellName(n) {
+    const hit = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).find(s => capNorm(s.name) === capNorm(n));
+    return hit ? hit.name : n.charAt(0).toUpperCase() + n.slice(1);
+  }
+  function capChecklistAfterChange(p) {
+    if (p.levelUpChecklist.every(i => i.done)) {
+      p.pendingLevelUp = false; p.levelUpChecklist = null;
+      if (levelForXp(p.xp || 0) > (p.level || 1)) p.pendingLevelUp = true;
+      persistLevelUp(p);
+      showToast(`${p.name} est à jour — passage de niveau terminé !`);
+      closeModal('modalLevelUp');
+      renderCharChips(); renderPlayerDetail(); renderNotifBadges();
+    } else {
+      persistLevelUp(p);
+      renderLevelUpChecklist(); renderNotifBadges();
+    }
+  }
+
   /* ===================== LORE › CHRONIQUES (légendes, récits anciens…) ===================== */
   // Table Supabase : lore_chroniques
   let chroniquesData = [];
@@ -45798,6 +46595,7 @@
       try { await loadHistLinkIgnore(); } catch (e) { console.error('Liens du Tome', e); }
       try { await loadTempoImage(); } catch (e) { console.error('Temporalité', e); }
       try { await loadChroniquesFromSupabase(); } catch (e) { console.error('Chroniques', e); }
+      try { await loadCapBaseFromSupabase(); } catch (e) { console.error('Capacités', e); }
       if (typeof renderCharChips === 'function') renderCharChips();
       if (typeof renderNotifBadges === 'function') renderNotifBadges();
       if (failCount > 0) {
