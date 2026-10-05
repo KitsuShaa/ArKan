@@ -1809,6 +1809,17 @@
   .capr-actions { display: flex; gap: 8px; margin-top: 12px; }
   .capr-send { flex: 1; padding: 9px; border-radius: 9px; border: none; background: var(--gold); color: #14100a; font-weight: 600; cursor: pointer; }
   .capr-skip { padding: 9px 14px; border-radius: 9px; border: 1px solid var(--card-border); background: transparent; color: var(--ink-dim); cursor: pointer; }
+  .cf-top { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 10px; }
+  .cf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0 10px; }
+  .cf-abilities { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 8px; }
+  .cf-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 4px 10px; font-size: 12.5px; color: var(--ink); margin-bottom: 6px; }
+  .cf-linked { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink); margin: 6px 0; }
+  .cf-hint { font-size: 12px; color: var(--ink-dim); background: var(--gold-soft); border: 1px solid rgba(201,162,75,.3); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; line-height: 1.5; }
+  .cf-hint-inline { font-size: 11px; color: var(--ink-faint); }
+  .cf-attack-row { display: grid; grid-template-columns: 1.4fr .8fr 1fr .7fr .8fr auto; gap: 6px; margin-bottom: 6px; }
+  .cf-attack-row input { padding: 7px 9px; border-radius: 7px; border: 1px solid var(--card-border); background: var(--bg-elevated); color: var(--ink); font-size: 12.5px; min-width: 0; }
+  .comp-card .quick-photo { background-size: cover; }
+  @media (max-width: 640px) { .cf-top { flex-direction: column; } .cf-abilities { grid-template-columns: repeat(3, 1fr); } .cf-attack-row { grid-template-columns: 1fr 1fr; } }
   .wlang-hint { font-size: 12px; color: var(--ink-dim); background: var(--gold-soft); border: 1px solid rgba(201,162,75,.3); border-radius: 8px; padding: 7px 10px; margin-bottom: 8px; line-height: 1.5; }
   .wlang-hint strong { color: var(--ink); } .wlang-hint em { color: var(--gold); font-style: normal; }
   .wlang-auto { margin-left: 5px; font-size: 9.5px; text-transform: uppercase; letter-spacing: .3px; color: var(--gold); border: 1px solid rgba(201,162,75,.45); border-radius: 999px; padding: 0 5px; }
@@ -2081,7 +2092,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 05/10 (39)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 05/10 (41)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2542,6 +2553,56 @@
     <div class="form-field"><label>Texte</label><textarea id="hrfTexte" style="min-height:320px; font-family:var(--font-serif); font-size:14px; line-height:1.6;"></textarea></div>
     <button class="modal-confirm-btn" id="hrfSaveBtn" onclick="saveHistRecap()">Créer</button>
     <button class="modal-cancel-btn" onclick="closeModal('modalHistRecap')">Annuler</button>
+  </div>
+</div>
+
+<!-- COMPAGNON D'UN JOUEUR -->
+<div class="modal-backdrop" id="modalCompanionForm">
+  <div class="modal-box" style="max-width:760px;">
+    <h3 id="cfTitle">Compagnon</h3>
+    <div class="cf-top">
+      <div class="photo-preview-box" id="cfPhotoPreview" style="width:150px; aspect-ratio:1; margin:0;" onclick="document.getElementById('cfPhotoInput').click()">
+        <div class="photo-preview-placeholder" id="cfPhotoPlaceholder"><span>Photo</span></div>
+      </div>
+      <input type="file" id="cfPhotoInput" accept="image/*" style="display:none;" onchange="onCompanionPhotoSelected(event)">
+      <div class="cf-grid" style="flex:1;">
+        <div class="form-field"><label>Nom *</label><input type="text" id="cfNom"></div>
+        <div class="form-field"><label>Espèce</label><input type="text" id="cfEspece" placeholder="Ex : Loup"></div>
+        <div class="form-field"><label>Sexe</label><input type="text" id="cfSexe"></div>
+        <div class="form-field"><label>Taille</label><input type="text" id="cfTaille" placeholder="Ex : 0,80 m au garrot"></div>
+        <div class="form-field"><label>Poids</label><input type="text" id="cfPoids" placeholder="Ex : 40 kg"></div>
+        <div class="form-field"><label>Vitesse</label><input type="text" id="cfVitesse" placeholder="Ex : 12 m"></div>
+      </div>
+    </div>
+    <label class="cf-linked"><input type="checkbox" id="cfLinked" onchange="compFormLinkedChanged()"> <strong>Lié à la progression du joueur</strong> (compagnon du Maître des bêtes)</label>
+    <div class="cf-hint" id="cfLinkedHint">Calculé automatiquement et mis à jour à chaque niveau du joueur : PV max = 4 × niveau total du joueur · +1 dé de vie par niveau · CA = CA de la bête + maîtrise du joueur · attaques et dégâts = mod. de Force du compagnon + maîtrise du joueur · maîtrise du joueur sur ses jets de sauvegarde et compétences.</div>
+    <div class="cf-grid">
+      <div class="form-field"><label>CA <span class="cf-hint-inline">(de la bête)</span></label><input type="number" id="cfCA"></div>
+      <div class="form-field cf-unlinked"><label>PV max</label><input type="number" id="cfPV"></div>
+      <div class="form-field"><label>Dés de vie (nombre)</label><input type="number" min="1" id="cfHdCount"></div>
+      <div class="form-field"><label>Type de dé de vie</label><input type="text" id="cfHdDie" placeholder="D8"></div>
+      <div class="form-field cf-unlinked"><label>Bonus de maîtrise propre</label><input type="number" id="cfProf"></div>
+      <div class="form-field"><label>Sens</label><input type="text" id="cfSens" placeholder="Ex : vision dans le noir 18 m"></div>
+    </div>
+    <div class="section-title">Caractéristiques</div>
+    <div class="cf-abilities">
+      <div class="form-field"><label>For</label><input type="number" id="cfAb_for"></div><div class="form-field"><label>Dex</label><input type="number" id="cfAb_dex"></div>
+      <div class="form-field"><label>Con</label><input type="number" id="cfAb_con"></div><div class="form-field"><label>Int</label><input type="number" id="cfAb_int"></div>
+      <div class="form-field"><label>Sag</label><input type="number" id="cfAb_sag"></div><div class="form-field"><label>Cha</label><input type="number" id="cfAb_cha"></div>
+    </div>
+    <div class="section-title">Jets de sauvegarde maîtrisés</div>
+    <div class="cf-checks" id="cfSaves"></div>
+    <div class="section-title">Compétences maîtrisées</div>
+    <div class="cf-checks" id="cfSkills"></div>
+    <div class="section-title">Attaques <span class="field-hint">(laisser vide s'il n'attaque pas)</span></div>
+    <div id="cfAttacks"></div>
+    <button class="filter-reset-btn" onclick="compAddAttackRow()">+ Ajouter une attaque</button>
+    <div class="section-title">Capacités</div>
+    <div id="cfCapsList"></div>
+    <button class="filter-reset-btn" onclick="addStatBlockEntry('cfCapsList')">+ Ajouter une capacité</button>
+    <button class="modal-confirm-btn" style="margin-top:16px;" onclick="saveCompanionForm()">Enregistrer et envoyer au joueur</button>
+    <button class="modal-cancel-btn" id="cfRemoveBtn" style="color:var(--garnet);" onclick="removeCompanion()">Retirer ce compagnon</button>
+    <button class="modal-cancel-btn" onclick="closeModal('modalCompanionForm')">Annuler</button>
   </div>
 </div>
 
@@ -4510,9 +4571,14 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 4h9l4 4v12a1 1 0 01-1 1H6a1 1 0 01-1-1V5a1 1 0 011-1z"/><path d="M15 4v4h4"/><path d="M8.5 11h7M8.5 14h7"/></svg>
               <span>Ajouter une capacité</span>
             </div>
+            <div class="big-action-btn" onclick="openCompanionForm('${p.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10c0-3 2-5 4-6 0 1.5 1 2.5 1 2.5S10 5 12 5s3 1.5 3 1.5.5-1 1-2.5c2 1 4 3 4 6-1 0-2 .5-2 .5.5 2 0 4-1 5.5-1-1-2-1-2-1 0 1.5-1 3-3 3s-3-1.5-3-3c0 0-1 0-2 1-1-1.5-1.5-3.5-1-5.5 0 0-1-.5-2-.5z"/></svg>
+              <span>${p.companionDef ? 'Modifier le compagnon' : 'Ajouter un compagnon'}</span>
+            </div>
           </div>
         </div>
       </div>
+      ${p.companionDef ? `<div class="player-grid" style="margin-top:14px;">${companionBlockHtml(p)}</div>` : ''}
     `;
   }
 
@@ -4591,6 +4657,12 @@
      'capacites', 'items', 'themeColor', 'inspiration', 'huntBoard', 'pendingLevelUp', 'levelUpChecklist', 'abilities', 'capChoix', 'subclasses', 'race', 'skills', 'saveThrows', 'weaponProfs', 'armorProfs', 'toolProfs', 'languages']
       .forEach(k => { if (d[k] !== undefined) p[k] = d[k]; });
     p.states = p.states || []; p.exhaustion = p.exhaustion || 0;
+    // Compagnon : définition (MJ), état de jeu (joueur), états, tableau de chasse
+    p.companionDef = d.companionDef || null;
+    p.companionState = d.companion && typeof d.companion === 'object' ? d.companion : null;
+    p.companionStates = d.companionStates || [];
+    p.companionHuntBoard = d.companionHuntBoard || [];
+    p.companion = p.companionDef ? p.companionDef.nom : null;
   }
   let lastLiveSnapshot = '';
   async function refreshPlayersLive() {
@@ -4600,7 +4672,8 @@
     if (error || !data) return;
     const snap = JSON.stringify(data.map(r => [r.id, r.data && r.data.currentHp, r.data && r.data.maxHp, r.data && r.data.coins,
       r.data && r.data.appData && r.data.appData.computedCA, r.data && r.data.states, r.data && r.data.exhaustion, r.data && r.data.xp,
-      r.data && r.data.level, r.data && r.data.pendingLevelUp, (r.data && r.data.huntBoard || []).length, r.data && r.data.inspiration]));
+      r.data && r.data.level, r.data && r.data.pendingLevelUp, (r.data && r.data.huntBoard || []).length, r.data && r.data.inspiration,
+      r.data && r.data.companion && r.data.companion.hp, r.data && r.data.companionStates, (r.data && r.data.companionHuntBoard || []).length, r.data && r.data.companionDef && r.data.companionDef.nom]));
     if (snap === lastLiveSnapshot) return;
     lastLiveSnapshot = snap;
     data.forEach(r => { const p = players.find(pl => pl.id === r.id); if (p) syncPlayerFromData(p, r.data); });
@@ -4625,8 +4698,11 @@
   }
 
   /* ===================== MODAL: ÉTAT ===================== */
-  function openEtatModal(playerId) {
+  let etatForCompanion = false;
+  function openEtatModal(playerId, forCompanion) {
     currentActionTargetId = playerId;
+    etatForCompanion = !!forCompanion;
+    if (etatForCompanion) { renderStateGrid(); openModal('modalEtat'); return; }
     renderStateGrid();
     openModal('modalEtat');
     const pRef = players.find(pl => pl.id === playerId);
@@ -4634,6 +4710,22 @@
   }
   function renderStateGrid() {
     const p = players.find(pl => pl.id === currentActionTargetId);
+    if (etatForCompanion && p.companionDef) {
+      const list = p.companionStates = p.companionStates || [];
+      document.getElementById('etatTargetName').textContent = `Pour ${p.companionDef.nom} (compagnon de ${p.name}) — clique un état actif pour le retirer`;
+      const grid = document.getElementById('stateGrid'); grid.innerHTML = '';
+      stateList.forEach(s => {
+        const btn = document.createElement('div');
+        btn.className = 'state-option' + (list.includes(s) ? ' active' : ''); btn.textContent = s;
+        btn.addEventListener('click', () => {
+          p.companionStates = list.includes(s) ? list.filter(x => x !== s) : [...list, s];
+          sbPatchPlayer(p, d => { d.companionStates = p.companionStates.slice(); }, null, false);
+          renderStateGrid(); renderPlayerDetail();
+        });
+        grid.appendChild(btn);
+      });
+      return;
+    }
     document.getElementById('etatTargetName').textContent = 'Pour ' + p.name + ' — clique un état actif (surligné) pour le retirer';
     const grid = document.getElementById('stateGrid');
     grid.innerHTML = '';
@@ -44411,6 +44503,15 @@
       { label: `+${gained} PV (D${die}: ${rolled} + mod.Con ${p.conMod >= 0 ? '+' : ''}${p.conMod})`, auto: true, done: true },
     ];
 
+    // --- Auto : compagnon lié à la progression ---
+    let compHeal = 0;
+    if (p.companionDef && p.companionDef.linked) {
+      const a = companionDerive(p.companionDef, p.level - 1), b = companionDerive(p.companionDef, p.level);
+      compHeal = Math.max(0, b.pvMax - a.pvMax);
+      const att = b.attacks[0] ? ` · ${b.attacks[0].nom} ${a.attacks[0].hit} → ${b.attacks[0].hit}` : '';
+      checklist.push({ label: `Compagnon ${p.companionDef.nom} : PV max ${a.pvMax} → ${b.pvMax}, dés de vie ${a.hdCount} → ${b.hdCount}, CA ${a.ca} → ${b.ca}${att}`, auto: true, done: true });
+    }
+
     // --- Auto : emplacements de sorts (si lanceur) ---
     const casters = p.classList.filter(c => casterTypeMap[c.name]);
     if (casters.length) {
@@ -44455,6 +44556,7 @@
       d.level = p.level; d.classes = p.classes; d.maxHp = p.maxHp;
       d.xpNext = p.level < 20 ? XP_TABLE[p.level + 1] : XP_TABLE[20];
       d.pendingHeal = [...(d.pendingHeal || []), { pid: 'h' + Date.now(), amount: gained }];
+      if (compHeal) d.pendingHeal.push({ pid: 'c' + Date.now(), amount: compHeal, target: 'companion' });
       if (capBase.length) { capRefreshOwned(d, p); p.capacites = d.capacites; }
     });
     document.getElementById('levelUpSub').textContent = `${className} niveau ${newLevel}`;
@@ -45803,7 +45905,8 @@
     if (error) { console.warn('Capacités', error); return; }
     capBase = data || [];
   }
-  const capNorm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  // « Artificier » (assistant) et « Artificer » (Lore / base) désignent la même classe
+  const capNorm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\bartificier\b/g, 'artificer');
   const CAP_ABBR = { FOR: 'for', DEX: 'dex', CON: 'con', INT: 'int', SAG: 'sag', CHA: 'cha' };
   const CAP_RECHARGE = { 'Aucun': 'aucun', 'Repos court': 'repos_court', 'Repos long': 'repos_long', 'Repos court ou long': 'repos_court_ou_long' };
   const capClassOf = row => String(row.origine || '').split('·')[0].trim();
@@ -46558,7 +46661,10 @@
       });
     }
     capParseMaitrises(r.maitrises, ctx, r).forEach((m, mi) => (m.count ? (mpicks[mi] || []) : capFixedValues(m)).forEach(v => wizApplyMaitrise(m.type, v)));
-    String(r.sorts || '').split(';').map(x => x.trim()).filter(x => /^Sort(?: mineur)?\s*:/i.test(x)).forEach(x =>
+    // Sorts imposés, y compris ceux « Dès niv. N » déjà atteints à la création
+    const lvlFor = r.source === 'Classe' ? capLevelFor(ctx, r) : ctx.niv;
+    String(r.sorts || '').split(';').map(x => x.trim()).map(x => { const m = x.match(/^Dès niv\.\s*(\d+)\s*—\s*(.+)$/); return m ? (+m[1] <= lvlFor ? m[2].trim() : '') : x; })
+      .filter(x => /^Sort(?: mineur)?\s*:/i.test(x)).forEach(x =>
       x.replace(/^Sort(?: mineur)?\s*:\s*/i, '').split(',').map(n => n.replace(/\(.*?\)/g, '').trim()).filter(Boolean).forEach(n => wizCap.spells.push({ name: capSpellName(n), from: r.id })));
     it.status = 'accepted';
     wizCapRefresh();
@@ -46580,6 +46686,138 @@
     });
     wizCap.extraCaps.forEach(x => { const o = capBase.find(r => r.id === x.baseId); if (o) out.push(capInstanceFromBase(o, ctx)); });
     return out;
+  }
+
+  /* ===================== COMPAGNONS (attribués par le MJ) ===================== */
+  const COMP_SKILL_LIST = ['Acrobaties', 'Arcanes', 'Athlétisme', 'Discrétion', 'Dressage', 'Escamotage', 'Histoire', 'Intimidation', 'Intuition', 'Investigation', 'Médecine', 'Nature', 'Perception', 'Persuasion', 'Religion', 'Représentation', 'Survie', 'Tromperie'];
+  const COMP_SAVE_LIST = ['Force', 'Dextérité', 'Constitution', 'Intelligence', 'Sagesse', 'Charisme'];
+  const COMP_SKILL_AB = { 'Acrobaties': 'dex', 'Arcanes': 'int', 'Athlétisme': 'for', 'Discrétion': 'dex', 'Dressage': 'sag', 'Escamotage': 'dex', 'Histoire': 'int', 'Intimidation': 'cha', 'Intuition': 'sag',
+    'Investigation': 'int', 'Médecine': 'sag', 'Nature': 'int', 'Perception': 'sag', 'Persuasion': 'cha', 'Religion': 'int', 'Représentation': 'cha', 'Survie': 'sag', 'Tromperie': 'cha' };
+  // Même calcul que la fiche joueur
+  function companionDerive(def, ownerLevel) {
+    const lvl = Math.max(1, parseInt(ownerLevel, 10) || 1);
+    const prof = 2 + Math.floor((lvl - 1) / 4);
+    const linked = !!def.linked;
+    const ab = def.abilities || {};
+    const mod = k => Math.floor(((parseInt(ab[k], 10) || 10) - 10) / 2);
+    const pb = linked ? prof : (parseInt(def.prof, 10) || 0);
+    const hdCount = linked ? Math.max(1, (parseInt(def.hdCount, 10) || 1) + (lvl - (parseInt(def.baseLevel, 10) || lvl))) : Math.max(1, parseInt(def.hdCount, 10) || 1);
+    const pvMax = linked ? 4 * lvl : Math.max(1, parseInt(def.pvMax, 10) || 1);
+    const ca = (parseInt(def.ca, 10) || 10) + (linked ? prof : 0);
+    const sign = v => (v >= 0 ? '+' : '') + v;
+    const attacks = (def.attacks || []).filter(a => a && a.nom).map(a => {
+      const hit = linked ? mod('for') + prof : (parseInt(a.toHit, 10) || 0);
+      const dmgB = linked ? mod('for') + prof : (parseInt(a.dmgBonus, 10) || 0);
+      return { nom: a.nom, hit: sign(hit), dmg: `${String(a.dice || '').toUpperCase()}${dmgB ? sign(dmgB) : ''}${a.type ? ' ' + a.type : ''}` };
+    });
+    return { lvl, prof, hdCount, pvMax, ca, attacks, perc: 10 + mod('sag') + ((def.skills || []).includes('Perception') ? pb : 0) };
+  }
+  let compFormPlayerId = null, compPendingPhoto = null;
+  function openCompanionForm(playerId) {
+    compFormPlayerId = playerId; compPendingPhoto = null;
+    const p = players.find(pl => pl.id === playerId);
+    const d = (p && p.companionDef) || null;
+    const v = (id, x) => { document.getElementById(id).value = x == null ? '' : x; };
+    document.getElementById('cfTitle').textContent = d ? `Compagnon de ${p.name}` : `Nouveau compagnon pour ${p.name}`;
+    v('cfNom', d && d.nom); v('cfEspece', d && d.espece); v('cfSexe', d && d.sexe); v('cfTaille', d && d.taille); v('cfPoids', d && d.poids);
+    v('cfCA', d ? d.ca : 12); v('cfPV', d ? d.pvMax : 10); v('cfHdCount', d ? d.hdCount : 1); v('cfHdDie', d ? d.hdDie : 'D8');
+    v('cfVitesse', d && d.vitesse); v('cfSens', d && d.sens); v('cfProf', d ? (d.prof ?? 0) : 0);
+    ['for', 'dex', 'con', 'int', 'sag', 'cha'].forEach(k => v('cfAb_' + k, d && d.abilities ? d.abilities[k] : 10));
+    document.getElementById('cfLinked').checked = !!(d && d.linked);
+    document.getElementById('cfSaves').innerHTML = COMP_SAVE_LIST.map(s => `<label><input type="checkbox" value="${s}" ${d && (d.saves || []).includes(s) ? 'checked' : ''}> ${s}</label>`).join('');
+    document.getElementById('cfSkills').innerHTML = COMP_SKILL_LIST.map(s => `<label><input type="checkbox" value="${s}" ${d && (d.skills || []).includes(s) ? 'checked' : ''}> ${s}</label>`).join('');
+    document.getElementById('cfAttacks').innerHTML = '';
+    ((d && d.attacks) || []).forEach(a => compAddAttackRow(a));
+    document.getElementById('cfCapsList').innerHTML = '';
+    ((d && d.capacites) || []).forEach(c => addStatBlockEntry('cfCapsList', c.nom, c.desc));
+    const prev = document.getElementById('cfPhotoPreview');
+    prev.style.backgroundImage = d && d.photo ? `url('${d.photo}')` : '';
+    document.getElementById('cfPhotoPlaceholder').style.display = d && d.photo ? 'none' : 'flex';
+    document.getElementById('cfRemoveBtn').style.display = d ? '' : 'none';
+    compFormLinkedChanged();
+    openModal('modalCompanionForm');
+  }
+  function compFormLinkedChanged() {
+    const linked = document.getElementById('cfLinked').checked;
+    document.querySelectorAll('.cf-unlinked').forEach(el => el.style.display = linked ? 'none' : '');
+    document.getElementById('cfLinkedHint').style.display = linked ? '' : 'none';
+  }
+  function compAddAttackRow(a) {
+    a = a || {};
+    const row = document.createElement('div');
+    row.className = 'cf-attack-row';
+    const e = x => histEsc(x == null ? '' : x);
+    row.innerHTML = `<input class="cfa-nom" placeholder="Nom (ex : Morsure)" value="${e(a.nom)}">
+      <input class="cfa-dice" placeholder="Dés (ex : 2D4)" value="${e(a.dice)}">
+      <input class="cfa-type" placeholder="Type (ex : perforant)" value="${e(a.type)}">
+      <input class="cfa-hit cf-unlinked" type="number" placeholder="Toucher" value="${e(a.toHit)}">
+      <input class="cfa-dmg cf-unlinked" type="number" placeholder="Bonus dégâts" value="${e(a.dmgBonus)}">
+      <button class="capl-btn danger" title="Retirer" onclick="this.parentElement.remove()">✕</button>`;
+    document.getElementById('cfAttacks').appendChild(row);
+    compFormLinkedChanged();
+  }
+  function onCompanionPhotoSelected(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { compPendingPhoto = ev.target.result; document.getElementById('cfPhotoPreview').style.backgroundImage = `url('${ev.target.result}')`; document.getElementById('cfPhotoPlaceholder').style.display = 'none'; };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
+  function saveCompanionForm() {
+    const p = players.find(pl => pl.id === compFormPlayerId);
+    if (!p) return;
+    const g = id => document.getElementById(id).value.trim();
+    if (!g('cfNom')) { showToast('Donne un nom au compagnon'); return; }
+    const old = p.companionDef || null;
+    const def = {
+      nom: g('cfNom'), espece: g('cfEspece'), sexe: g('cfSexe'), taille: g('cfTaille'), poids: g('cfPoids'),
+      photo: compPendingPhoto || (old && old.photo) || null,
+      linked: document.getElementById('cfLinked').checked,
+      ca: parseInt(g('cfCA'), 10) || 10, pvMax: parseInt(g('cfPV'), 10) || 1, hdCount: parseInt(g('cfHdCount'), 10) || 1, hdDie: (g('cfHdDie') || 'D8').toUpperCase(),
+      vitesse: g('cfVitesse'), sens: g('cfSens'), prof: parseInt(g('cfProf'), 10) || 0,
+      abilities: Object.fromEntries(['for', 'dex', 'con', 'int', 'sag', 'cha'].map(k => [k, parseInt(g('cfAb_' + k), 10) || 10])),
+      saves: [...document.querySelectorAll('#cfSaves input:checked')].map(i => i.value),
+      skills: [...document.querySelectorAll('#cfSkills input:checked')].map(i => i.value),
+      attacks: [...document.querySelectorAll('#cfAttacks .cf-attack-row')].map(r => ({ nom: r.querySelector('.cfa-nom').value.trim(), dice: r.querySelector('.cfa-dice').value.trim(), type: r.querySelector('.cfa-type').value.trim(),
+        toHit: r.querySelector('.cfa-hit').value, dmgBonus: r.querySelector('.cfa-dmg').value })).filter(a => a.nom),
+      capacites: readStatBlockList('cfCapsList').map(c => ({ nom: c.name, desc: c.text })),
+      // niveau du joueur à l'attribution : point de départ de la progression des dés de vie
+      baseLevel: old && old.baseLevel ? old.baseLevel : (p.level || 1),
+    };
+    sbPatchPlayer(p, d => { d.companionDef = def; p.companionDef = def; p.companion = def.nom; }, old ? `Compagnon « ${def.nom} » mis à jour` : `« ${def.nom} » attribué à ${p.name}`, true)
+      .then(ok => { if (ok) { closeModal('modalCompanionForm'); renderPlayerDetail(); } });
+  }
+  function removeCompanion() {
+    const p = players.find(pl => pl.id === compFormPlayerId);
+    if (!p || !p.companionDef || !confirm(`Retirer « ${p.companionDef.nom} » à ${p.name} ?`)) return;
+    sbPatchPlayer(p, d => { d.companionDef = null; d.companion = null; d.companionStates = []; p.companionDef = null; p.companion = null; }, 'Compagnon retiré', true)
+      .then(ok => { if (ok) { closeModal('modalCompanionForm'); renderPlayerDetail(); } });
+  }
+  function companionBlockHtml(p) {
+    const def = p.companionDef;
+    if (!def) return '';
+    const c = companionDerive(def, p.level);
+    const hp = p.companionState && p.companionState.hp != null ? p.companionState.hp : c.pvMax;
+    const states = (p.companionStates || []).map(s => `<span class="active-tag">${histEsc(s)}</span>`).join('');
+    return `<div class="pcard comp-card">
+      <div class="quick-photo-row">
+        <div class="quick-photo" style="${def.photo ? `background:url('${def.photo}') center/cover;` : ''}">${def.photo ? '' : histEsc(def.nom.slice(0, 2))}</div>
+        <div class="quick-photo-text"><div class="qi-race">${histEsc(def.nom)}</div><div class="qi-sub">${histEsc([def.espece, 'compagnon'].filter(Boolean).join(' · '))}${def.linked ? ' · lié au niveau' : ''}</div></div>
+      </div>
+      <div class="qi-hp-label">Points de vie</div>
+      <div class="qi-hp-bar"><div class="qi-hp-fill" style="width:${Math.max(0, Math.min(100, hp / c.pvMax * 100))}%;"></div><div class="qi-hp-numbers">${hp} / ${c.pvMax}</div></div>
+      <div class="qi-stat-row">
+        <div class="qi-stat-block"><div class="qsb-value">${c.ca}</div><div class="qsb-label">CA</div></div>
+        <div class="qi-stat-block"><div class="qsb-value">${c.hdCount}${histEsc(def.hdDie || 'D8')}</div><div class="qsb-label">Dés de vie</div></div>
+        <div class="qi-stat-block"><div class="qsb-value">${(p.companionHuntBoard || []).length}</div><div class="qsb-label">Chasse</div></div>
+      </div>
+      <div class="quad-actions" style="grid-template-columns:repeat(2,1fr);">
+        <div class="quad-btn" onclick="openCompanionForm('${p.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>Modifier</div>
+        <div class="quad-btn" onclick="openEtatModal('${p.id}', true)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>États</div>
+      </div>
+      <div class="active-tags">${states}</div>
+    </div>`;
   }
 
   /* ===================== LORE › CHRONIQUES (légendes, récits anciens…) ===================== */

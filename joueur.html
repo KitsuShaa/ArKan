@@ -3141,6 +3141,15 @@
     overflow: hidden;
   }
 #page-inventaire .comp-hero img { width: 100%; height: 100%; object-fit: cover; }
+.comp-ident { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0 12px; }
+.comp-ident span { font-size: 11.5px; padding: 3px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--card-border); color: var(--ink-dim); }
+.comp-prof-line { font-size: 12.5px; color: var(--ink-dim); margin: 0 0 8px; line-height: 1.5; }
+.comp-prof-line strong { color: var(--ink); font-weight: 600; }
+.comp-dead-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 24px; }
+.comp-dead-box { background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; padding: 24px; max-width: 320px; text-align: center; }
+.comp-dead-box h3 { margin: 0 0 8px; font-family: var(--font-serif); color: var(--ink); }
+.comp-dead-box p { font-size: 13px; color: var(--ink-dim); margin: 0 0 16px; }
+.comp-dead-box button { padding: 10px 20px; border-radius: 10px; border: none; background: var(--accent, #c9a24b); color: #14100a; font-weight: 600; }
 #page-inventaire .comp-hero .comp-photo-placeholder { color: var(--ink-faint); font-size: 12px; text-align: center; }
 #page-inventaire .comp-hero .comp-photo-placeholder svg { width: 32px; height: 32px; margin-bottom: 6px; }
 #page-inventaire .comp-name-plate {
@@ -3919,8 +3928,8 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 10c0-3 2-5 4-6 0 1.5 1 2.5 1 2.5S10 5 12 5s3 1.5 3 1.5.5-1 1-2.5c2 1 4 3 4 6-1 0-2 .5-2 .5.5 2 0 4-1 5.5-1-1-2-1-2-1 0 1.5-1 3-3 3s-3-1.5-3-3c0 0-1 0-2 1-1-1.5-1.5-3.5-1-5.5 0 0-1-.5-2-.5z"/></svg>
     </div>
     <div class="companion-info">
-      <div class="c-name">Grondin</div>
-      <div class="c-sub">Panthère • Compagnon</div>
+      <div class="c-name" id="compBtnName">Compagnon</div>
+      <div class="c-sub" id="compBtnSub">Compagnon</div>
     </div>
     <div class="arrow">›</div>
   </div>
@@ -3945,22 +3954,21 @@
   </div>
   <div class="overlay-body" style="padding-top:0;">
 
-    <div class="comp-hero" id="compHero" onclick="document.getElementById('compPhotoInput').click()">
+    <div class="comp-hero" id="compHero">
       <div class="comp-photo-placeholder" id="compPhotoPlaceholder">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/></svg>
-        Ajouter une photo
       </div>
       <div class="comp-name-plate">
-        <h2>Grondin</h2>
-        <div class="comp-subline">Panthère • Compagnon</div>
+        <h2 id="compName">Compagnon</h2>
+        <div class="comp-subline" id="compSub">Compagnon</div>
       </div>
     </div>
-    <input type="file" id="compPhotoInput" accept="image/*" style="display:none;" onchange="setCompanionPhoto(event)">
+    <div class="comp-ident" id="compIdent"></div>
 
     <div class="comp-top-row">
-      <div class="comp-top-card"><div class="ctc-value">13</div><div class="ctc-label">CA</div></div>
-      <div class="comp-top-card"><div class="ctc-value">15m</div><div class="ctc-label">Vitesse</div></div>
-      <div class="comp-top-card"><div class="ctc-value">15</div><div class="ctc-label">Perception</div></div>
+      <div class="comp-top-card"><div class="ctc-value" id="compCA">—</div><div class="ctc-label">CA</div></div>
+      <div class="comp-top-card"><div class="ctc-value" id="compSpeed">—</div><div class="ctc-label">Vitesse</div></div>
+      <div class="comp-top-card"><div class="ctc-value" id="compPerc">—</div><div class="ctc-label">Perception passive</div></div>
     </div>
 
     <div class="comp-hp-card">
@@ -3984,57 +3992,28 @@
       </div>
     </div>
 
-    <div class="comp-stat-grid">
-      <div class="comp-stat-block"><div class="cs-name">For</div><div class="cs-mod">+2</div><div class="cs-score">14</div></div>
-      <div class="comp-stat-block"><div class="cs-name">Dex</div><div class="cs-mod">+3</div><div class="cs-score">17</div></div>
-      <div class="comp-stat-block"><div class="cs-name">Con</div><div class="cs-mod">+2</div><div class="cs-score">14</div></div>
-      <div class="comp-stat-block"><div class="cs-name">Int</div><div class="cs-mod">-4</div><div class="cs-score">3</div></div>
-      <div class="comp-stat-block"><div class="cs-name">Sag</div><div class="cs-mod">+1</div><div class="cs-score">12</div></div>
-      <div class="comp-stat-block"><div class="cs-name">Cha</div><div class="cs-mod">-1</div><div class="cs-score">8</div></div>
-    </div>
+    <div class="comp-stat-grid" id="compStats"></div>
 
     <div class="comp-hitdice-row">
-      <span>Dés de vie (3D8)</span>
+      <span id="compHdLabel">Dés de vie</span>
       <div class="comp-hd-boxes" id="compHitDice"></div>
     </div>
 
-    <div class="section-title" style="margin-top:0;">Attaques</div>
-    <div class="attack-card">
-      <div class="a-name">Morsure</div>
-      <div class="a-line"><strong>Pour toucher :</strong> 1D20+4</div>
-      <div class="a-line"><strong>Dégâts :</strong> 1D6+2 perforant</div>
-    </div>
-    <div class="attack-card">
-      <div class="a-name">Griffes</div>
-      <div class="a-line"><strong>Pour toucher :</strong> 1D20+4</div>
-      <div class="a-line"><strong>Dégâts :</strong> 1D4+2 tranchant</div>
-    </div>
-
-    <div class="section-title">Capacités</div>
-    <div class="comp-cap-card">
-      <div class="cc-name">Vision nocturne</div>
-      <div class="cc-desc">Voit dans le noir jusqu'à 18 mètres.</div>
-    </div>
-    <div class="comp-cap-card">
-      <div class="cc-name">Odorat développé</div>
-      <div class="cc-desc">Avantage aux jets de Sagesse (Perception) reposant sur l'odorat.</div>
-    </div>
-    <div class="comp-cap-card">
-      <div class="cc-name">Attaque en embuscade</div>
-      <div class="cc-desc">Si la panthère surprend une créature et la touche lors de son premier tour, l'attaque inflige 2D6 dégâts supplémentaires.</div>
-    </div>
+    <div id="compProfs"></div>
+    <div id="compAttacksWrap"><div class="section-title" style="margin-top:0;">Attaques</div><div id="compAttacks"></div></div>
+    <div id="compCapsWrap"><div class="section-title">Capacités</div><div id="compCaps"></div></div>
 
     <div class="toggle-row" style="margin-top:14px;">
       <div>
         <div class="tr-label">Afficher en combat</div>
-        <div class="tr-sub">Ajoute Grondin au bloc "En combat" de l'onglet Combat</div>
+        <div class="tr-sub" id="compCombatSub">Ajoute ton compagnon au bloc "En combat" de l'onglet Combat</div>
       </div>
-      <div class="switch on" id="companionCombatSwitch" onclick="toggleCompanionCombat()"></div>
+      <div class="switch" id="companionCombatSwitch" onclick="toggleCompanionCombat()"></div>
     </div>
 
     <div class="hunt-chip" style="margin-top:18px;" onclick="document.getElementById('compHuntPage').classList.add('open')">
       <div class="hunt-bg-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.5 5.5L20 8.5l-4 4 1 5.5L12 15.5 7 18l1-5.5-4-4 5.5-1z"/></svg></div>
-      <div class="hunt-text">Tableau de chasse de Grondin : <span class="hunt-num">3</span></div>
+      <div class="hunt-text">Tableau de chasse de <span id="compHuntName">ton compagnon</span> : <span class="hunt-num" id="compHuntNum">0</span></div>
     </div>
 
   </div>
@@ -4045,7 +4024,7 @@
   <div class="hunt-header">
     <div class="hunt-header-top">
       <button class="back-btn" onclick="document.getElementById('compHuntPage').classList.remove('open')">‹ Retour</button>
-      <h2>Tableau de chasse — Grondin</h2>
+      <h2 id="compHuntTitle">Tableau de chasse</h2>
     </div>
     <div class="hunt-total">
       <div class="num" id="compHuntTotal">0</div>
@@ -4383,7 +4362,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 05/10 (15)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 05/10 (16)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -7044,8 +7023,70 @@
   }
 
   /* ===================== COMPANION ===================== */
-  let compCurrentHp = 19, compMaxHp = 19;
-  let compHitDiceTotal = 3, compHitDiceUsed = 0;
+  let compCurrentHp = 0, compMaxHp = 1;
+  let companionDef = null, compHpKnown = false;
+  const COMP_SKILLS = { 'Acrobaties': 'dex', 'Arcanes': 'int', 'Athlétisme': 'for', 'Discrétion': 'dex', 'Dressage': 'sag', 'Escamotage': 'dex', 'Histoire': 'int', 'Intimidation': 'cha', 'Intuition': 'sag',
+    'Investigation': 'int', 'Médecine': 'sag', 'Nature': 'int', 'Perception': 'sag', 'Persuasion': 'cha', 'Religion': 'int', 'Représentation': 'cha', 'Survie': 'sag', 'Tromperie': 'cha' };
+  const COMP_AB = [['for', 'For'], ['dex', 'Dex'], ['con', 'Con'], ['int', 'Int'], ['sag', 'Sag'], ['cha', 'Cha']];
+  const COMP_SAVE_KEY = { 'Force': 'for', 'Dextérité': 'dex', 'Constitution': 'con', 'Intelligence': 'int', 'Sagesse': 'sag', 'Charisme': 'cha' };
+  // Valeurs calculées du compagnon (identique au calcul de la console MJ)
+  function companionDerive(def, ownerLevel) {
+    const lvl = Math.max(1, parseInt(ownerLevel, 10) || 1);
+    const prof = 2 + Math.floor((lvl - 1) / 4);
+    const linked = !!def.linked;
+    const ab = def.abilities || {};
+    const mod = k => Math.floor(((parseInt(ab[k], 10) || 10) - 10) / 2);
+    const pb = linked ? prof : (parseInt(def.prof, 10) || 0);
+    const hdCount = linked ? Math.max(1, (parseInt(def.hdCount, 10) || 1) + (lvl - (parseInt(def.baseLevel, 10) || lvl))) : Math.max(1, parseInt(def.hdCount, 10) || 1);
+    const pvMax = linked ? 4 * lvl : Math.max(1, parseInt(def.pvMax, 10) || 1);
+    const ca = (parseInt(def.ca, 10) || 10) + (linked ? prof : 0);
+    const skills = (def.skills || []);
+    const perc = 10 + mod('sag') + (skills.includes('Perception') ? pb : 0);
+    const sign = v => (v >= 0 ? '+' : '') + v;
+    const attacks = (def.attacks || []).filter(a => a && a.nom).map(a => {
+      const hit = linked ? mod('for') + prof : (parseInt(a.toHit, 10) || 0);
+      const dmgB = linked ? mod('for') + prof : (parseInt(a.dmgBonus, 10) || 0);
+      return { nom: a.nom, hit: sign(hit), dmg: `${String(a.dice || '').toUpperCase()}${dmgB ? sign(dmgB) : ''}${a.type ? ' ' + a.type : ''}` };
+    });
+    const saves = (def.saves || []).map(sv => `${sv} ${sign(mod(COMP_SAVE_KEY[sv] || 'for') + pb)}`);
+    const skillLines = skills.map(sk => `${sk} ${sign(mod(COMP_SKILLS[sk] || 'sag') + pb)}`);
+    return { lvl, prof, pb, hdCount, pvMax, ca, perc, attacks, saves, skillLines, mod, sign };
+  }
+  let companionOwnerLevel = 1;
+  function renderCompanionSheet() {
+    const btn = document.getElementById('companionBtn');
+    if (!companionDef) { if (btn) btn.style.display = 'none'; window.AppData.companionInCombat = false; return; }
+    const def = companionDef, c = companionDerive(def, companionOwnerLevel);
+    window.AppData.companionName = def.nom || 'Compagnon';
+    compMaxHp = c.pvMax; compHitDiceTotal = c.hdCount;
+    if (compCurrentHp > compMaxHp) compCurrentHp = compMaxHp;
+    if (compHitDiceUsed > compHitDiceTotal) compHitDiceUsed = compHitDiceTotal;
+    const sub = [def.espece, 'Compagnon'].filter(Boolean).join(' • ');
+    const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('compBtnName', def.nom || 'Compagnon'); set('compBtnSub', sub); set('compName', def.nom || 'Compagnon'); set('compSub', sub);
+    set('compCA', c.ca); set('compSpeed', def.vitesse || '—'); set('compPerc', c.perc);
+    set('compHdLabel', `Dés de vie (${c.hdCount}${String(def.hdDie || 'D8').toUpperCase()})`);
+    set('compHuntName', def.nom || 'ton compagnon'); set('compHuntTitle', `Tableau de chasse — ${def.nom || 'Compagnon'}`);
+    set('compCombatSub', `Ajoute ${def.nom || 'ton compagnon'} au bloc "En combat" de l'onglet Combat`);
+    document.getElementById('compIdent').innerHTML = [def.sexe, def.taille, def.poids, def.sens].filter(Boolean).map(x => `<span>${esc(x)}</span>`).join('');
+    const hero = document.getElementById('compHero');
+    let img = hero.querySelector('img');
+    if (def.photo) { if (!img) { img = document.createElement('img'); hero.insertBefore(img, hero.firstChild); } img.src = def.photo; document.getElementById('compPhotoPlaceholder').style.display = 'none'; }
+    else { if (img) img.remove(); document.getElementById('compPhotoPlaceholder').style.display = ''; }
+    document.getElementById('compStats').innerHTML = COMP_AB.map(([k, l]) => `<div class="comp-stat-block"><div class="cs-name">${l}</div><div class="cs-mod">${c.sign(c.mod(k))}</div><div class="cs-score">${parseInt((def.abilities || {})[k], 10) || 10}</div></div>`).join('');
+    document.getElementById('compProfs').innerHTML = (c.saves.length ? `<div class="comp-prof-line"><strong>Jets de sauvegarde :</strong> ${esc(c.saves.join(', '))}</div>` : '')
+      + (c.skillLines.length ? `<div class="comp-prof-line"><strong>Compétences :</strong> ${esc(c.skillLines.join(', '))}</div>` : '');
+    document.getElementById('compAttacksWrap').style.display = c.attacks.length ? '' : 'none';
+    document.getElementById('compAttacks').innerHTML = c.attacks.map(a => `<div class="attack-card"><div class="a-name">${esc(a.nom)}</div><div class="a-line"><strong>Pour toucher :</strong> 1D20${a.hit}</div><div class="a-line"><strong>Dégâts :</strong> ${esc(a.dmg)}</div></div>`).join('');
+    const caps = (def.capacites || []).filter(x => x && (x.nom || x.desc));
+    document.getElementById('compCapsWrap').style.display = caps.length ? '' : 'none';
+    document.getElementById('compCaps').innerHTML = caps.map(x => `<div class="comp-cap-card"><div class="cc-name">${esc(x.nom)}</div><div class="cc-desc">${esc(x.desc)}</div></div>`).join('');
+    document.getElementById('companionCombatSwitch').classList.toggle('on', !!window.AppData.companionInCombat);
+    if (btn) btn.style.display = 'flex';
+    renderCompanionHp(); renderCompanionHitDice();
+  }
+  let compHitDiceTotal = 1, compHitDiceUsed = 0;
 
   function openCompanion() {
     renderCompanionHp();
@@ -7064,11 +7105,14 @@
     const sw = document.getElementById('companionCombatSwitch');
     const isOn = sw.classList.toggle('on');
     window.AppData.companionInCombat = isOn;
-    showToast(isOn ? 'Grondin ajouté au module combat' : 'Grondin retiré du module combat');
+    const nm = window.AppData.companionName || 'Compagnon';
+    showToast(isOn ? `${nm} ajouté au module combat` : `${nm} retiré du module combat`);
+    if (typeof buildCombatItems === 'function') { combatItems = buildCombatItems(); renderCombatList(); }
+    schedulePlayerStateSave();
   }
 
-  window.AppData.companionInCombat = true;
-  window.AppData.companionName = 'Grondin';
+  window.AppData.companionInCombat = false;
+  window.AppData.companionName = 'Compagnon';
 
   function setCompanionPhoto(e) {
     const file = e.target.files[0];
@@ -7093,8 +7137,11 @@
   }
 
   function adjustCompHp(delta) {
+    const before = compCurrentHp;
     compCurrentHp = Math.max(0, Math.min(compMaxHp, compCurrentHp + delta));
+    if (before === 0 && compCurrentHp > 0) document.querySelectorAll('.comp-death-dot').forEach(d => d.classList.remove('filled'));
     renderCompanionHp();
+    schedulePlayerStateSave();
   }
 
   function renderCompanionHitDice() {
@@ -7106,6 +7153,7 @@
       box.addEventListener('click', () => {
         box.classList.toggle('used');
         compHitDiceUsed = container.querySelectorAll('.used').length;
+        schedulePlayerStateSave();
       });
       container.appendChild(box);
     }
@@ -7116,19 +7164,36 @@
     for (let i = 0; i < 3; i++) {
       const dot = document.createElement('div');
       dot.className = `comp-death-dot ${cls}`;
-      dot.addEventListener('click', () => dot.classList.toggle('filled'));
+      dot.addEventListener('click', () => { dot.classList.toggle('filled'); checkCompanionDeathSaves(); schedulePlayerStateSave(); });
       container.appendChild(dot);
     }
   }
   buildCompDeathDots('compSuccessDots', 'success');
   buildCompDeathDots('compFailDots', 'fail');
 
+  // Jets contre la mort du compagnon : mêmes règles que le personnage
+  function checkCompanionDeathSaves() {
+    const ok = document.querySelectorAll('#compSuccessDots .filled').length, ko = document.querySelectorAll('#compFailDots .filled').length;
+    const nm = window.AppData.companionName || 'Ton compagnon';
+    if (ok >= 3) {
+      document.querySelectorAll('.comp-death-dot').forEach(d => d.classList.remove('filled'));
+      compCurrentHp = Math.max(1, compCurrentHp); renderCompanionHp();
+      showToast(`${nm} est stabilisé — il remonte à 1 PV`);
+    } else if (ko >= 3) {
+      const ov = document.createElement('div');
+      ov.className = 'comp-dead-overlay';
+      ov.innerHTML = `<div class="comp-dead-box"><h3>${nm} est mort</h3><p>Trois échecs aux jets contre la mort. Préviens ton MJ.</p><button>J'ai compris</button></div>`;
+      ov.querySelector('button').onclick = () => { ov.remove(); document.querySelectorAll('.comp-death-dot').forEach(d => d.classList.remove('filled')); schedulePlayerStateSave(); };
+      document.body.appendChild(ov);
+    }
+  }
   function companionLongRest() {
     compCurrentHp = compMaxHp;
     compHitDiceUsed = 0;
     renderCompanionHp();
     renderCompanionHitDice();
     document.querySelectorAll('.comp-death-dot').forEach(d => d.classList.remove('filled'));
+    schedulePlayerStateSave();
   }
 
   function resetItemUsesOnRest(rechargeTypes) {
@@ -7226,10 +7291,11 @@
     ((d && d.pendingHeal) || []).forEach(e => {
       if (!e || !e.pid || consumedPending.has(e.pid)) return;
       consumedPending.add(e.pid);
-      currentHp = Math.min(maxHp, currentHp + (parseInt(e.amount) || 0));
+      if (e.target === 'companion') compCurrentHp = Math.min(compMaxHp, compCurrentHp + (parseInt(e.amount) || 0));
+      else currentHp = Math.min(maxHp, currentHp + (parseInt(e.amount) || 0));
       changed = true;
     });
-    if (changed) { updateHpDisplay(); schedulePlayerStateSave(); }
+    if (changed) { updateHpDisplay(); if (companionDef) renderCompanionHp(); schedulePlayerStateSave(); }
   }
   function absorbPendingCoins(d) {
     absorbPendingHeal(d);
@@ -7280,6 +7346,7 @@
     };
     fill(d.huntBoard, 0, 'huntTotal', 'huntList');
     fill(d.companionHuntBoard, 1, 'compHuntTotal', 'compHuntList');
+    { const el = document.getElementById('compHuntNum'); if (el) el.textContent = (d.companionHuntBoard || []).length; }
   }
   function applyMjOwned(d) {
     if (!d) return;
@@ -7331,7 +7398,7 @@
       concentrationSpellId = saved.concentrationSpellId || null;
       if (saved.deathSaves) { setFilled('#successDots', saved.deathSaves.success || 0); setFilled('#failDots', saved.deathSaves.fail || 0); }
       if (saved.companion) {
-        if (saved.companion.hp != null) compCurrentHp = saved.companion.hp;
+        if (saved.companion.hp != null) { compCurrentHp = saved.companion.hp; compHpKnown = true; }
         compHitDiceUsed = saved.companion.hitDiceUsed || 0;
         if (saved.companion.deathSaves) { setFilled('#compSuccessDots', saved.companion.deathSaves.success || 0); setFilled('#compFailDots', saved.companion.deathSaves.fail || 0); }
       }
@@ -7344,8 +7411,7 @@
       if (typeof renderCapacities === 'function') renderCapacities();
       updateHpDisplay();
       updateConcBadge();
-      const compBtn = document.getElementById('companionBtn');
-      if (compBtn && window.AppData.companionInCombat) compBtn.style.display = '';
+      renderCompanionSheet();
     } catch (e) {
       console.error('Erreur application état joueur', e);
     }
@@ -7712,15 +7778,16 @@
       // depuis sa console, et cette valeur doit alors persister d'une connexion à l'autre.)
       if (typeof updateExhaustionWarnings === 'function') updateExhaustionWarnings();
       renderHuntBoards(p);
-      window.AppData.companionInCombat = false;
+      companionDef = p.companionDef || null;
+      companionOwnerLevel = p.level || 1;
+      if (companionDef && !compHpKnown) { compCurrentHp = companionDerive(companionDef, companionOwnerLevel).pvMax; compHpKnown = true; }
+      renderCompanionSheet();
       concentrationSpellId = null;
       if (typeof updateConcBadge === 'function') updateConcBadge();
       messages = [];
       hasUnreadMjMessage = false;
       setMsgBadge(false);
       startMessagePolling();
-      const compBtn = document.getElementById('companionBtn');
-      if (compBtn) compBtn.style.display = 'none';
 
     } catch (e) {
       console.error('Erreur application identité joueur', e);
