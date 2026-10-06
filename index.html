@@ -1809,11 +1809,30 @@
   .capr-actions { display: flex; gap: 8px; margin-top: 12px; }
   .capr-send { flex: 1; padding: 9px; border-radius: 9px; border: none; background: var(--gold); color: #14100a; font-weight: 600; cursor: pointer; }
   .capr-skip { padding: 9px 14px; border-radius: 9px; border: 1px solid var(--card-border); background: transparent; color: var(--ink-dim); cursor: pointer; }
+  .capr-vis { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink); margin-bottom: 10px; }
+  .cb-vis { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; color: var(--ink-dim); white-space: nowrap; }
+  .skill-wizard-row.wiz-off { opacity: .4; }
+  .wrc-head { display: flex; gap: 18px; align-items: center; margin-bottom: 14px; }
+  .wrc-photo { width: 120px; aspect-ratio: 375 / 280; border-radius: 10px; border: 1px solid var(--card-border); background: var(--card) center / cover no-repeat; flex-shrink: 0; }
+  .wrc-head h2 { margin: 0 0 4px; font-family: var(--font-serif); color: var(--ink); }
+  .wrc-sub { font-size: 13px; color: var(--ink-dim); }
+  .wrc-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-bottom: 10px; }
+  .wrc-stats > div, .wrc-ab { border: 1px solid var(--card-border); border-radius: 10px; padding: 8px 12px; background: var(--card); }
+  .wrc-stats span, .wrc-ab span { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); }
+  .wrc-stats strong { font-size: 16px; }
+  .wrc-abs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .wrc-ab { text-align: center; } .wrc-ab strong { font-size: 20px; display: block; } .wrc-ab em { font-style: normal; color: var(--gold); font-size: 12.5px; }
+  .wrc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .wrc-blk { border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; background: var(--card); }
+  .wrc-t { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--gold); margin-bottom: 4px; }
+  .wrc-b { font-size: 13px; color: var(--ink); line-height: 1.55; }
+  @media (max-width: 700px) { .wrc-grid { grid-template-columns: 1fr; } .wrc-abs { grid-template-columns: repeat(3, 1fr); } }
   .wst-pill { border: 1px solid var(--card-border); background: transparent; color: var(--ink-faint); border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
   .wst-pill.current { background: var(--gold); border-color: var(--gold); color: #14100a; font-weight: 600; }
   .wst-pill.done { border-color: rgba(201,162,75,.5); color: var(--gold); }
   #wizardStepsTrack { display: flex; gap: 6px; flex-wrap: wrap; }
   .wiz-p1-top { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+  .wiz-p1-top .photo-upload-block { flex: 0 0 300px; max-width: 100%; }
   .wiz-grants { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
   .wiz-tag { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(201,162,75,.45); background: var(--gold-soft); color: var(--gold); }
   .wab-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
@@ -2138,7 +2157,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 06/10 (44)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 06/10 (45)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4039,10 +4058,12 @@
         <div id="wSpellsPage"></div>
         <div class="section-title">Emplacements de sorts</div>
         <div class="spell-block" id="wSpellBlock"></div>
-        <div class="section-title">Calculs automatiques</div>
-        <div class="auto-summary-grid" id="wAutoRecap"></div>
-        <div class="section-title">Récapitulatif</div>
-        <div class="wizard-final-summary" id="wFinalSummary"></div>
+      </div>
+
+      <!-- PAGE 6 : RÉCAPITULATIF -->
+      <div class="wizard-step" data-step="6">
+        <div id="wRecap"></div>
+        <div style="display:none"><div id="wAutoRecap"></div><div id="wFinalSummary"></div></div>
       </div>
 
     </div>
@@ -6450,7 +6471,7 @@
   };
 
   let wizardStep = 1;
-  const wizardTotalSteps = 5;
+  const wizardTotalSteps = 6;
   let capaciteBlockCount = 0;
 
   function fillSelect(id, options) {
@@ -6498,7 +6519,7 @@
     wizCapReset(editId ? players.find(x => x.id === editId) : null);
     wizResetNewState(editId ? players.find(x => x.id === editId) : null);
     ['wRace', 'wHistorique'].forEach(id => { const el = document.getElementById(id); if (el && !el.dataset.wiz2) { el.dataset.wiz2 = '1'; el.addEventListener('change', () => { wizAbSync(); wizAbRender(); wizRaceGrantsRender(); }); } });
-    { const b = document.getElementById('wizardBody'); if (b && !b.dataset.wiz2) { b.dataset.wiz2 = '1'; b.addEventListener('change', e => { if (wizardStep === 3 && e.target.matches('input[type=checkbox]')) wizProfsBanners(); }); } }
+    { const b = document.getElementById('wizardBody'); if (b && !b.dataset.wiz2) { b.dataset.wiz2 = '1'; b.addEventListener('change', e => { if (wizardStep === 3 && e.target.matches('input[type=checkbox]')) setTimeout(wizProfsBanners, 0); }); } }
     capaciteBlockCount = 0;
 
     renderSkillsWizard();
@@ -6586,7 +6607,7 @@
         if (c.uses) lastBlock.dataset.uses = c.uses;
         if (c.baseId) lastBlock.dataset.baseId = c.baseId;
         if (c.custom) lastBlock.dataset.custom = '1';
-        if (c.hiddenForPlayer) lastBlock.dataset.hidden = '1';
+        if (c.hiddenForPlayer) { lastBlock.dataset.hidden = '1'; const hb = lastBlock.querySelector('.cb-hide'); if (hb) hb.checked = true; }
         capMarkBlock(lastBlock);
       });
     }
@@ -6817,6 +6838,7 @@
           <option value="Autre">Autre</option>
         </select>
         <input type="text" class="cb-title" placeholder="Titre de la capacité (tape quelques lettres pour chercher dans la base)">
+        <label class="cb-vis" title="Ne pas afficher dans l'espace Capacités du joueur"><input type="checkbox" class="cb-hide"> Masquée</label>
         <div class="cb-remove" onclick="document.getElementById('${id}').remove()">✕ retirer</div>
       </div>
       <textarea class="cb-text" placeholder="Texte de la capacité..."></textarea>
@@ -6982,7 +7004,8 @@
     if (wizardStep === 2) { renderSaveThrows(); wizCap.open = null; wizCapRefresh(); }
     if (wizardStep === 3) { applyAutoLanguages(true); wizProfsApply(); }
     if (wizardStep === 4) wizHpRender();
-    if (wizardStep === 5) { wizSpellsRender(); renderSpellBlock(); renderAutoRecap(); renderFinalSummary(); }
+    if (wizardStep === 5) { wizSpellsRender(); renderSpellBlock(); }
+    if (wizardStep === 6) { renderAutoRecap(); renderFinalSummary(); wizRecapRender(); }
     document.getElementById('wizardBody').scrollTop = 0;
   }
 
@@ -7023,13 +7046,13 @@
       if (miss.length && !confirm(`Il reste des maîtrises à choisir :\n• ${miss.map(q => q.label).join('\n• ')}\n\nContinuer quand même ?`)) return false;
     }
     if (step === 4) {
-      if (!document.getElementById('wPV').value) errors.push('Points de vie obligatoires.');
+      if (!document.getElementById('wPV').value) errors.push('Indique les PV obtenus à chaque niveau.');
       const p = wizPseudoPlayer();
       if ([[p.classe1, p.niveau1], [p.classe2, p.niveau2]].filter(([c, n]) => c && n).some(([c, n]) => wizHp.order.filter(x => x === c).length !== n)) errors.push("L'ordre des niveaux ne correspond pas aux niveaux des classes.");
     }
     if (step === 5 && !errors.length) {
       const miss = wizSpellsMissing();
-      if (miss && !confirm(`${miss} sort${miss > 1 ? 's' : ''} reste${miss > 1 ? 'nt' : ''} à choisir. Créer le personnage quand même ?`)) return false;
+      if (miss && !confirm(`${miss} sort${miss > 1 ? 's' : ''} reste${miss > 1 ? 'nt' : ''} à choisir. Continuer quand même ?`)) return false;
     }
     if (errors.length) {
       document.getElementById('wizardError').textContent = errors[0];
@@ -7122,7 +7145,8 @@
       if (div.dataset.uses) c.uses = parseInt(div.dataset.uses);
       if (div.dataset.baseId) c.baseId = div.dataset.baseId;
       if (div.dataset.custom) c.custom = true;
-      if (div.dataset.hidden) c.hiddenForPlayer = true;
+      const hb = div.querySelector('.cb-hide');
+      if (hb ? hb.checked : div.dataset.hidden) c.hiddenForPlayer = true;
       return c;
     });
     // Capacités proposées par la base (vérifiées à l'étape 6)
@@ -46142,6 +46166,7 @@
     if (cap.recharge !== 'aucun') block.dataset.recharge = cap.recharge; else delete block.dataset.recharge;
     if (cap.uses) block.dataset.uses = cap.uses; else delete block.dataset.uses;
     if (cap.hiddenForPlayer) block.dataset.hidden = '1'; else delete block.dataset.hidden;
+    const hb = block.querySelector('.cb-hide'); if (hb) hb.checked = !!cap.hiddenForPlayer;
     capMarkBlock(block);
   }
   function capMarkBlock(block) {
@@ -46487,6 +46512,8 @@
     } else {
       const inst = capInstanceFromBase(r, ctx);
       if (item.kind === 'cap') {
+        const vis = item.visible != null ? item.visible : r.visible_joueur !== false;
+        html += `<label class="capr-vis"><input type="checkbox" id="caprVisible" ${vis ? 'checked' : ''}> Visible dans l'espace Capacités du joueur <span class="capr-hint">(décoche pour une capacité qui n'est qu'une maîtrise)</span></label>`;
         html += `<div class="capr-label">Texte envoyé au joueur <span class="capr-hint">(modifiable pour ce personnage uniquement)</span></div>
           <textarea class="capr-text" id="caprText" data-orig="${histEsc(inst.text)}">${histEsc(inst.text)}</textarea>
           <div class="capr-info">${inst.uses ? `${inst.uses} utilisation${inst.uses > 1 ? 's' : ''} · ${histEsc(r.rechargement.toLowerCase())}` : (r.rechargement && r.rechargement !== 'Aucun' ? histEsc(r.rechargement) : 'Utilisation libre')}${r.visible_joueur === false ? ' · <em>masquée côté joueur (maîtrise seule)</em>' : ''}</div>`;
@@ -46583,6 +46610,8 @@
         if (simple) { inst.choiceLabel = picks[0]; inst.title = `${r.nom} : ${picks[0]}`; }
         if (r.choix === 'Sous-classe' && picks[0]) inst.title = `${r.nom} : ${picks[0]}`, inst.choiceLabel = picks[0];
         if (textEl && textEl.value.trim() !== textEl.dataset.orig) { inst.text = textEl.value.trim(); inst.custom = true; }
+        const visEl = panel.querySelector('#caprVisible');
+        if (visEl) { if (visEl.checked) delete inst.hiddenForPlayer; else inst.hiddenForPlayer = true; }
         d.capacites.push(inst);
         // Maîtrises
         capParseMaitrises(r.maitrises, ctx(), r).forEach((m, mi) => (m.count ? (mpicks[mi] || []) : capFixedValues(m)).forEach(v => capApplyMaitrise(d, m.type, v)));
@@ -46767,6 +46796,8 @@
       mpicks[+b.dataset.mi] = vals;
     }
     const textEl = panel.querySelector('#caprText');
+    const visEl = panel.querySelector('#caprVisible');
+    if (visEl) it.visible = visEl.checked;
     const cls = capClassOf(r);
     const ctx = capCtxFromPlayer(wizPseudoPlayer());
     it.picks = picks; it.mpicks = mpicks;
@@ -46800,6 +46831,7 @@
       const inst = capInstanceFromBase(r, ctx);
       if (it.choiceLabel) { inst.choiceLabel = it.choiceLabel; inst.title = `${r.nom} : ${it.choiceLabel}`; }
       if (it.custom && it.text) { inst.text = it.text; inst.custom = true; }
+      if (it.visible != null) { if (it.visible) delete inst.hiddenForPlayer; else inst.hiddenForPlayer = true; }
       out.push(inst);
     });
     wizCap.extraCaps.forEach(x => { const o = capBase.find(r => r.id === x.baseId); if (o) out.push(capInstanceFromBase(o, ctx)); });
@@ -46964,7 +46996,7 @@
         const chosen = ((p.capChoix || {})[m[1].trim()] || [])[0];
         const hit = chosen && m[2].split('|').map(x => x.split('=')).find(([k]) => capNorm(k) === capNorm(chosen));
         if (hit) out.push({ kind: 'fixed', names: hit[1].split(',').map(x => x.trim()).filter(Boolean) });
-        else out.push({ kind: 'note', text: `Sorts selon ${m[1].trim()} : fais d'abord ce choix.` });
+        else out.push({ kind: 'note', text: `Sorts selon ${m[1].trim()} : valide d'abord ce choix à la page Classes.` });
         return;
       }
       m = part.match(/^Sort( mineur)?\s*\((.+?)\s*au choix\)\s*:\s*(.+)$/i);
@@ -47074,7 +47106,7 @@
   /* ===================== ASSISTANT DE CRÉATION — 5 PAGES ===================== */
   const WIZ_AB = [['for', 'Force', 'wFor'], ['dex', 'Dextérité', 'wDex'], ['con', 'Constitution', 'wCon'], ['int', 'Intelligence', 'wInt'], ['sag', 'Sagesse', 'wSag'], ['cha', 'Charisme', 'wCha']];
   const WIZ_ARRAY = [15, 14, 13, 12, 10, 8];
-  const WIZ_STEP_LABELS = ['Identité', 'Classes', 'Maîtrises', 'Points de vie', 'Sorts'];
+  const WIZ_STEP_LABELS = ['Identité', 'Classes', 'Maîtrises', 'Points de vie', 'Sorts', 'Récapitulatif'];
   let wizAb = { mode: 'standard', base: {}, choice: [], asi: {} };
   let wizHp = { order: [], rolls: {} };
   let wizSpells = {};
@@ -47174,12 +47206,27 @@
     wizAb.mode = mode;
     wizAbSync(); wizAbRender();
   }
+  function wizDerived(onlyRace) {
+    const p = wizPseudoPlayer();
+    const base = (() => { const r = getWizardRacesData().find(x => x.name === p.race); return r ? r.speed : 9; })();
+    let caps = wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').map(i => ({ baseId: i.baseId }));
+    if (onlyRace) {
+      const parent = typeof wizRaceLore === 'function' ? (wizRaceLore(p.race).parent || {}).name : '';
+      caps = [...capRowsFor(p.race), ...(parent ? capRowsFor(parent) : [])].map(r => ({ baseId: r.id }));
+    }
+    const fx = capComputeEffects(caps, p);
+    const speed = (fx.speedSet || base) + fx.speedAdd;
+    const ab = p.abilities, mod = k => wizMod(ab[k]);
+    let ca = 10 + mod('dex');
+    fx.unarmored.forEach(u => { const e = String(u.formula).replace(/MOD_(FOR|DEX|CON|INT|SAG|CHA)/g, (m, k) => `(${mod(k.toLowerCase())})`); if (/^[\d\s+\-()]+$/.test(e)) { try { ca = Math.max(ca, Function('return ' + e)()); } catch (err) {} } });
+    return { speed, ca, fx };
+  }
   // Ce que la race et l'historique accordent d'office (aperçu page 1)
   function wizRaceGrantsRender() {
     const box = document.getElementById('wRaceGrants');
     if (!box) return;
     const g = wizGrants(true).filter(x => x.source === 'race' || x.source === 'historique');
-    const speed = (() => { const r = getWizardRacesData().find(x => x.name === document.getElementById('wRace').value); return r ? r.speed : null; })();
+    const speed = document.getElementById('wRace').value ? wizDerived(true).speed : null;
     const tags = g.map(x => x.value);
     box.innerHTML = tags.length || speed ? `<span class="field-hint">Accordé d'office (coché aux pages suivantes) :</span> ${speed ? `<span class="wiz-tag">Vitesse ${String(speed).replace('.', ',')} m</span>` : ''}${[...new Set(tags)].map(t => `<span class="wiz-tag">${histEsc(t)}</span>`).join('')}` : '';
   }
@@ -47245,7 +47292,8 @@
     if (!t) return [];
     if (/^armes? courantes?$/.test(t)) return weaponCategories.filter(c => c.key.startsWith('courantes')).flatMap(c => c.items);
     if (/^armes? de guerre$/.test(t)) return weaponCategories.filter(c => c.key.startsWith('guerre')).flatMap(c => c.items);
-    return list.filter(x => { const n = wN(x); return n === t || n.includes(t) || (t.length > 4 && t.includes(n)); });
+    const core = v => v.replace(/^(kit|outils?|materiel|instruments?)\s+(de\s+|d')?/, '').trim();
+    return list.filter(x => { const n = wN(x); return n === t || n.includes(t) || (t.length > 4 && t.includes(n)) || (core(n) && core(n) === core(t)); });
   }
   function wizCandidates(type, among) {
     const base = type === 'competence' || type === 'expertise' ? skillsData.map(s => s.name) : type === 'langue' ? languagesData
@@ -47285,19 +47333,27 @@
     wizCap.extraCaps.forEach(x => { const o = capBase.find(r => r.id === x.baseId); if (o && o.maitrises) capParseMaitrises(o.maitrises, capCtxFromPlayer(p), o).forEach(m => { if (!m.count) add(m.type, capFixedValues(m), o.origine); }); });
     return out;
   }
+  function wizToolKind(cands, n) {
+    const art = cands.filter(c => toolCategories[0].items.includes(c)).length, mus = cands.filter(c => toolCategories[1].items.includes(c)).length;
+    const pl = n > 1 ? 's' : '';
+    if (art && mus) return `outil${pl} d'artisan ou instrument${pl}`;
+    if (mus) return `instrument${pl} de musique`;
+    if (art) return `outil${pl} d'artisan`;
+    return `outil${pl} divers`;
+  }
   // Tout ce qu'il reste à choisir ({type, count, candidates, label})
   function wizRequirements() {
     const p = wizPseudoPlayer(), out = [];
     const h = historiquesDatabase.find(x => x.name === p.historique);
     if (h) {
-      wizParseList(h.outils).picks.forEach(q => out.push({ type: 'outil', count: q.count, candidates: wizCandidates('outil', q.among), label: `${h.name} : ${q.count} outil${q.count > 1 ? 's' : ''} au choix` }));
+      wizParseList(h.outils).picks.forEach(q => { const c = wizCandidates('outil', q.among); out.push({ type: 'outil', count: q.count, candidates: c, label: `${h.name} : ${q.count} ${wizToolKind(c, q.count)}` }); });
     }
     [[p.classe1, 1], [p.classe2, 2]].forEach(([c, rank]) => {
       if (!c) return;
       const cl = classesLoreDatabase.find(x => capNorm(x.name) === capNorm(c)) || {};
       const src = rank === 1 ? cl : (MULTI_PROFS[capNorm(c)] || {});
       wizParseList(src.competences).picks.forEach(q => out.push({ type: 'competence', count: q.count, candidates: wizCandidates('competence', q.among), label: `${c} : ${q.count} compétence${q.count > 1 ? 's' : ''}` }));
-      wizParseList(src.outils).picks.forEach(q => out.push({ type: 'outil', count: q.count, candidates: wizCandidates('outil', q.among), label: `${c} : ${q.count} outil${q.count > 1 ? 's' : ''} ou instrument${q.count > 1 ? 's' : ''}` }));
+      wizParseList(src.outils).picks.forEach(q => { const cd = wizCandidates('outil', q.among); out.push({ type: 'outil', count: q.count, candidates: cd, label: `${c} : ${q.count} ${wizToolKind(cd, q.count)}` }); });
     });
     wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
       const r = capBase.find(x => x.id === it.baseId);
@@ -47326,7 +47382,7 @@
       const tag = el.parentElement && el.parentElement.querySelector('.wiz-src'); if (tag) tag.remove();
       if (el.dataset.wasGranted) { el.checked = false; delete el.dataset.wasGranted; }
     });
-    wizGrants(false).forEach(g => {
+    wizGrants(true).forEach(g => {
       const el = wizCheckboxFor(g.type, g.value);
       if (!el) return;
       if (!el.checked) el.dataset.wasGranted = '1';
@@ -47337,9 +47393,19 @@
     wizProfsBanners();
   }
   function wizProfsBanners() {
+    try { return wizProfsBannersInner(); } catch (e) { console.error('Maîtrises', e); return []; }
+  }
+  function wizProfsBannersInner() {
     const reqs = wizRequirements();
+    const allowed = new Set([...reqs.filter(q => q.type === 'competence').flatMap(q => q.candidates), ...wizGrants(true).filter(g => g.type === 'competence').map(g => g.value)].map(capNorm));
+    skillsData.forEach((sk, i) => {
+      const t = document.getElementById('wSkillT' + i);
+      if (!t || t.hasAttribute('data-grant')) return;
+      const off = !currentEditingPlayerId && !allowed.has(capNorm(sk.name)) && !t.checked;
+      t.disabled = off; const row = t.closest('.skill-wizard-row'); if (row) row.classList.toggle('wiz-off', off);
+    });
     Object.values(WIZ_TYPE_BOX).filter(Boolean).forEach(id => { const b = document.getElementById(id); if (b) b.innerHTML = ''; });
-    const granted = new Set(wizGrants(false).map(g => g.type + '|' + capNorm(g.value)));
+    const granted = new Set(wizGrants(true).map(g => g.type + '|' + capNorm(g.value)));
     const counted = new Set();
     reqs.forEach(q => {
       const box = document.getElementById(WIZ_TYPE_BOX[q.type]);
@@ -47351,13 +47417,13 @@
     });
     // Ce qui est déjà accordé, en rappel vert par section
     const by = {};
-    wizGrants(false).forEach(g => { const id = WIZ_TYPE_BOX[g.type]; if (id) (by[id] = by[id] || new Set()).add(g.source); });
+    wizGrants(true).forEach(g => { const id = WIZ_TYPE_BOX[g.type]; if (id) (by[id] = by[id] || new Set()).add(g.source); });
     Object.entries(by).forEach(([id, srcs]) => { const b = document.getElementById(id); if (b) b.insertAdjacentHTML('afterbegin', `<span class="wiz-req ok">Accordé : ${histEsc([...srcs].join(', '))} ✓</span>`); });
     return reqs;
   }
   function wizProfsMissing() {
     const reqs = wizRequirements();
-    const granted = new Set(wizGrants(false).map(g => g.type + '|' + capNorm(g.value)));
+    const granted = new Set(wizGrants(true).map(g => g.type + '|' + capNorm(g.value)));
     return reqs.filter(q => q.candidates.filter(c => { const el = wizCheckboxFor(q.type, c); return el && el.checked && !granted.has(q.type + '|' + capNorm(c)); }).length < q.count);
   }
 
@@ -47385,18 +47451,19 @@
     const rows = wizHp.order.map((c, i) => {
       counts[c] = (counts[c] || 0) + 1;
       const d = die(c), avg = Math.floor(d / 2) + 1;
-      const v = i === 0 ? d : (wizHp.rolls[i] != null ? wizHp.rolls[i] : avg);
+      const v = i === 0 ? d : (wizHp.rolls[i] != null ? wizHp.rolls[i] : null);
       const b = bon.filter(x => !x.cls || capNorm(x.cls) === capNorm(c)).reduce((s, x) => s + x.v, 0);
-      const lineTot = Math.max(1, v + conMod) + b;
-      sum += lineTot;
+      const lineTot = v == null ? null : Math.max(1, v + conMod) + b;
+      if (lineTot != null) sum += lineTot;
       const sel = i === 0 || classes.length < 2 ? `<span>${histEsc(c)} ${counts[c]}</span>` : `<select onchange="wizHpOrder(${i}, this.value)" aria-label="Classe du niveau ${i + 1}">${classes.map(([cc]) => `<option ${cc === c ? 'selected' : ''}>${histEsc(cc)}</option>`).join('')}</select>`;
-      const pv = i === 0 ? `<strong>${d}</strong> <span class="field-hint">maximum</span>` : `<input type="number" min="1" max="${d}" value="${v}" onchange="wizHpRoll(${i}, this.value)" aria-label="PV du niveau ${i + 1}"> <button type="button" class="wizhp-avg" onclick="wizHpRoll(${i}, ${avg})">Moyenne (${avg})</button>`;
-      return `<div class="wizhp-row"><span class="wizhp-n">${i + 1}</span><span>${sel}</span><span>D${d}</span><span>${pv}</span><span>${wizSign(conMod)}</span><span>${b ? '+' + b : '—'}</span><strong>${lineTot}</strong></div>`;
+      const pv = i === 0 ? `<strong>${d}</strong> <span class="field-hint">maximum</span>` : `<input type="number" min="1" max="${d}" value="${v == null ? '' : v}" placeholder="1 à ${d}" onchange="wizHpRoll(${i}, this.value)" aria-label="PV du niveau ${i + 1}">`;
+      return `<div class="wizhp-row"><span class="wizhp-n">${i + 1}</span><span>${sel}</span><span>D${d}</span><span>${pv}</span><span>${wizSign(conMod)}</span><span>${b ? '+' + b : '—'}</span><strong>${lineTot == null ? '—' : lineTot}</strong></div>`;
     }).join('');
     const okOrder = classes.every(([c, n]) => wizHp.order.filter(x => x === c).length === n);
-    document.getElementById('wPV').value = sum;
+    const missingHp = wizHp.order.some((c, i) => i > 0 && wizHp.rolls[i] == null);
+    document.getElementById('wPV').value = missingHp ? '' : sum;
     box.innerHTML = `
-      <p class="wizard-hint">Niveau 1 : le maximum du dé de vie de la classe 1. Ensuite, les PV obtenus avec le dé de la classe qui prend le niveau (moyenne proposée, ou ton lancer), plus le modificateur de Constitution et les bonus de race ou de classe${bon.length ? ` (${histEsc(bon.map(x => x.nom).join(', '))})` : ''}. Indique dans quel ordre le personnage a pris ses niveaux.</p>
+      <p class="wizard-hint">Niveau 1 : le maximum du dé de vie de la classe 1. Ensuite, les PV obtenus avec le dé de la classe qui prend le niveau, plus le modificateur de Constitution et les bonus de race ou de classe${bon.length ? ` (${histEsc(bon.map(x => x.nom).join(', '))})` : ''}. Indique dans quel ordre le personnage a pris ses niveaux.</p>
       <div class="wizhp-row wizhp-head"><span>Niv.</span><span>Classe</span><span>Dé</span><span>PV du dé</span><span>Mod. Con</span><span>Bonus</span><span>Total</span></div>
       ${rows}
       ${okOrder ? '' : `<div class="wizard-error" style="margin-top:8px">L'ordre doit contenir ${classes.map(([c, n]) => `${n} niveau${n > 1 ? 'x' : ''} de ${c}`).join(' et ')}.</div>`}
@@ -47410,10 +47477,10 @@
     const all = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).filter(s => q.levels.includes(parseInt(s.level, 10) || 0)
       && (!q.classes.length || (s.classes || []).some(c => q.classes.some(k => capNorm(c) === capNorm(k))))
       && (!q.schools.length || q.schools.some(sc => capNorm(s.school || '').startsWith(capNorm(sc).slice(0, 5)))));
-    const taken = new Set(Object.values(wizSpells).flat().filter(Boolean).map(capNorm));
-    const byLvl = {};
+    const taken = new Set([...Object.values(wizSpells).flat().filter(Boolean), ...wizSpellsFixedNames()].map(capNorm));
+    const byLvl = {}, seen = new Set();
     all.filter(s => !taken.has(capNorm(s.name)) || capNorm(s.name) === capNorm(current || '')).sort((a, b) => a.name.localeCompare(b.name, 'fr'))
-      .forEach(s => (byLvl[s.level || 0] = byLvl[s.level || 0] || []).push(s));
+      .forEach(s => { const k = capNorm(s.name); if (seen.has(k)) return; seen.add(k); (byLvl[s.level || 0] = byLvl[s.level || 0] || []).push(s); });
     return `<option value="">— choisir —</option>` + Object.keys(byLvl).sort((a, b) => a - b).map(l => `<optgroup label="${+l ? 'Niveau ' + l : 'Sorts mineurs'}">${byLvl[l].map(s => `<option ${capNorm(s.name) === capNorm(current || '') ? 'selected' : ''}>${histEsc(s.name)}</option>`).join('')}</optgroup>`).join('');
   }
   function wizSpellBlock(key, q, title) {
@@ -47459,6 +47526,14 @@
     box.innerHTML = (html || '<p class="wizard-hint">Aucune classe lanceuse de sorts.</p>')
       + (granted ? `<div class="section-title">Sorts accordés par les capacités</div>${granted}` : '');
   }
+  function wizSpellsFixedNames() {
+    const p = wizPseudoPlayer(), names = [];
+    wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
+      const r = capBase.find(x => x.id === it.baseId);
+      if (r && r.sorts) capSpellReqs(r.sorts, p, r).forEach(q => { if (q.kind === 'fixed') names.push(...q.names); });
+    });
+    return names;
+  }
   // Tous les sorts retenus (imposés + choisis) pour l'enregistrement
   function wizSpellsFinal() {
     const p = wizPseudoPlayer(), names = [];
@@ -47475,6 +47550,44 @@
     return miss;
   }
 
+  function wizRecapRender() {
+    const box = document.getElementById('wRecap');
+    if (!box) return;
+    const p = wizPseudoPlayer(), d = wizDerived(false);
+    const v = id => (document.getElementById(id) || {}).value || '—';
+    const checked = (type, list) => list.filter(x => { const el = wizCheckboxFor(type, x); return el && el.checked; });
+    const skills = skillsData.map((s, i) => ({ n: s.name, t: (document.getElementById('wSkillT' + i) || {}).checked, e: (document.getElementById('wSkillE' + i) || {}).checked })).filter(x => x.t).map(x => x.n + (x.e ? ' (expert)' : ''));
+    const caps = [...wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').map(i => { const r = capBase.find(x => x.id === i.baseId) || {}; const vis = i.visible != null ? i.visible : r.visible_joueur !== false; return `${histEsc(i.label)}${i.choiceLabel ? ' : ' + histEsc(i.choiceLabel) : ''}${vis ? '' : ' <em>(masquée)</em>'}`; }),
+      ...wizCap.items.filter(i => i.kind === 'asi' && i.status === 'accepted').map(i => `ASI : ${histEsc(i.choiceLabel)}`)];
+    const subs = Object.entries(wizCap.subclasses || {}).map(([c, sc]) => `${c} : ${sc}`);
+    const ab = WIZ_AB.map(([k, l, id]) => `<div class="wrc-ab"><span>${l.slice(0, 3)}</span><strong>${v(id)}</strong><em>${v(id) === '—' ? '' : wizSign(wizMod(v(id)))}</em></div>`).join('');
+    const block = (t, body) => `<div class="wrc-blk"><div class="wrc-t">${t}</div><div class="wrc-b">${body || '—'}</div></div>`;
+    box.innerHTML = `
+      <div class="wrc-head">
+        <div class="wrc-photo" style="${photoData && photoData.src ? `background-image:url('${photoData.src}')` : ''}"></div>
+        <div><h2>${histEsc(v('wNom'))}</h2>
+          <div class="wrc-sub">${histEsc(v('wRace'))} · ${histEsc(p.classe1)} ${p.niveau1}${p.classe2 ? ` / ${histEsc(p.classe2)} ${p.niveau2}` : ''} · niveau ${p.level} · ${histEsc(v('wHistorique'))}</div>
+          <div class="wrc-sub">${histEsc(v('wAlignement'))} · ${histEsc(v('wDieu'))} · ${histEsc(v('wTaille'))} · ${histEsc(v('wPoids'))} · ${histEsc(v('wAge'))} · ${histEsc(v('wAnniv'))}</div></div>
+      </div>
+      <div class="wrc-stats">
+        <div><span>PV</span><strong>${v('wPV')}</strong></div><div><span>CA (sans armure)</span><strong>${d.ca}</strong></div>
+        <div><span>Vitesse</span><strong>${String(d.speed).replace('.', ',')} m · ${Math.round(d.speed / 1.5)} cases</strong></div>
+        <div><span>Maîtrise</span><strong>+${2 + Math.floor((p.level - 1) / 4)}</strong></div><div><span>XP</span><strong>${v('wXP')}</strong></div>
+      </div>
+      <div class="wrc-abs">${ab}</div>
+      <div class="wrc-grid">
+        ${block('Sous-classes', histEsc(subs.join(' · ')))}
+        ${block('Jets de sauvegarde', histEsc([v('wSave1'), v('wSave2')].join(', ')))}
+        ${block('Compétences', histEsc(skills.join(', ')))}
+        ${block('Armes', histEsc(checked('arme', weaponCategories.flatMap(c => c.items)).join(', ')))}
+        ${block('Armures', histEsc(checked('armure', armorCategories).join(', ')))}
+        ${block('Outils et instruments', histEsc(checked('outil', [...toolCategories.flatMap(c => c.items), ...generalToolItems]).join(', ')))}
+        ${block('Langues', histEsc(checked('langue', languagesData).join(', ')))}
+        ${block('Sorts', histEsc(wizSpellsFinal().join(', ')))}
+        ${block('Capacités', caps.join(' · '))}
+        ${d.fx.resist.length || d.fx.immun.length ? block('Résistances et immunités', histEsc([...d.fx.resist, ...d.fx.immun].join(', '))) : ''}
+      </div>`;
+  }
   function wizResetNewState(p) {
     wizAb = { mode: p ? 'libre' : 'standard', base: {}, choice: [], asi: {} };
     wizHp = { order: [], rolls: {} };
