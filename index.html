@@ -1809,6 +1809,48 @@
   .capr-actions { display: flex; gap: 8px; margin-top: 12px; }
   .capr-send { flex: 1; padding: 9px; border-radius: 9px; border: none; background: var(--gold); color: #14100a; font-weight: 600; cursor: pointer; }
   .capr-skip { padding: 9px 14px; border-radius: 9px; border: 1px solid var(--card-border); background: transparent; color: var(--ink-dim); cursor: pointer; }
+  .wst-pill { border: 1px solid var(--card-border); background: transparent; color: var(--ink-faint); border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+  .wst-pill.current { background: var(--gold); border-color: var(--gold); color: #14100a; font-weight: 600; }
+  .wst-pill.done { border-color: rgba(201,162,75,.5); color: var(--gold); }
+  #wizardStepsTrack { display: flex; gap: 6px; flex-wrap: wrap; }
+  .wiz-p1-top { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+  .wiz-grants { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
+  .wiz-tag { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(201,162,75,.45); background: var(--gold-soft); color: var(--gold); }
+  .wab-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .wab-mode { display: inline-flex; border: 1px solid var(--card-border); border-radius: 999px; overflow: hidden; }
+  .wab-mode button { border: none; background: transparent; color: var(--ink-dim); padding: 7px 14px; font-size: 12.5px; cursor: pointer; }
+  .wab-mode button.on { background: var(--gold); color: #14100a; font-weight: 600; }
+  .wab-chips { display: flex; gap: 6px; }
+  .wab-chip { min-width: 30px; text-align: center; padding: 4px 8px; border-radius: 999px; border: 1px solid rgba(201,162,75,.45); color: var(--gold); font-size: 13px; }
+  .wab-chip.used { opacity: .35; text-decoration: line-through; }
+  .wab-row { display: grid; grid-template-columns: 1.3fr 1fr 1.2fr .6fr .6fr; align-items: center; gap: 10px; padding: 7px 4px; border-bottom: 1px solid var(--card-border); font-size: 13.5px; }
+  .wab-head { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); }
+  .wab-row select, .wab-row input { width: 100px; padding: 6px 8px; border-radius: 7px; border: 1px solid var(--card-border); background: var(--bg-elevated); color: var(--ink); }
+  .wab-bonus { color: var(--gold); font-size: 12.5px; }
+  .wab-total { font-weight: 600; }
+  .wab-choice { margin-top: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--ink-dim); }
+  .wab-choice select { padding: 6px 8px; border-radius: 7px; border: 1px solid var(--card-border); background: var(--bg-elevated); color: var(--ink); }
+  .wiz-reqs { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 8px; }
+  .wiz-req { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--gold); color: var(--gold); }
+  .wiz-req.ok { border-color: #4d6b40; color: #8fbf7a; }
+  .wiz-src { margin-left: 6px; font-size: 10px; padding: 0 6px; border-radius: 999px; border: 1px solid var(--card-border); color: var(--ink-faint); }
+  .wizhp-row { display: grid; grid-template-columns: 50px 1.3fr .6fr 1.8fr .7fr .8fr .6fr; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--card-border); font-size: 13.5px; }
+  .wizhp-head { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-faint); }
+  .wizhp-n { font-family: var(--font-serif); font-size: 18px; color: var(--gold); }
+  .wizhp-row input, .wizhp-row select { width: 80px; padding: 6px 8px; border-radius: 7px; border: 1px solid var(--card-border); background: var(--bg-elevated); color: var(--ink); }
+  .wizhp-row select { width: 140px; }
+  .wizhp-avg { margin-left: 6px; font-size: 11.5px; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--card-border); background: transparent; color: var(--ink-dim); cursor: pointer; }
+  .wizhp-total { display: flex; justify-content: flex-end; align-items: baseline; gap: 12px; padding-top: 12px; }
+  .wizhp-total strong { font-family: var(--font-serif); font-size: 30px; color: var(--gold); }
+  .wsp-class { border: 1px solid var(--card-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+  .wsp-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; font-size: 13px; color: var(--ink-dim); }
+  .wsp-head h4 { margin: 0; font-family: var(--font-serif); font-size: 17px; color: var(--gold); }
+  .wsp-blk { border: 1px solid var(--card-border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .wsp-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13.5px; }
+  .wsp-sel { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; }
+  .wsp-sel select { width: 100%; padding: 7px 9px; border-radius: 7px; border: 1px solid var(--card-border); background: var(--bg-elevated); color: var(--ink); font-size: 13px; }
+  .wsp-fixed { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wsp-fixed span { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--card-border); color: var(--ink-faint); background: var(--bg-elevated); }
   .cf-top { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 10px; }
   .cf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0 10px; }
   .cf-abilities { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 8px; }
@@ -1822,6 +1864,10 @@
   @media (max-width: 640px) { .cf-top { flex-direction: column; } .cf-abilities { grid-template-columns: repeat(3, 1fr); } .cf-attack-row { grid-template-columns: 1fr 1fr; } }
   .wlang-hint { font-size: 12px; color: var(--ink-dim); background: var(--gold-soft); border: 1px solid rgba(201,162,75,.3); border-radius: 8px; padding: 7px 10px; margin-bottom: 8px; line-height: 1.5; }
   .wlang-hint strong { color: var(--ink); } .wlang-hint em { color: var(--gold); font-style: normal; }
+  .wlang-ok { color: var(--success, #6fa86a); }
+  .capr-spellpick { border: 1px solid var(--card-border); border-radius: 8px; padding: 6px; margin-bottom: 6px; }
+  .capr-spellsearch { width: 100%; box-sizing: border-box; padding: 6px 9px; border-radius: 7px; border: 1px solid var(--card-border); background: var(--bg-elevated); color: var(--ink); font-size: 12.5px; margin-bottom: 6px; }
+  .capr-spelllist { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 4px; max-height: 240px; overflow-y: auto; }
   .wlang-auto { margin-left: 5px; font-size: 9.5px; text-transform: uppercase; letter-spacing: .3px; color: var(--gold); border: 1px solid rgba(201,162,75,.45); border-radius: 999px; padding: 0 5px; }
   .clp-edit { border-collapse: collapse; font-size: 12px; width: 100%; }
   .clp-edit th { font-size: 10px; text-transform: uppercase; letter-spacing: .3px; color: var(--ink-faint); padding: 4px; text-align: left; white-space: nowrap; }
@@ -2092,7 +2138,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 05/10 (42)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 06/10 (44)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3889,8 +3935,9 @@
 
     <div class="wizard-body" id="wizardBody">
 
-      <!-- STEP 1 : IDENTITÉ -->
+      <!-- PAGE 1 : IDENTITÉ, RACE, CARACTÉRISTIQUES, HISTOIRE -->
       <div class="wizard-step" data-step="1">
+        <div class="wiz-p1-top">
         <div class="photo-upload-block">
           <div class="photo-preview-box" id="wPhotoPreview" onclick="document.getElementById('wPhotoInput').click()">
             <div class="photo-preview-placeholder" id="wPhotoPlaceholder">
@@ -3901,21 +3948,40 @@
           <input type="file" id="wPhotoInput" accept="image/*" style="display:none;" onchange="onPhotoSelected(event)">
           <button class="filter-reset-btn" id="wPhotoRecadrerBtn" style="display:none;" onclick="openPhotoCropper()">Recadrer le portrait</button>
         </div>
+          <div style="flex:1;min-width:0">
+            <div class="section-title" style="margin-top:0;">Identité</div>
+            <div class="wizard-grid-3">
+              <div class="form-field" style="grid-column:span 2"><label>Nom *</label><input type="text" id="wNom"></div>
+              <div class="form-field"><label>Alignement *</label><select id="wAlignement"></select></div>
+              <div class="form-field"><label>Taille *</label><input type="text" id="wTaille" placeholder="Ex : 1,78 m"></div>
+              <div class="form-field"><label>Poids *</label><input type="text" id="wPoids" placeholder="Ex : 58 kg"></div>
+              <div class="form-field"><label>Âge *</label><input type="text" id="wAge" placeholder="Ex : 112 ans"></div>
+              <div class="form-field"><label>Anniversaire *</label><input type="text" id="wAnniv" placeholder="Ex : 12 florennal"></div>
+              <div class="form-field" style="grid-column:span 2"><label>Dieu *</label><select id="wDieu"></select></div>
+            </div>
+          </div>
+        </div>
+        <div class="section-title">Race et historique</div>
         <div class="wizard-grid-2">
-          <div class="form-field"><label>Nom *</label><input type="text" id="wNom"></div>
-          <div class="form-field"><label>Race *</label><select id="wRace"></select></div>
+          <div class="form-field"><label>Race / sous-race *</label><select id="wRace"></select></div>
           <div class="form-field"><label>Historique *</label><select id="wHistorique"></select></div>
-          <div class="form-field"><label>Alignement *</label><select id="wAlignement"></select></div>
-          <div class="form-field"><label>Dieu *</label><select id="wDieu"></select></div>
-          <div></div>
-          <div class="form-field"><label>Poids *</label><input type="text" id="wPoids" placeholder="Ex : 58 kg"></div>
-          <div class="form-field"><label>Taille *</label><input type="text" id="wTaille" placeholder="Ex : 1,78 m"></div>
-          <div class="form-field"><label>Âge *</label><input type="text" id="wAge" placeholder="Ex : 112 ans"></div>
-          <div class="form-field"><label>Anniversaire *</label><input type="text" id="wAnniv" placeholder="Ex : 12 florennal"></div>
+        </div>
+        <div class="wiz-grants" id="wRaceGrants"></div>
+        <div class="section-title">Caractéristiques</div>
+        <div id="wAbBlock"></div>
+        <div style="display:none">
+          <input type="number" id="wFor" onchange="updateAutoCalc()"><input type="number" id="wDex" onchange="updateAutoCalc()"><input type="number" id="wCon" onchange="updateAutoCalc()">
+          <input type="number" id="wInt" onchange="updateAutoCalc()"><input type="number" id="wSag" onchange="updateAutoCalc()"><input type="number" id="wCha" onchange="updateAutoCalc()">
+        </div>
+        <div class="section-title">Histoire du personnage <span class="field-hint">(facultatifs)</span></div>
+        <div class="wizard-grid-3">
+          <div class="form-field"><label>Origine</label><textarea id="wOrigine" style="min-height:90px;"></textarea></div>
+          <div class="form-field"><label>Avant l'aventure</label><textarea id="wAvantAventure" style="min-height:90px;"></textarea></div>
+          <div class="form-field"><label>Ellipse</label><textarea id="wEllipse" style="min-height:90px;"></textarea></div>
         </div>
       </div>
 
-      <!-- STEP 2 : CLASSES & XP -->
+      <!-- PAGE 2 : CLASSES, XP, CAPACITÉS -->
       <div class="wizard-step" data-step="2">
         <div class="wizard-grid-2">
           <div class="form-field"><label>Classe 1 *</label><select id="wClasse1" onchange="onClassChange()"></select></div>
@@ -3932,67 +3998,49 @@
           <input type="number" id="wXP" min="0" onchange="updateAutoCalc()">
           <div class="xp-range-hint" id="xpRangeHint"></div>
         </div>
-      </div>
-
-      <!-- STEP 3 : CARACTÉRISTIQUES & JDS -->
-      <div class="wizard-step" data-step="3">
-        <div class="section-title" style="margin-top:0;">Caractéristiques</div>
-        <div class="wizard-grid-3">
-          <div class="form-field"><label>Force *</label><input type="number" id="wFor" onchange="updateAutoCalc()"></div>
-          <div class="form-field"><label>Dextérité *</label><input type="number" id="wDex" onchange="updateAutoCalc()"></div>
-          <div class="form-field"><label>Constitution *</label><input type="number" id="wCon" onchange="updateAutoCalc()"></div>
-          <div class="form-field"><label>Intelligence *</label><input type="number" id="wInt" onchange="updateAutoCalc()"></div>
-          <div class="form-field"><label>Sagesse *</label><input type="number" id="wSag" onchange="updateAutoCalc()"></div>
-          <div class="form-field"><label>Charisme *</label><input type="number" id="wCha" onchange="updateAutoCalc()"></div>
-        </div>
-        <div class="section-title">Jets de sauvegarde maîtrisés (prédéfinis selon la classe 1 — modifiables)</div>
+        <div class="section-title">Jets de sauvegarde maîtrisés <span class="field-hint">(selon la classe 1)</span></div>
         <div class="wizard-grid-2" id="wSaveThrows"></div>
-      </div>
-
-      <!-- STEP 4 : COMPÉTENCES -->
-      <div class="wizard-step" data-step="4">
-        <div class="section-title" style="margin-top:0;">Compétences<span class="required-star">*</span></div>
-        <p class="wizard-hint">Coche « Maîtrisée », puis « Expert » en plus si besoin (double bonus de maîtrise).</p>
-        <div class="skills-wizard-list" id="wSkillsList"></div>
-      </div>
-
-      <!-- STEP 5 : MAÎTRISES -->
-      <div class="wizard-step" data-step="5">
-        <div class="section-title" style="margin-top:0;">Armes<span class="required-star">*</span></div>
-        <div id="wWeaponCats"></div>
-        <div class="section-title">Armures</div>
-        <div id="wArmorBlock"></div>
-        <div class="section-title">Outils</div>
-        <div id="wToolCats"></div>
-        <div id="wToolGeneralBlock"></div>
-        <div class="section-title">Langues</div>
-        <div id="wLangBlock"></div>
-      </div>
-
-      <!-- STEP 6 : CAPACITÉS (facultatif) -->
-      <div class="wizard-step" data-step="6">
-        <div class="section-title" style="margin-top:0;">Capacités proposées <span class="field-hint">(d'après la race, l'historique, la classe et le niveau — vérifie chaque ligne, fais les choix, puis valide)</span></div>
+        <div class="section-title">Capacités niveau par niveau <span class="field-hint">(ouvre chaque ligne pour la lire, la retoucher pour ce personnage et faire ses choix)</span></div>
         <div id="wCapProposed"></div>
         <div class="section-title">Autres capacités <span class="field-hint">(ajoutées à la main — tape quelques lettres pour chercher dans la base)</span></div>
         <div id="wCapacitesList"></div>
         <button class="filter-reset-btn" onclick="addCapaciteBlock()">+ Ajouter une capacité</button>
-
-        <div class="section-title">Histoire du personnage <span class="field-hint">(facultatifs)</span></div>
-        <div class="form-field"><label>Origine</label><textarea id="wOrigine" style="min-height:60px;"></textarea></div>
-        <div class="form-field"><label>Avant l'aventure</label><textarea id="wAvantAventure" style="min-height:60px;"></textarea></div>
-        <div class="form-field"><label>Ellipse</label><textarea id="wEllipse" style="min-height:60px;"></textarea></div>
       </div>
 
-      <!-- STEP 7 : PV + RÉCAP -->
-      <div class="wizard-step" data-step="7">
-        <div class="form-field"><label>Points de vie actuels et max *</label><input type="number" id="wPV" min="1"></div>
+      <!-- PAGE 3 : MAÎTRISES -->
+      <div class="wizard-step" data-step="3">
+        <p class="wizard-hint" style="margin-top:0">Ce qui est accordé d'office est coché et verrouillé, avec sa source. Les pastilles indiquent ce qu'il reste à choisir et passent au vert une fois le compte atteint.</p>
+        <div class="section-title" style="margin-top:0;">Compétences <span class="field-hint">(« Expert » = bonus de maîtrise doublé)</span></div>
+        <div class="wiz-reqs" id="wReqSkills"></div>
+        <div class="skills-wizard-list" id="wSkillsList"></div>
+        <div class="section-title">Armes</div>
+        <div class="wiz-reqs" id="wReqWeapons"></div>
+        <div id="wWeaponCats"></div>
+        <div class="section-title">Armures</div>
+        <div class="wiz-reqs" id="wReqArmor"></div>
+        <div id="wArmorBlock"></div>
+        <div class="section-title">Outils et instruments</div>
+        <div class="wiz-reqs" id="wReqTools"></div>
+        <div id="wToolCats"></div>
+        <div id="wToolGeneralBlock"></div>
+        <div class="section-title">Langues</div>
+        <div class="wiz-reqs" id="wReqLangs"></div>
+        <div id="wLangBlock"></div>
+      </div>
 
+      <!-- PAGE 4 : POINTS DE VIE -->
+      <div class="wizard-step" data-step="4">
+        <div id="wHpBlock"></div>
+        <input type="hidden" id="wPV">
+      </div>
+
+      <!-- PAGE 5 : SORTS + RÉCAPITULATIF -->
+      <div class="wizard-step" data-step="5">
+        <div id="wSpellsPage"></div>
+        <div class="section-title">Emplacements de sorts</div>
+        <div class="spell-block" id="wSpellBlock"></div>
         <div class="section-title">Calculs automatiques</div>
         <div class="auto-summary-grid" id="wAutoRecap"></div>
-
-        <div class="section-title">Sorts</div>
-        <div class="spell-block" id="wSpellBlock"></div>
-
         <div class="section-title">Récapitulatif</div>
         <div class="wizard-final-summary" id="wFinalSummary"></div>
       </div>
@@ -4065,7 +4113,7 @@
           bonus_ca: r.bonus_ca, bonus_arme: r.bonus_arme, degats_des: r.degats_des,
           avantage_sauvegarde: r.avantage_sauvegarde, avantage_competence: r.avantage_competence,
           description_complete: r.description_complete, source: r.source, cache_aux_joueurs: r.cache_aux_joueurs,
-          poids: parseKg(r.poids),
+          poids: parseKg(r.poids), prix: r.prix,
         }) },
       { table: 'armes_magiques', target: armesMagiquesDatabase, map: r => ({
           id: r.id, name: r.nom, categorie_secondaire: r.categorie_secondaire, rarete: r.rarete,
@@ -6402,7 +6450,7 @@
   };
 
   let wizardStep = 1;
-  const wizardTotalSteps = 7;
+  const wizardTotalSteps = 5;
   let capaciteBlockCount = 0;
 
   function fillSelect(id, options) {
@@ -6448,6 +6496,9 @@
     document.getElementById('wEllipse').value = '';
     document.getElementById('wCapacitesList').innerHTML = '';
     wizCapReset(editId ? players.find(x => x.id === editId) : null);
+    wizResetNewState(editId ? players.find(x => x.id === editId) : null);
+    ['wRace', 'wHistorique'].forEach(id => { const el = document.getElementById(id); if (el && !el.dataset.wiz2) { el.dataset.wiz2 = '1'; el.addEventListener('change', () => { wizAbSync(); wizAbRender(); wizRaceGrantsRender(); }); } });
+    { const b = document.getElementById('wizardBody'); if (b && !b.dataset.wiz2) { b.dataset.wiz2 = '1'; b.addEventListener('change', e => { if (wizardStep === 3 && e.target.matches('input[type=checkbox]')) wizProfsBanners(); }); } }
     capaciteBlockCount = 0;
 
     renderSkillsWizard();
@@ -6496,6 +6547,7 @@
       document.getElementById('wSag').value = ab.sag; document.getElementById('wCha').value = ab.cha;
     }
     document.getElementById('wPV').value = p.maxHp || (p.pv ? p.pv.split('/')[1] : '') || '';
+    wizAb.mode = 'libre';
     document.getElementById('wOrigine').value = p.origine || '';
     document.getElementById('wAvantAventure').value = p.avantAventure || '';
     document.getElementById('wEllipse').value = p.ellipse || '';
@@ -6702,6 +6754,22 @@
       if (el && !el.dataset.autoLang) { el.dataset.autoLang = '1'; el.addEventListener('change', () => applyAutoLanguages(false)); }
     });
   }
+  let wizLangSrcs = [];
+  // Bandeau des langues : ce qui est accordé et ce qu'il reste à cocher (se met à jour à chaque case)
+  function wizLangHintRefresh() {
+    const hint = document.getElementById('wLangHint');
+    if (!hint) return;
+    const srcs = wizLangSrcs;
+    const free = srcs.reduce((n, s) => n + s.free, 0);
+    const fixed = new Set(srcs.flatMap(s => s.fixed));
+    const extra = languagesData.filter((l, i) => { const el = document.getElementById('wlang_' + i); return el && el.checked && el.dataset.auto !== '1' && !fixed.has(l); }).length;
+    const left = free - extra;
+    const parts = srcs.map(s => `<strong>${s.label}</strong> : ${[...s.fixed, ...(s.free ? [`${s.free} au choix`] : [])].join(', ')}${s.notes.length ? ` (${histEsc(s.notes.join(', '))})` : ''}`);
+    hint.innerHTML = parts.length ? parts.join(' · ') + (free ? (left > 0 ? ` — <em>coche ${left} langue${left > 1 ? 's' : ''} de plus</em>` : ' — <span class="wlang-ok">✓ langues au choix cochées</span>') : '') : '';
+    hint.style.display = parts.length ? 'block' : 'none';
+    const box = document.getElementById('wLangBlock');
+    if (box && !box.dataset.hintBound) { box.dataset.hintBound = '1'; box.addEventListener('change', wizLangHintRefresh); }
+  }
   function applyAutoLanguages(silent) {
     const srcs = wizAutoLanguageSources();
     const want = new Map();
@@ -6717,13 +6785,8 @@
         if (lab) lab.insertAdjacentHTML('beforeend', `<span class="wlang-auto">${want.get(l)}</span>`);
       } else if (el.dataset.auto === '1') { el.checked = false; delete el.dataset.auto; } // retiré si la race/l'historique a changé
     });
-    const free = srcs.reduce((n, s) => n + s.free, 0);
-    const hint = document.getElementById('wLangHint');
-    if (hint) {
-      const parts = srcs.map(s => `<strong>${s.label}</strong> : ${[...s.fixed, ...(s.free ? [`${s.free} au choix`] : [])].join(', ')}${s.notes.length ? ` (${histEsc(s.notes.join(', '))})` : ''}`);
-      hint.innerHTML = parts.length ? parts.join(' · ') + (free ? ` — <em>coche ${free} langue${free > 1 ? 's' : ''} de plus</em>` : '') : '';
-      hint.style.display = parts.length ? 'block' : 'none';
-    }
+    wizLangSrcs = srcs;
+    wizLangHintRefresh();
     if (!silent && want.size) showToast(`Langues cochées d'office : ${[...want.keys()].join(', ')}`);
   }
 
@@ -6907,16 +6970,20 @@
 
   function renderWizardStep() {
     document.querySelectorAll('.wizard-step').forEach(s => s.classList.toggle('active', parseInt(s.dataset.step) === wizardStep));
-    document.getElementById('wizardStepsTrack').innerHTML = Array.from({length: wizardTotalSteps}, (_, i) => {
+    document.getElementById('wizardStepsTrack').innerHTML = WIZ_STEP_LABELS.map((l, i) => {
       const n = i + 1;
       const cls = n < wizardStep ? 'done' : n === wizardStep ? 'current' : '';
-      return `<div class="wst-dot ${cls}"></div>`;
+      return `<button type="button" class="wst-pill ${cls}" onclick="wizGoTo(${n})">${n} · ${l}${n < wizardStep ? ' ✓' : ''}</button>`;
     }).join('');
     document.getElementById('wizardPrevBtn').style.visibility = wizardStep === 1 ? 'hidden' : 'visible';
     document.getElementById('wizardNextBtn').textContent = wizardStep === wizardTotalSteps ? 'Créer le personnage' : 'Suivant';
     document.getElementById('wizardError').textContent = '';
-    if (wizardStep === 6) { wizCap.open = null; wizCapRefresh(); }
-    if (wizardStep === 7) { renderAutoRecap(); renderFinalSummary(); }
+    if (wizardStep === 1) { wizAbRender(); wizRaceGrantsRender(); }
+    if (wizardStep === 2) { renderSaveThrows(); wizCap.open = null; wizCapRefresh(); }
+    if (wizardStep === 3) { applyAutoLanguages(true); wizProfsApply(); }
+    if (wizardStep === 4) wizHpRender();
+    if (wizardStep === 5) { wizSpellsRender(); renderSpellBlock(); renderAutoRecap(); renderFinalSummary(); }
+    document.getElementById('wizardBody').scrollTop = 0;
   }
 
   function clearFieldErrors() {
@@ -6935,6 +7002,9 @@
       ['wNom','wRace','wHistorique','wAlignement','wDieu','wPoids','wTaille','wAge','wAnniv'].forEach(id => {
         if (!document.getElementById(id).value.trim()) { markError(id); errors.push('Champs obligatoires manquants.'); }
       });
+      if (['wFor','wDex','wCon','wInt','wSag','wCha'].some(id => document.getElementById(id).value === '')) errors.push(wizAb.mode === 'standard' ? 'Place les 6 valeurs 15, 14, 13, 12, 10 et 8.' : 'Toutes les caractéristiques sont obligatoires.');
+      const rb = wizRaceBonus();
+      if (wizAb.mode === 'standard' && rb.choice && wizAb.choice.filter(Boolean).length < rb.choice) errors.push('Choisis le bonus racial au choix.');
     }
     if (step === 2) {
       if (!document.getElementById('wClasse1').value) { markError('wClasse1'); errors.push('Classe 1 obligatoire.'); }
@@ -6948,21 +7018,18 @@
         markError('wXP'); errors.push("L'XP ne correspond pas au niveau total — corrige l'un des deux.");
       }
     }
-    if (step === 3) {
-      ['wFor','wDex','wCon','wInt','wSag','wCha'].forEach(id => {
-        if (document.getElementById(id).value === '') { markError(id); errors.push('Toutes les caractéristiques sont obligatoires.'); }
-      });
+    if (step === 3 && !errors.length) {
+      const miss = wizProfsMissing();
+      if (miss.length && !confirm(`Il reste des maîtrises à choisir :\n• ${miss.map(q => q.label).join('\n• ')}\n\nContinuer quand même ?`)) return false;
     }
     if (step === 4) {
-      const anyTrained = skillsData.some((sk, i) => document.getElementById('wSkillT'+i).checked);
-      if (!anyTrained) errors.push('Coche au moins une compétence maîtrisée.');
+      if (!document.getElementById('wPV').value) errors.push('Points de vie obligatoires.');
+      const p = wizPseudoPlayer();
+      if ([[p.classe1, p.niveau1], [p.classe2, p.niveau2]].filter(([c, n]) => c && n).some(([c, n]) => wizHp.order.filter(x => x === c).length !== n)) errors.push("L'ordre des niveaux ne correspond pas aux niveaux des classes.");
     }
-    if (step === 5) {
-      const anyWeapon = weaponCategories.some(cat => document.getElementById('wcat_' + cat.key).checked || cat.items.some((it, i) => document.getElementById(`witem_${cat.key}_${i}`).checked));
-      if (!anyWeapon) errors.push('Coche au moins une maîtrise d\'arme.');
-    }
-    if (step === 7) {
-      if (!document.getElementById('wPV').value) { markError('wPV'); errors.push('Points de vie obligatoires.'); }
+    if (step === 5 && !errors.length) {
+      const miss = wizSpellsMissing();
+      if (miss && !confirm(`${miss} sort${miss > 1 ? 's' : ''} reste${miss > 1 ? 'nt' : ''} à choisir. Créer le personnage quand même ?`)) return false;
     }
     if (errors.length) {
       document.getElementById('wizardError').textContent = errors[0];
@@ -6971,6 +7038,10 @@
     return true;
   }
 
+  function wizGoTo(n) {
+    if (n > wizardStep) { for (let k = wizardStep; k < n; k++) if (!validateStep(k)) { wizardStep = k; renderWizardStep(); validateStep(k); return; } }
+    wizardStep = n; renderWizardStep();
+  }
   function wizardNext() {
     if (!validateStep(wizardStep)) return;
     if (wizardStep === wizardTotalSteps) {
@@ -7023,7 +7094,8 @@
       cha: parseInt(document.getElementById('wCha').value) || 10,
     };
 
-    const saveThrows = [...new Set([document.getElementById('wSave1').value, document.getElementById('wSave2').value, ...wizCap.extraSaves])];
+    const saveThrows = [...new Set([document.getElementById('wSave1').value, document.getElementById('wSave2').value, ...wizCap.extraSaves,
+      ...wizGrants(false).filter(g => g.type === 'jd').map(g => g.value)])];
 
     const skills = skillsData.map((sk, i) => ({
       name: sk.name, ability: sk.ability,
@@ -7059,8 +7131,8 @@
       const pendingCaps = wizCap.items.filter(i => i.status === 'pending').length;
       let includePending = false;
       if (pendingCaps) {
-        if (!confirm(`${pendingCaps} capacité${pendingCaps > 1 ? 's' : ''} proposée${pendingCaps > 1 ? 's' : ''} n'${pendingCaps > 1 ? 'ont' : 'a'} pas été vérifiée${pendingCaps > 1 ? 's' : ''}.\n\nOK : les ajouter telles quelles (sans faire leurs choix).\nAnnuler : revenir à l'étape Capacités pour les vérifier.`)) {
-          wizardStep = 6; renderWizardStep(); return;
+        if (!confirm(`${pendingCaps} capacité${pendingCaps > 1 ? 's' : ''} proposée${pendingCaps > 1 ? 's' : ''} n'${pendingCaps > 1 ? 'ont' : 'a'} pas été vérifiée${pendingCaps > 1 ? 's' : ''}.\n\nOK : les ajouter telles quelles (sans faire leurs choix).\nAnnuler : revenir à la page Classes pour les vérifier.`)) {
+          wizardStep = 2; renderWizardStep(); return;
         }
         includePending = true;
       }
@@ -7087,11 +7159,14 @@
       speed: (() => { const r = getWizardRacesData().find(x => x.name === document.getElementById('wRace').value); return r ? r.speed : 9; })(),
       origine: document.getElementById('wOrigine').value, avantAventure: document.getElementById('wAvantAventure').value, ellipse: document.getElementById('wEllipse').value,
       maxHp: parseInt(pv) || 1, currentHp: isEditing ? existingPlayer.currentHp : (parseInt(pv) || 1),
-      knownSpellNames: [...new Set([...(isEditing ? (existingPlayer.knownSpellNames || []) : []), ...wizCap.spells.map(x => x.name)])],
-      capChoix: wizCap.choix, subclasses: wizCap.subclasses,
+      knownSpellNames: [...new Set([...(isEditing ? (existingPlayer.knownSpellNames || []) : []), ...wizSpellsFinal()])],
+      hpLog: wizHp.order.length ? wizHp.order.map((c, i) => ({ niveau: i + 1, classe: c })) : undefined,
+      capChoix: wizCap.choix, subclasses: wizCap.subclasses, speedBase: null,
       items: isEditing ? existingPlayer.items : undefined, coins: isEditing ? existingPlayer.coins : undefined,
       photo: photoData ? photoData.src : (isEditing ? existingPlayer.photo : null),
     };
+    // Effets des capacités : vitesse (sous-race, moine…), CA sans armure, résistances
+    capApplyEffects(newPlayer, newPlayer);
     if (isEditing) {
       Object.assign(existingPlayer, newPlayer);
     } else {
@@ -7270,6 +7345,7 @@
         { key: 'categorie', label: 'Catégorie', type: 'text', col: 1 },
         { key: 'rarete', label: 'Rareté', type: 'select', options: rarityList, col: 1 },
         { key: 'poids', label: 'Poids', type: 'kg', col: 1 },
+        { key: 'prix', label: 'Prix (pour les achats)', type: 'text', col: 1 },
         { key: 'necessite_lien', label: 'Nécessite un lien', type: 'checkbox' },
         { key: 'lien_detail', label: 'Détail du lien', type: 'text' },
         { key: 'emplacement_equipement', label: 'Emplacement équipement', type: 'text' },
@@ -34066,7 +34142,9 @@
       caFormula: o.ca_formule || '', ...parseArmorFormula(o.ca_formule, o.categorie), desc: o.ca_formule ? `CA ${o.ca_formule}` : '' };
     if (cat === 'equipement') return { ...base, category: 'objet', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: !!o.equipable, magic: !!o.magique, desc: '' };
     if (cat === 'outils') return { ...base, category: 'outil', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: false, magic: false, desc: o.categorie || '' };
-    if (cat === 'objetsMagiques') return { ...base, category: 'objet_magique', weight: parseKg(o.poids) || 0, price: '—', equipable: !!o.emplacement_equipement, magic: true, usesMax: o.charges_max || null, usesLeft: o.charges_max || null, recharge, desc: o.description_complete || '' };
+    // Potions (de guérison ou autres) : catégorie « Potions », empilables, reconnues par les raccourcis du module Combat
+    if (/potion/i.test(o.name || '')) return { ...base, category: 'potion', qty: 1, weight: parseKg(o.poids) || 0.25, price: o.prix || '—', equipable: false, magic: cat === 'objetsMagiques', desc: o.description_complete || '' };
+    if (cat === 'objetsMagiques') return { ...base, category: 'objet_magique', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: !!o.emplacement_equipement, magic: true, usesMax: o.charges_max || null, usesLeft: o.charges_max || null, recharge, desc: o.description_complete || '' };
     if (cat === 'armesMagiques') {
       const arme = armesDatabase.find(a => a.name === o.categorie_secondaire) || null;
       const ownW = parseKg(o.poids);
@@ -44529,7 +44607,11 @@
       const cl = classesLoreDatabase.find(c => capNorm(c.name) === capNorm(className));
       const prog = cl && clpGet(cl);
       const magic = prog ? clpMagicLines(prog, prog.rows, newLevel - 1).map(l => l.replace(/<[^>]+>/g, '')) : [];
-      if (magic.length) checklist.push({ label: 'Sorts — ' + magic.join(' · '), auto: false, done: false });
+      if (magic.length) {
+        const hasPick = capClassSpellReqs({ ...p }, className, newLevel - 1, newLevel).length;
+        checklist.push(hasPick ? { kind: 'classspells', baseId: 'classspells:' + className, cls: className, from: newLevel - 1, to: newLevel, label: `Sorts de ${className} — ${magic.join(' · ')}`, done: false }
+          : { label: 'Sorts — ' + magic.join(' · '), auto: false, done: false });
+      }
     }
 
     // --- Manuel : ASI ---
@@ -44557,7 +44639,7 @@
       d.xpNext = p.level < 20 ? XP_TABLE[p.level + 1] : XP_TABLE[20];
       d.pendingHeal = [...(d.pendingHeal || []), { pid: 'h' + Date.now(), amount: gained }];
       if (compHeal) d.pendingHeal.push({ pid: 'c' + Date.now(), amount: compHeal, target: 'companion' });
-      if (capBase.length) { capRefreshOwned(d, p); p.capacites = d.capacites; }
+      if (capBase.length) { capRefreshOwned(d, p); capApplyEffects(d, p); p.capacites = d.capacites; p.speed = d.speed; p.capEffects = d.capEffects; }
     });
     document.getElementById('levelUpSub').textContent = `${className} niveau ${newLevel}`;
     renderCharChips();
@@ -45906,7 +45988,7 @@
     capBase = data || [];
   }
   // « Artificier » (assistant) et « Artificer » (Lore / base) désignent la même classe
-  const capNorm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\bartificier\b/g, 'artificer');
+  const capNorm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[’`]/g, "'").trim().replace(/\bartificier\b/g, 'artificer');
   const CAP_ABBR = { FOR: 'for', DEX: 'dex', CON: 'con', INT: 'int', SAG: 'sag', CHA: 'cha' };
   const CAP_RECHARGE = { 'Aucun': 'aucun', 'Repos court': 'repos_court', 'Repos long': 'repos_long', 'Repos court ou long': 'repos_court_ou_long' };
   const capClassOf = row => String(row.origine || '').split('·')[0].trim();
@@ -46342,7 +46424,8 @@
     const owned = new Set((p.capacites || []).map(c => c.baseId).filter(Boolean));
     const replaced = new Set(capBase.filter(r => r.remplace).map(r => r.remplace));
     const pushRow = r => { if (!owned.has(r.id) && !items.some(i => i.baseId === r.id)) items.push({ kind: 'cap', baseId: r.id, label: r.nom, origine: r.origine, done: false }); };
-    capBase.filter(r => r.source === 'Classe' && r.niveau === classLevel && (capNorm(r.origine) === capNorm(className) || (sub && capNorm(r.origine) === capNorm(`${className} · ${sub}`)))).forEach(pushRow);
+    capBase.filter(r => r.source === 'Classe' && r.niveau === classLevel && (capNorm(r.origine) === capNorm(className) || (sub && capNorm(r.origine) === capNorm(`${className} · ${sub}`))))
+      .sort((a, b) => (b.choix ? 1 : 0) - (a.choix ? 1 : 0)).forEach(pushRow);
     const raceNames = [p.race, parentRace].filter(Boolean).map(capNorm);
     capBase.filter(r => r.source === 'Race' && r.niveau === p.level && r.niveau > 1 && raceNames.includes(capNorm(r.origine)) && !replaced.has(r.id)).forEach(pushRow);
     // Choix qui s'agrandissent avec le niveau (Métamagie, Manifestations, Ennemi juré…)
@@ -46387,7 +46470,12 @@
 
   /* ---- Panneau de vérification d'une ligne ---- */
   let capReviewOpen = null;
-  function capReviewHtml(p, item, idx) {
+  function capReviewHtml(p, item, idx, opts) {
+    const inWizard = !!(opts && opts.wizard);
+    if (item.kind === 'classspells') {
+      return `<div class="capr-panel">${capSpellPickHtml(capClassSpellReqs(p, item.cls, item.from, item.to), p)}
+        <div class="capr-actions"><button class="capr-send" onclick="capReviewSend(${idx})">Envoyer à la fiche</button><button class="capr-skip" onclick="capReviewSkip(${idx})">Écarter</button></div></div>`;
+    }
     const r = capBase.find(x => x.id === item.baseId);
     if (!r) return '<div class="capr-panel">Capacité introuvable dans la base.</div>';
     const cls = capClassOf(r);
@@ -46395,7 +46483,7 @@
     const d = p;
     let html = '<div class="capr-panel">';
     if (item.kind === 'spell') {
-      html += `<div class="capr-label">Sorts à ajouter</div><div class="capr-info">${histEsc(item.spells)}</div>`;
+      html += `<div class="capr-label">Sorts</div>` + capSpellPickHtml(capSpellReqs(item.spells, p, r), p);
     } else {
       const inst = capInstanceFromBase(r, ctx);
       if (item.kind === 'cap') {
@@ -46416,17 +46504,24 @@
       }
       // Maîtrises
       const ms = item.kind === 'cap' ? capParseMaitrises(r.maitrises, ctx, r) : [];
+      if (inWizard) {
+        const fixedM = ms.filter(m => !m.count).flatMap(m => capFixedValues(m)), pickM = ms.filter(m => m.count);
+        if (fixedM.length || pickM.length) html += `<div class="capr-label">Maîtrises</div><div class="capr-info">${fixedM.length ? `Cochées d'office : ${histEsc(fixedM.join(', '))}. ` : ''}${pickM.length ? `À choisir page 3 : ${histEsc(pickM.map(m => m.count + ' ' + m.label.toLowerCase()).join(', '))}.` : ''}</div>`;
+        if (r.sorts) html += `<div class="capr-label">Sorts</div><div class="capr-info">Imposés ou à choisir à la page 5.</div>`;
+        if (r.effets) html += `<div class="capr-label">Effet sur la fiche</div><div class="capr-info">${histEsc(capEval(r.effets, ctx, r))}</div>`;
+        ms.length = 0;
+      }
       ms.forEach((m, mi) => {
         if (!m.count) { const vals = capFixedValues(m); if (vals.length) html += `<div class="capr-label">${histEsc(m.label)} cochée${vals.length > 1 ? 's' : ''} d'office</div><div class="capr-info">${histEsc(vals.join(', '))}</div>`; return; }
         const cands = capCandidates(m, d);
         html += `<div class="capr-label">${histEsc(m.label)} — ${m.count} au choix</div><div class="capr-opts capr-mopts" data-mi="${mi}" data-need="${m.count}">${cands.map(c => `<label class="capr-opt small"><input type="checkbox" value="${histEsc(c)}"> <span>${histEsc(c)}</span></label>`).join('')}</div>`;
       });
       // Sorts accordés (hors « Dès niv. » à venir)
-      if (item.kind === 'cap' && r.sorts) {
-        const now = String(r.sorts).split(';').map(x => x.trim()).filter(x => x && !/^Dès niv\./.test(x) && !/^Carac/i.test(x));
-        if (now.length) html += `<div class="capr-label">Sorts</div><div class="capr-info">${now.map(histEsc).join('<br>')}<br><span class="capr-hint">Les sorts imposés sont ajoutés à ses sorts connus ; ceux « au choix » sont à choisir dans son module Sorts.</span></div>`;
+      if (item.kind === 'cap' && r.sorts && !inWizard) {
+        const reqs = capSpellReqs(r.sorts, p, r);
+        if (reqs.length) html += `<div class="capr-label">Sorts</div>` + capSpellPickHtml(reqs, p);
       }
-      if (item.kind === 'cap' && r.effets) html += `<div class="capr-label">Effet sur la fiche — à vérifier</div><div class="capr-info">${histEsc(capEval(r.effets, ctx, r))}</div>`;
+      if (item.kind === 'cap' && r.effets && !inWizard) html += `<div class="capr-label">Effet sur la fiche — à vérifier</div><div class="capr-info">${histEsc(capEval(r.effets, ctx, r))}</div>`;
     }
     html += `<div class="capr-actions"><button class="capr-send" onclick="capReviewSend(${idx})">Envoyer à la fiche</button><button class="capr-skip" onclick="capReviewSkip(${idx})">Écarter</button></div></div>`;
     return html;
@@ -46441,9 +46536,19 @@
   function capReviewSend(idx) {
     const p = players.find(pl => pl.id === levelUpTargetId);
     const item = p.levelUpChecklist[idx];
+    const panel = document.querySelector('.capr-panel');
+    if (item.kind === 'classspells') {
+      const names = capReadSpellPicks(panel, capClassSpellReqs(p, item.cls, item.from, item.to));
+      if (!names) return;
+      sbPatchPlayer(p, d => { d.knownSpellNames = [...new Set([...(d.knownSpellNames || []), ...names])]; p.knownSpellNames = d.knownSpellNames; },
+        names.length ? `Sorts envoyés à ${p.name} : ${names.join(', ')}` : 'Aucun sort ajouté', true)
+        .then(ok => { if (!ok) return; item.done = true; item.sent = true; capReviewOpen = null; capChecklistAfterChange(p); });
+      return;
+    }
     const r = capBase.find(x => x.id === item.baseId);
     if (!r) return;
-    const panel = document.querySelector('.capr-panel');
+    const spellNames = capReadSpellPicks(panel, item.kind === 'spell' ? capSpellReqs(item.spells, p, r) : item.kind === 'cap' ? capSpellReqs(r.sorts, p, r) : []);
+    if (!spellNames) return;
     // Choix
     let picks = [];
     const optBox = panel.querySelector('.capr-opts[data-group]');
@@ -46465,11 +46570,8 @@
       d.capChoix = d.capChoix || {};
       d.capacites = d.capacites || [];
       const ctx = () => capCtxFromPlayer({ ...p, ...d });
-      if (item.kind === 'spell') {
-        const names = item.spells.replace(/^Sort(?: mineur)?\s*:\s*/i, '').split(',').map(x => x.replace(/\(.*?\)/g, '').trim()).filter(Boolean);
-        d.knownSpellNames = [...new Set([...(d.knownSpellNames || []), ...names.map(capSpellName)])];
-        return;
-      }
+      if (spellNames.length) { d.knownSpellNames = [...new Set([...(d.knownSpellNames || []), ...spellNames])]; p.knownSpellNames = d.knownSpellNames; }
+      if (item.kind === 'spell') return;
       if (r.choix === 'Sous-classe' && picks[0]) {
         d.subclasses = { ...(d.subclasses || {}), [cls]: picks[0] };
       } else if (r.choix && picks.length) {
@@ -46484,11 +46586,6 @@
         d.capacites.push(inst);
         // Maîtrises
         capParseMaitrises(r.maitrises, ctx(), r).forEach((m, mi) => (m.count ? (mpicks[mi] || []) : capFixedValues(m)).forEach(v => capApplyMaitrise(d, m.type, v)));
-        // Sorts imposés
-        String(r.sorts || '').split(';').map(x => x.trim()).filter(x => /^Sort(?: mineur)?\s*:/i.test(x)).forEach(x => {
-          const names = x.replace(/^Sort(?: mineur)?\s*:\s*/i, '').split(',').map(n => n.replace(/\(.*?\)/g, '').trim()).filter(Boolean);
-          d.knownSpellNames = [...new Set([...(d.knownSpellNames || []), ...names.map(capSpellName)])];
-        });
       }
       // Options-capacités choisies (styles de combat, métamagies…) : chacune devient une capacité
       picks.forEach(name => {
@@ -46504,7 +46601,8 @@
         capBase.filter(x => capNorm(x.origine) === capNorm(`${cls} · ${picks[0]}`) && (x.niveau || 1) <= lvl)
           .forEach(x => newItems.push({ kind: 'cap', baseId: x.id, label: x.nom, origine: x.origine, done: false }));
       }
-      ['capacites', 'capChoix', 'subclasses', 'skills', 'weaponProfs', 'armorProfs', 'toolProfs', 'languages', 'saveThrows', 'knownSpellNames'].forEach(k => { if (d[k] !== undefined) p[k] = d[k]; });
+      capApplyEffects(d, p);
+      ['capacites', 'capChoix', 'subclasses', 'skills', 'weaponProfs', 'armorProfs', 'toolProfs', 'languages', 'saveThrows', 'knownSpellNames', 'speed', 'speedBase', 'capEffects'].forEach(k => { if (d[k] !== undefined) p[k] = d[k]; });
     }, `Envoyé à ${p.name} : ${item.label}`, true).then(ok => {
       if (!ok) return;
       item.done = true; item.sent = true;
@@ -46546,6 +46644,7 @@
       abilities: ab, capChoix: wizCap.choix, subclasses: wizCap.subclasses,
       skills: skillsData.map((s, i) => ({ name: s.name, trained: !!(document.getElementById('wSkillT' + i) || {}).checked, expert: !!(document.getElementById('wSkillE' + i) || {}).checked })),
       languages: languagesData.filter((l, i) => (document.getElementById('wlang_' + i) || {}).checked),
+      knownSpellNames: wizCap.spells.map(x => x.name),
     };
   }
   function wizCapBuild() {
@@ -46567,9 +46666,15 @@
     });
     // Une capacité de sous-race qui en remplace une autre (Souffle du drakéïde chromatique…) l'emporte
     const replaced = new Set(rows.map(x => x.r.remplace).filter(Boolean));
-    wizCap.items = rows.filter(x => !replaced.has(x.r.id)).sort((a, b) => a.order - b.order || String(a.r.origine).length - String(b.r.origine).length || a.r.nom.localeCompare(b.r.nom, 'fr'))
+    wizCap.items = rows.filter(x => !replaced.has(x.r.id)).sort((a, b) => a.order - b.order || (b.r.choix ? 1 : 0) - (a.r.choix ? 1 : 0) || String(a.r.origine).length - String(b.r.origine).length || a.r.nom.localeCompare(b.r.nom, 'fr'))
       .map(x => prev.get(x.r.id) || { kind: 'cap', baseId: x.r.id, label: x.r.nom, origine: x.r.origine, group: x.group, status: 'pending' })
       .map(it => ({ ...it, group: (rows.find(x => x.r.id === it.baseId) || {}).group || it.group }));
+    // Améliorations de caractéristiques (pas de don) à leur place dans la liste
+    wizAsiItems(p).forEach(a => {
+      const kept = prev.get(a.baseId) || a;
+      const pos = wizCap.items.findIndex(x => { const r = rows.find(y => y.r.id === x.baseId); return r && r.order > a.order; });
+      if (pos > -1) wizCap.items.splice(pos, 0, { ...kept, group: a.group }); else wizCap.items.push({ ...kept, group: a.group });
+    });
   }
   function wizCapRender() {
     const box = document.getElementById('wCapProposed');
@@ -46588,8 +46693,9 @@
       const sub = it.origine && it.origine.includes('·') ? `<span class="capr-origin">${histEsc(it.origine.split('·').slice(1).join('·').trim())}</span>` : '';
       const choice = it.choiceLabel ? `<span class="capr-origin">${histEsc(it.choiceLabel)}</span>` : '';
       html += `<div class="checklist-item capr-item${it.status !== 'pending' ? ' done' : ''}"><div class="capr-item-label">${histEsc(it.label)}${sub}${choice}</div>${st}</div>`;
-      if (wizCap.open === idx && it.status === 'pending') {
-        html += capReviewHtml(p, it, idx).replace(/capReviewSend\(/g, 'wizCapAccept(').replace(/capReviewSkip\(/g, 'wizCapSkip(').replace('Envoyer à la fiche', 'Valider')
+      if (wizCap.open === idx && it.status === 'pending' && it.kind === 'asi') html += wizAsiPanel(it, idx);
+      else if (wizCap.open === idx && it.status === 'pending') {
+        html += capReviewHtml(p, it, idx, { wizard: true }).replace(/capReviewSend\(/g, 'wizCapAccept(').replace(/capReviewSkip\(/g, 'wizCapSkip(').replace('Envoyer à la fiche', 'Valider')
           .replace('Les sorts imposés sont ajoutés à ses sorts connus', 'Les sorts imposés seront ajoutés à ses sorts connus');
       }
     });
@@ -46609,6 +46715,7 @@
     wizCap.extraCaps = wizCap.extraCaps.filter(x => x.from !== it.baseId);
     wizCap.spells = wizCap.spells.filter(x => x.from !== it.baseId);
     Object.assign(it, { status: 'pending', picks: null, mpicks: null, text: null, custom: false, choiceLabel: null });
+    if (it.kind === 'asi') { it.asi = null; wizAbSync(); }
     wizCap.open = idx;
     wizCapRefresh();
     wizCap.open = wizCap.items.findIndex(x => x.baseId === it.baseId);
@@ -46632,9 +46739,20 @@
   }
   function wizCapAccept(idx) {
     const it = wizCap.items[idx];
-    const r = capBase.find(x => x.id === it.baseId);
     const panel = document.querySelector('#wCapProposed .capr-panel');
-    if (!r || !panel) return;
+    if (!panel) return;
+    const pseudo = wizPseudoPlayer();
+    if (it.kind === 'classspells') {
+      const names = capReadSpellPicks(panel, capClassSpellReqs(pseudo, it.cls, 0, it.to));
+      if (!names) return;
+      names.forEach(n => wizCap.spells.push({ name: n, from: it.baseId }));
+      it.status = 'accepted';
+      const next = wizCap.items.findIndex(x => x.status === 'pending'); wizCap.open = next > -1 ? next : null; wizCapRender();
+      return;
+    }
+    const r = capBase.find(x => x.id === it.baseId);
+    if (!r) return;
+    const spellNames = [];
     let picks = [];
     const optBox = panel.querySelector('.capr-opts[data-group]');
     if (optBox) {
@@ -46660,15 +46778,12 @@
       if (isSimple && picks.length === 1) it.choiceLabel = picks[0];
       picks.forEach(name => {
         const o = capBase.find(x => x.option_de === r.choix && x.nom === name);
-        if (o) { wizCap.extraCaps.push({ baseId: o.id, from: r.id }); capParseMaitrises(o.maitrises, ctx, o).forEach(m => { if (!m.count) capFixedValues(m).forEach(v => wizApplyMaitrise(m.type, v)); }); }
+        if (o) wizCap.extraCaps.push({ baseId: o.id, from: r.id });
       });
     }
-    capParseMaitrises(r.maitrises, ctx, r).forEach((m, mi) => (m.count ? (mpicks[mi] || []) : capFixedValues(m)).forEach(v => wizApplyMaitrise(m.type, v)));
-    // Sorts imposés, y compris ceux « Dès niv. N » déjà atteints à la création
-    const lvlFor = r.source === 'Classe' ? capLevelFor(ctx, r) : ctx.niv;
-    String(r.sorts || '').split(';').map(x => x.trim()).map(x => { const m = x.match(/^Dès niv\.\s*(\d+)\s*—\s*(.+)$/); return m ? (+m[1] <= lvlFor ? m[2].trim() : '') : x; })
-      .filter(x => /^Sort(?: mineur)?\s*:/i.test(x)).forEach(x =>
-      x.replace(/^Sort(?: mineur)?\s*:\s*/i, '').split(',').map(n => n.replace(/\(.*?\)/g, '').trim()).filter(Boolean).forEach(n => wizCap.spells.push({ name: capSpellName(n), from: r.id })));
+    // maîtrises : cochées et comptées à la page 3
+    // Sorts imposés (y compris « Dès niv. N » déjà atteint) et sorts choisis dans le panneau
+    spellNames.forEach(n => wizCap.spells.push({ name: n, from: r.id }));
     it.status = 'accepted';
     wizCapRefresh();
     const next = wizCap.items.findIndex(x => x.status === 'pending');
@@ -46821,6 +46936,549 @@
       </div>
       <div class="active-tags">${states}</div>
     </div>`;
+  }
+
+  /* ===================== SORTS À CHOISIR (création / niveau) ===================== */
+  const capAccessibleLevel = (p, cls) => {
+    const c = classesLoreDatabase.find(x => capNorm(x.name) === capNorm(cls));
+    const prog = c && clpGet(c);
+    const lvl = (realClassList(p).find(x => capNorm(x.name) === capNorm(cls)) || {}).level || p.level || 1;
+    if (prog && prog.rows[lvl - 1]) {
+      const r = prog.rows[lvl - 1];
+      const k = (prog.cols || []).findIndex(x => capNorm(x) === capNorm('Niv. emplacements'));
+      if (k > -1 && parseInt((r.vals || [])[k], 10)) return parseInt(r.vals[k], 10);
+      const n = clpSlotList(r.slots).length; if (n) return n;
+    }
+    return Math.min(9, Math.ceil((p.level || 1) / 2));
+  };
+  // Lit « Sorts accordés » : sorts imposés et sorts à choisir (avec leurs filtres)
+  function capSpellReqs(spec, p, row) {
+    const ctx = capCtxFromPlayer(p), out = [];
+    const lvlFor = row && row.source === 'Classe' ? capLevelFor(ctx, row) : ctx.niv;
+    String(spec || '').split(';').map(x => x.trim()).filter(Boolean).forEach(part => {
+      const dn = part.match(/^Dès niv\.\s*(\d+)\s*—\s*(.+)$/);
+      if (dn) { if (+dn[1] > lvlFor) return; part = dn[2].trim(); }
+      if (/^Carac/i.test(part)) return;
+      let m = part.match(/^Sort selon (.+?)\s*:\s*(.+)$/i);
+      if (m) {
+        const chosen = ((p.capChoix || {})[m[1].trim()] || [])[0];
+        const hit = chosen && m[2].split('|').map(x => x.split('=')).find(([k]) => capNorm(k) === capNorm(chosen));
+        if (hit) out.push({ kind: 'fixed', names: hit[1].split(',').map(x => x.trim()).filter(Boolean) });
+        else out.push({ kind: 'note', text: `Sorts selon ${m[1].trim()} : fais d'abord ce choix.` });
+        return;
+      }
+      m = part.match(/^Sort( mineur)?\s*\((.+?)\s*au choix\)\s*:\s*(.+)$/i);
+      if (m) {
+        let count = m[2].trim();
+        count = /^PALIER/i.test(count) ? parseInt(capPalier(count.replace(/^PALIER\s*/i, ''), lvlFor), 10) || 0 : parseInt(count, 10) || 1;
+        const f = m[3].replace(/\(.*?\)/g, '').split(',').map(x => x.trim()).filter(Boolean);
+        const lv = f.find(x => /^niveau/i.test(x));
+        const school = f.find(x => /^école/i.test(x));
+        const classes = f.filter(x => !/^niveau|^école|toutes listes/i.test(x));
+        const maxLvl = capAccessibleLevel(p, classes[0] || capClassOf(row || {}));
+        const levels = m[1] ? [0] : lv && /accessible/i.test(lv) ? Array.from({ length: maxLvl }, (_, i) => i + 1) : lv ? [parseInt(lv.replace(/\D/g, ''), 10) || 1] : Array.from({ length: maxLvl }, (_, i) => i + 1);
+        out.push({ kind: 'pick', count, levels, classes, schools: school ? school.replace(/^école\s*/i, '').split(/\s+ou\s+|,/).map(x => x.trim()) : [], label: part });
+        return;
+      }
+      m = part.match(/^Sort( mineur)?\s*:\s*(.+)$/i);
+      if (m) out.push({ kind: 'fixed', names: m[2].split(',').map(x => x.replace(/\(.*?\)/g, '').trim()).filter(Boolean) });
+    });
+    return out;
+  }
+  // Sorts de classe à choisir : sorts mineurs, sorts connus / grimoire, ou liste libre
+  function capClassSpellReqs(p, cls, fromLvl, toLvl) {
+    const c = classesLoreDatabase.find(x => capNorm(x.name) === capNorm(cls));
+    const prog = c && clpGet(c);
+    if (!prog || !prog.magie || !prog.magie.type) return [];
+    const val = (lvl, name) => { if (lvl < 1) return 0; const k = (prog.cols || []).findIndex(x => capNorm(x) === capNorm(name)); return k > -1 ? (parseInt(((prog.rows[lvl - 1] || {}).vals || [])[k], 10) || 0) : 0; };
+    const maxAt = lvl => { const r = prog.rows[lvl - 1] || {}; const k = (prog.cols || []).findIndex(x => capNorm(x) === capNorm('Niv. emplacements')); return (k > -1 && parseInt((r.vals || [])[k], 10)) || clpSlotList(r.slots).length; };
+    const maxLvl = maxAt(toLvl);
+    const out = [];
+    const cantrips = val(toLvl, 'Sorts mineurs') - val(fromLvl, 'Sorts mineurs');
+    if (cantrips > 0) out.push({ kind: 'pick', count: cantrips, levels: [0], classes: [cls], schools: [], label: `${cantrips} sort${cantrips > 1 ? 's' : ''} mineur${cantrips > 1 ? 's' : ''} de ${cls}` });
+    if (!maxLvl) return out;
+    const lv = Array.from({ length: maxLvl }, (_, i) => i + 1);
+    if (prog.magie.type === 'connus') {
+      const n = val(toLvl, 'Sorts connus') - val(fromLvl, 'Sorts connus');
+      if (n > 0) out.push({ kind: 'pick', count: n, levels: lv, classes: [cls], schools: [], label: `${n} sort${n > 1 ? 's' : ''} connu${n > 1 ? 's' : ''} de ${cls}` });
+    } else if (prog.magie.type === 'grimoire') {
+      const n = fromLvl < 1 ? 6 + 2 * (toLvl - 1) : 2 * (toLvl - fromLvl);
+      out.push({ kind: 'pick', count: n, levels: fromLvl < 1 ? [1] : lv, classes: [cls], schools: [], label: `${n} sorts à ajouter au grimoire` });
+    } else {
+      out.push({ kind: 'pick', count: 0, levels: lv, classes: [cls], schools: [], label: `Sorts de ${cls} (nombre libre, jusqu'au niveau ${maxLvl})` });
+    }
+    return out;
+  }
+  function capSpellPickHtml(reqs, p) {
+    const known = new Set((p.knownSpellNames || []).map(capNorm));
+    return reqs.map((q, qi) => {
+      if (q.kind === 'note') return `<div class="capr-info"><em>${histEsc(q.text)}</em></div>`;
+      if (q.kind === 'fixed') return `<div class="capr-info">Ajoutés d'office : <strong>${histEsc(q.names.join(', '))}</strong></div>`;
+      const list = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).filter(s => q.levels.includes(parseInt(s.level, 10) || 0)
+        && (!q.classes.length || (s.classes || []).some(c => q.classes.some(k => capNorm(c) === capNorm(k))))
+        && (!q.schools.length || q.schools.some(sc => capNorm(s.school || '').startsWith(capNorm(sc).slice(0, 5))))
+        && !known.has(capNorm(s.name))).sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name, 'fr'));
+      return `<div class="capr-label">${histEsc(q.label)}${q.count ? ` — ${q.count} à choisir` : ''}</div>
+        <div class="capr-spellpick" data-need="${q.count}" data-qi="${qi}">
+          <input type="text" class="capr-spellsearch" placeholder="Filtrer les sorts…" oninput="capSpellFilter(this)">
+          <div class="capr-spelllist">${list.map(s => `<label class="capr-opt small" data-n="${histEsc(capNorm(s.name))}"><input type="checkbox" value="${histEsc(s.name)}"> <span>${histEsc(s.name)} <span class="capr-hint">· ${s.level ? 'niv. ' + s.level : 'mineur'}${s.school ? ' · ' + histEsc(s.school) : ''}</span></span></label>`).join('') || '<div class="capr-hint">Aucun sort ne correspond dans ton module Sorts.</div>'}</div>
+        </div>`;
+    }).join('');
+  }
+  function capSpellFilter(inp) {
+    const q = capNorm(inp.value);
+    inp.parentElement.querySelectorAll('[data-n]').forEach(el => { el.style.display = !q || el.dataset.n.includes(q) ? '' : 'none'; });
+  }
+  // Lit les sorts choisis dans un panneau ; renvoie null si un compte n'est pas respecté
+  function capReadSpellPicks(panel, reqs) {
+    const names = [];
+    reqs.forEach(q => { if (q.kind === 'fixed') names.push(...q.names); });
+    for (const box of panel.querySelectorAll('.capr-spellpick')) {
+      const vals = [...box.querySelectorAll('input[type=checkbox]:checked')].map(i => i.value);
+      const need = +box.dataset.need;
+      if (need && vals.length !== need && box.querySelector('input[type=checkbox]')) { showToast(`Choisis ${need} sort${need > 1 ? 's' : ''}`); return null; }
+      names.push(...vals);
+    }
+    return names.map(capSpellName);
+  }
+
+  /* ===================== EFFETS SUR LA FICHE (vitesse, CA sans armure, résistances…) ===================== */
+  function capComputeEffects(caps, p) {
+    const ctx = capCtxFromPlayer(p);
+    const fx = { speedSet: null, speedAdd: 0, speeds: {}, unarmored: [], resist: [], immun: [], notes: [] };
+    (caps || []).forEach(c => {
+      const r = capBase.find(x => x.id === c.baseId);
+      if (!r || !r.effets) return;
+      capEval(r.effets, ctx, r).split(';').map(x => x.trim()).filter(Boolean).forEach(e => {
+        let m;
+        if ((m = e.match(/^Vitesse\s*\((nage|vol|escalade|fouissement)\)\s*:\s*([\d,.]+)/i))) fx.speeds[m[1].toLowerCase()] = parseFloat(m[2].replace(',', '.'));
+        else if ((m = e.match(/^Vitesse\s*:\s*\+\s*([\d,.]+)/i))) fx.speedAdd += parseFloat(m[1].replace(',', '.'));
+        else if ((m = e.match(/^Vitesse\s*:\s*([\d,.]+)/i))) fx.speedSet = Math.max(fx.speedSet || 0, parseFloat(m[1].replace(',', '.')));
+        else if ((m = e.match(/^CA sans armure\s*:\s*([^(]+)(\((.+)\))?/i))) fx.unarmored.push({ formula: m[1].trim(), shield: !/sans bouclier/i.test(m[3] || '') });
+        else if ((m = e.match(/^Résistance\s*:\s*(.+)$/i))) fx.resist.push(...m[1].split(',').map(x => x.trim()));
+        else if ((m = e.match(/^Immunité\s*:\s*(.+)$/i))) fx.immun.push(...m[1].split(',').map(x => x.trim()));
+        else fx.notes.push(e);
+      });
+    });
+    return fx;
+  }
+  // Applique les effets aux champs que la fiche joueur lit (vitesse, CA sans armure…)
+  function capApplyEffects(d, p) {
+    if (!capBase.length) return;
+    const fx = capComputeEffects(d.capacites, { ...p, ...d });
+    if (d.speedBase == null) d.speedBase = parseFloat(d.speed) || 9;
+    d.speed = (fx.speedSet || d.speedBase) + fx.speedAdd;
+    d.capEffects = fx;
+  }
+
+  /* ===================== ASSISTANT DE CRÉATION — 5 PAGES ===================== */
+  const WIZ_AB = [['for', 'Force', 'wFor'], ['dex', 'Dextérité', 'wDex'], ['con', 'Constitution', 'wCon'], ['int', 'Intelligence', 'wInt'], ['sag', 'Sagesse', 'wSag'], ['cha', 'Charisme', 'wCha']];
+  const WIZ_ARRAY = [15, 14, 13, 12, 10, 8];
+  const WIZ_STEP_LABELS = ['Identité', 'Classes', 'Maîtrises', 'Points de vie', 'Sorts'];
+  let wizAb = { mode: 'standard', base: {}, choice: [], asi: {} };
+  let wizHp = { order: [], rolls: {} };
+  let wizSpells = {};
+  const wN = t => capNorm(t).replace(/s\b/g, '');
+  const wizMod = v => Math.floor(((parseInt(v, 10) || 10) - 10) / 2);
+  const wizSign = v => (v >= 0 ? '+' : '') + v;
+
+  /* ---- Page 1 : caractéristiques ---- */
+  // Bonus raciaux lus dans le Lore (« Votre Dextérité augmente de 2 », « deux caractéristiques de votre choix augmentent de 1 »…)
+  function wizRaceBonus() {
+    const race = (document.getElementById('wRace') || {}).value || '';
+    const { race: r, parent } = typeof wizRaceLore === 'function' ? wizRaceLore(race) : {};
+    const texts = [parent, r && r !== parent ? r : null].filter(Boolean).map(x => ((x.traits || [])[0] || {}).text || '').map(t => t.split('\n')[0]);
+    const fixed = {}; let choice = 0;
+    texts.forEach(t => {
+      if (/toutes de (\d)/i.test(t)) { const v = +t.match(/toutes de (\d)/i)[1]; WIZ_AB.forEach(([k]) => fixed[k] = (fixed[k] || 0) + v); return; }
+      WIZ_AB.forEach(([k, label]) => { const m = t.match(new RegExp(label + '\\s+(?:augmente\\s+)?de\\s+(\\d)', 'i')); if (m) fixed[k] = (fixed[k] || 0) + (+m[1]); });
+      const c = t.match(/(une|deux|trois)\s+(?:autres?\s+)?(?:valeurs?\s+de\s+)?caractéristiques?\s+(?:de votre choix|au choix)[^.]*?de\s+(\d)/i);
+      if (c) choice += { une: 1, deux: 2, trois: 3 }[c[1].toLowerCase()] || 1;
+    });
+    // Races dont le Lore ne précise pas le bonus : valeurs du Manuel des joueurs / Volo
+    if (!Object.keys(fixed).length && !choice) {
+      const n = capNorm((parent || r || {}).name || race);
+      const DEF = { humain: { for: 1, dex: 1, con: 1, int: 1, sag: 1, cha: 1 }, 'homme-lezard': { con: 2, sag: 1 }, 'yuan ti': { cha: 2, int: 1 } };
+      Object.assign(fixed, DEF[n] || {});
+    }
+    return { fixed, choice };
+  }
+  function wizAsiTotals() {
+    const out = {};
+    if (wizAb.mode !== 'standard') return out;
+    wizCap.items.filter(i => i.kind === 'asi' && i.status === 'accepted' && i.asi).forEach(i => i.asi.forEach(k => { if (k) out[k] = (out[k] || 0) + 1; }));
+    return out;
+  }
+  function wizAbTotals() {
+    const rb = wizRaceBonus(), asi = wizAsiTotals(), tot = {};
+    WIZ_AB.forEach(([k, , id]) => {
+      if (wizAb.mode === 'libre') { tot[k] = parseInt(document.getElementById(id).value, 10) || null; return; }
+      const b = wizAb.base[k];
+      if (!b) { tot[k] = null; return; }
+      const ch = wizAb.choice.filter(x => x === k).length;
+      tot[k] = Math.min(20, b + (rb.fixed[k] || 0) + ch) + (asi[k] || 0);
+    });
+    return tot;
+  }
+  function wizAbSync() {
+    if (wizAb.mode !== 'standard') return;
+    const tot = wizAbTotals();
+    WIZ_AB.forEach(([k, , id]) => { document.getElementById(id).value = tot[k] == null ? '' : Math.min(20, tot[k]); });
+    if (typeof updateAutoCalc === 'function') updateAutoCalc();
+  }
+  function wizAbRender() {
+    const box = document.getElementById('wAbBlock');
+    if (!box) return;
+    const rb = wizRaceBonus(), asi = wizAsiTotals();
+    const std = wizAb.mode === 'standard';
+    const used = Object.values(wizAb.base).filter(Boolean);
+    const chips = WIZ_ARRAY.map((v, i) => { const n = WIZ_ARRAY.slice(0, i + 1).filter(x => x === v).length; const u = used.filter(x => x === v).length >= n; return `<span class="wab-chip${u ? ' used' : ''}">${v}</span>`; }).join('');
+    const tot = wizAbTotals();
+    const rows = WIZ_AB.map(([k, label, id]) => {
+      let baseCell;
+      if (std) {
+        const mine = wizAb.base[k];
+        const avail = WIZ_ARRAY.filter((v, i) => { const taken = Object.entries(wizAb.base).filter(([kk, vv]) => kk !== k && vv === v).length; const total = WIZ_ARRAY.filter(x => x === v).length; return taken < total; });
+        baseCell = `<select onchange="wizAbSet('${k}', this.value)" aria-label="${label}"><option value="">—</option>${[...new Set(avail)].map(v => `<option value="${v}" ${mine === v ? 'selected' : ''}>${v}</option>`).join('')}</select>`;
+      } else {
+        baseCell = `<input type="number" min="1" max="30" value="${histEsc(document.getElementById(id).value)}" oninput="document.getElementById('${id}').value = this.value; wizAbRefreshTotals()" aria-label="${label}">`;
+      }
+      const bonus = std ? [(rb.fixed[k] ? `+${rb.fixed[k]}` : ''), wizAb.choice.filter(x => x === k).length ? `+${wizAb.choice.filter(x => x === k).length} (choix)` : '', asi[k] ? `+${asi[k]} (ASI)` : ''].filter(Boolean).join(' ') || '—' : '—';
+      const t = tot[k];
+      return `<div class="wab-row"><span>${label}</span><span>${baseCell}</span><span class="wab-bonus">${bonus}</span><span class="wab-total" data-tot="${k}">${t == null ? '—' : t}</span><span class="wab-total" data-mod="${k}">${t == null ? '—' : wizSign(wizMod(t))}</span></div>`;
+    }).join('');
+    const choiceSel = std && rb.choice ? `<div class="wab-choice">Bonus racial au choix : ${Array.from({ length: rb.choice }, (_, i) => `<select onchange="wizAbChoice(${i}, this.value)" aria-label="Bonus au choix ${i + 1}"><option value="">+1 à…</option>${WIZ_AB.filter(([k]) => !rb.fixed[k]).map(([k, l]) => `<option value="${k}" ${wizAb.choice[i] === k ? 'selected' : ''}>${l}</option>`).join('')}</select>`).join(' ')}</div>` : '';
+    box.innerHTML = `
+      <div class="wab-top">
+        <div class="wab-mode"><button type="button" class="${std ? 'on' : ''}" onclick="wizAbMode('standard')">Tableau standard</button><button type="button" class="${std ? '' : 'on'}" onclick="wizAbMode('libre')">Saisie libre</button></div>
+        ${std ? `<div class="wab-chips">${chips}</div>` : '<div class="field-hint">Valeurs finales (bonus de race et ASI déjà compris).</div>'}
+      </div>
+      <div class="wab-row wab-head"><span>Caractéristique</span><span>${std ? 'Valeur' : 'Valeur finale'}</span><span>Bonus</span><span>Total</span><span>Mod.</span></div>
+      ${rows}${choiceSel}`;
+  }
+  function wizAbRefreshTotals() {
+    const tot = wizAbTotals();
+    WIZ_AB.forEach(([k]) => {
+      const t = document.querySelector(`[data-tot="${k}"]`), m = document.querySelector(`[data-mod="${k}"]`);
+      if (t) t.textContent = tot[k] == null ? '—' : tot[k];
+      if (m) m.textContent = tot[k] == null ? '—' : wizSign(wizMod(tot[k]));
+    });
+    if (typeof updateAutoCalc === 'function') updateAutoCalc();
+  }
+  function wizAbSet(k, v) { wizAb.base[k] = v ? parseInt(v, 10) : null; wizAbSync(); wizAbRender(); }
+  function wizAbChoice(i, k) { wizAb.choice[i] = k || null; wizAbSync(); wizAbRender(); }
+  function wizAbMode(mode) {
+    if (mode === wizAb.mode) return;
+    if (mode === 'libre') { WIZ_AB.forEach(([k, , id]) => { const t = wizAbTotals()[k]; if (t != null) document.getElementById(id).value = t; }); }
+    else { WIZ_AB.forEach(([, , id]) => document.getElementById(id).value = ''); wizAb.base = {}; wizAb.choice = []; }
+    wizAb.mode = mode;
+    wizAbSync(); wizAbRender();
+  }
+  // Ce que la race et l'historique accordent d'office (aperçu page 1)
+  function wizRaceGrantsRender() {
+    const box = document.getElementById('wRaceGrants');
+    if (!box) return;
+    const g = wizGrants(true).filter(x => x.source === 'race' || x.source === 'historique');
+    const speed = (() => { const r = getWizardRacesData().find(x => x.name === document.getElementById('wRace').value); return r ? r.speed : null; })();
+    const tags = g.map(x => x.value);
+    box.innerHTML = tags.length || speed ? `<span class="field-hint">Accordé d'office (coché aux pages suivantes) :</span> ${speed ? `<span class="wiz-tag">Vitesse ${String(speed).replace('.', ',')} m</span>` : ''}${[...new Set(tags)].map(t => `<span class="wiz-tag">${histEsc(t)}</span>`).join('')}` : '';
+  }
+
+  /* ---- Page 2 : ASI (sans don) ---- */
+  function wizAsiItems(p) {
+    const out = [];
+    [[p.classe1, p.niveau1], [p.classe2, p.niveau2]].forEach(([c, n]) => {
+      if (!c || !n) return;
+      const cl = classesLoreDatabase.find(x => capNorm(x.name) === capNorm(c));
+      const prog = cl && clpGet(cl);
+      if (!prog) return;
+      prog.rows.slice(0, n).forEach((r, i) => {
+        if (/Amélioration de caractéristiques/i.test(r.feats || '')) out.push({ kind: 'asi', baseId: `asi:${c}:${i + 1}`, label: 'Amélioration de caractéristiques', group: `${c} — niveau ${i + 1}`, order: 10 + (c === p.classe1 ? 0 : 100) + i + 1, status: 'pending' });
+      });
+    });
+    return out;
+  }
+  function wizAsiPanel(it, idx) {
+    const opts = sel => `<option value="">—</option>` + WIZ_AB.map(([k, l]) => `<option value="${k}" ${sel === k ? 'selected' : ''}>${l}</option>`).join('');
+    const a = it.asi || [];
+    return `<div class="capr-panel"><div class="capr-label">Deux fois +1 (ou deux fois la même caractéristique pour +2) — pas de don</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="wAsiA">${opts(a[0])}</select><select id="wAsiB">${opts(a[1])}</select></div>
+      ${wizAb.mode === 'libre' ? '<div class="capr-info"><em>Saisie libre : tes valeurs de la page 1 sont finales, l\'ASI n\'y est pas ajoutée.</em></div>' : ''}
+      <div class="capr-actions"><button class="capr-send" onclick="wizAsiAccept(${idx})">Valider</button><button class="capr-skip" onclick="wizCapSkip(${idx})">Écarter</button></div></div>`;
+  }
+  function wizAsiAccept(idx) {
+    const it = wizCap.items[idx];
+    const a = document.getElementById('wAsiA').value, b = document.getElementById('wAsiB').value;
+    if (!a || !b) { showToast('Choisis les deux points'); return; }
+    it.asi = [a, b]; it.status = 'accepted'; it.choiceLabel = a === b ? `+2 ${WIZ_AB.find(x => x[0] === a)[1]}` : `+1 ${WIZ_AB.find(x => x[0] === a)[1]}, +1 ${WIZ_AB.find(x => x[0] === b)[1]}`;
+    wizAbSync();
+    const next = wizCap.items.findIndex(x => x.status === 'pending'); wizCap.open = next > -1 ? next : null; wizCapRender();
+  }
+
+  /* ---- Page 3 : maîtrises (accordées + à choisir) ---- */
+  const MULTI_PROFS = {
+    barbare: { armures: 'boucliers', armes: 'armes courantes, armes de guerre' }, barde: { armures: 'légères', competences: '1 au choix', outils: 'un instrument de musique au choix' },
+    clerc: { armures: 'légères, intermédiaires, boucliers' }, druide: { armures: 'légères, intermédiaires, boucliers' },
+    guerrier: { armures: 'légères, intermédiaires, boucliers', armes: 'armes courantes, armes de guerre' }, moine: { armes: 'armes courantes, épée courte' },
+    paladin: { armures: 'légères, intermédiaires, boucliers', armes: 'armes courantes, armes de guerre' },
+    rodeur: { armures: 'légères, intermédiaires, boucliers', armes: 'armes courantes, armes de guerre', competences: '1 parmi Athlétisme, Discrétion, Dressage, Intuition, Investigation, Nature, Perception et Survie' },
+    roublard: { armures: 'légères', competences: '1 parmi Acrobaties, Athlétisme, Discrétion, Escamotage, Intimidation, Intuition, Investigation, Perception, Persuasion, Représentation et Tromperie', outils: 'outils de voleur' },
+    occultiste: { armures: 'légères', armes: 'armes courantes' }, artificer: { armures: 'légères, intermédiaires, boucliers', outils: 'outils de voleur, outils de bricoleur' },
+  };
+  const NUMW = { un: 1, une: 1, deux: 2, trois: 3, quatre: 4 };
+  // « 2 parmi A, B et C » / « 3 au choix » / « un jeu au choix »
+  function wizParseList(txt) {
+    const t = String(txt || '').trim();
+    if (!t || /^(aucune?|—)$/i.test(t)) return { fixed: [], picks: [] };
+    const fixed = [], picks = [];
+    let m = t.match(/^(\d+|un|une|deux|trois|quatre)\s+parmi\s+(.+)$/i);
+    if (m) return { fixed, picks: [{ count: +m[1] || NUMW[m[1].toLowerCase()] || 1, among: m[2].split(/,|\bet\b/).map(x => x.trim()).filter(Boolean) }] };
+    t.split(',').map(x => x.trim()).filter(Boolean).forEach(part => {
+      const c = part.match(/^(\d+|un|une|deux|trois|quatre)\b\s*(.*?)\s*au choix$/i);
+      if (c) picks.push({ count: +c[1] || NUMW[c[1].toLowerCase()] || 1, among: c[2] ? [c[2]] : ['toutes'] });
+      else fixed.push(part.replace(/\(.*?\)/g, '').trim());
+    });
+    return { fixed, picks };
+  }
+  function wizMatch(list, txt) {
+    const t = wN(txt);
+    if (!t) return [];
+    if (/^armes? courantes?$/.test(t)) return weaponCategories.filter(c => c.key.startsWith('courantes')).flatMap(c => c.items);
+    if (/^armes? de guerre$/.test(t)) return weaponCategories.filter(c => c.key.startsWith('guerre')).flatMap(c => c.items);
+    return list.filter(x => { const n = wN(x); return n === t || n.includes(t) || (t.length > 4 && t.includes(n)); });
+  }
+  function wizCandidates(type, among) {
+    const base = type === 'competence' || type === 'expertise' ? skillsData.map(s => s.name) : type === 'langue' ? languagesData
+      : type === 'outil' ? [...toolCategories.flatMap(c => c.items), ...generalToolItems] : type === 'arme' ? weaponCategories.flatMap(c => c.items) : armorCategories;
+    const a = (among || []).join(' ');
+    if (!among || !among.length || /toute|tous|^au choix$/i.test(a)) return base;
+    if (/instrument/i.test(a) && /artisan/i.test(a)) return [...toolCategories[0].items, ...toolCategories[1].items];
+    if (/instrument/i.test(a)) return toolCategories[1].items;
+    if (/artisan/i.test(a)) return toolCategories[0].items;
+    if (/jeu/i.test(a)) return generalToolItems.filter(x => /jeu/i.test(x));
+    return among.flatMap(x => wizMatch(base, x));
+  }
+  // Tout ce qui est accordé d'office ({type, value, source}) ; withPending : inclut les capacités pas encore validées
+  function wizGrants(withPending) {
+    const p = wizPseudoPlayer(), out = [];
+    const add = (type, values, source) => values.forEach(v => out.push({ type, value: v, source }));
+    const h = historiquesDatabase.find(x => x.name === p.historique);
+    if (h) {
+      add('competence', wizParseList(h.competences).fixed.flatMap(x => wizMatch(skillsData.map(s => s.name), x)), 'historique');
+      add('outil', wizParseList(h.outils).fixed.flatMap(x => wizMatch([...toolCategories.flatMap(c => c.items), ...generalToolItems], x)), 'historique');
+    }
+    [[p.classe1, 1], [p.classe2, 2]].forEach(([c, rank]) => {
+      if (!c) return;
+      const cl = classesLoreDatabase.find(x => capNorm(x.name) === capNorm(c)) || {};
+      const src = rank === 1 ? cl : (MULTI_PROFS[capNorm(c)] || {});
+      add('arme', wizParseList(src.armes).fixed.flatMap(x => wizMatch(weaponCategories.flatMap(k => k.items), x)), c);
+      add('armure', wizParseList(String(src.armures || '').replace(/\(.*?\)/g, '')).fixed.flatMap(x => wizMatch(armorCategories, x)), c);
+      add('outil', wizParseList(src.outils).fixed.flatMap(x => wizMatch([...toolCategories.flatMap(k => k.items), ...generalToolItems], x)), c);
+    });
+    wizCap.items.filter(i => i.kind === 'cap' && (withPending ? i.status !== 'skipped' : i.status === 'accepted')).forEach(it => {
+      const r = capBase.find(x => x.id === it.baseId);
+      if (!r || !r.maitrises) return;
+      const src = r.source === 'Race' ? 'race' : r.source === 'Historique' ? 'historique' : r.origine;
+      capParseMaitrises(r.maitrises, capCtxFromPlayer(p), r).forEach(m => { if (!m.count) add(m.type, capFixedValues(m), src); });
+    });
+    // options choisies (style de combat, manifestations…) qui donnent des maîtrises
+    wizCap.extraCaps.forEach(x => { const o = capBase.find(r => r.id === x.baseId); if (o && o.maitrises) capParseMaitrises(o.maitrises, capCtxFromPlayer(p), o).forEach(m => { if (!m.count) add(m.type, capFixedValues(m), o.origine); }); });
+    return out;
+  }
+  // Tout ce qu'il reste à choisir ({type, count, candidates, label})
+  function wizRequirements() {
+    const p = wizPseudoPlayer(), out = [];
+    const h = historiquesDatabase.find(x => x.name === p.historique);
+    if (h) {
+      wizParseList(h.outils).picks.forEach(q => out.push({ type: 'outil', count: q.count, candidates: wizCandidates('outil', q.among), label: `${h.name} : ${q.count} outil${q.count > 1 ? 's' : ''} au choix` }));
+    }
+    [[p.classe1, 1], [p.classe2, 2]].forEach(([c, rank]) => {
+      if (!c) return;
+      const cl = classesLoreDatabase.find(x => capNorm(x.name) === capNorm(c)) || {};
+      const src = rank === 1 ? cl : (MULTI_PROFS[capNorm(c)] || {});
+      wizParseList(src.competences).picks.forEach(q => out.push({ type: 'competence', count: q.count, candidates: wizCandidates('competence', q.among), label: `${c} : ${q.count} compétence${q.count > 1 ? 's' : ''}` }));
+      wizParseList(src.outils).picks.forEach(q => out.push({ type: 'outil', count: q.count, candidates: wizCandidates('outil', q.among), label: `${c} : ${q.count} outil${q.count > 1 ? 's' : ''} ou instrument${q.count > 1 ? 's' : ''}` }));
+    });
+    wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
+      const r = capBase.find(x => x.id === it.baseId);
+      if (!r || !r.maitrises) return;
+      capParseMaitrises(r.maitrises, capCtxFromPlayer(p), r).forEach(m => {
+        if (!m.count) return;
+        out.push({ type: m.type, count: m.count, candidates: m.type === 'expertise' && /maitrisee/.test(capNorm(m.values.join(' '))) ? skillsData.map(s => s.name) : wizCandidates(m.type, m.values), label: `${r.nom} : ${m.count} ${m.label.toLowerCase()}${m.count > 1 ? 's' : ''}` });
+      });
+    });
+    return out;
+  }
+  const WIZ_TYPE_BOX = { competence: 'wReqSkills', expertise: 'wReqSkills', arme: 'wReqWeapons', armure: 'wReqArmor', outil: 'wReqTools', langue: 'wReqLangs', jd: null };
+  function wizCheckboxFor(type, value) {
+    const n = capNorm(value);
+    if (type === 'competence' || type === 'expertise') { const i = skillsData.findIndex(s => capNorm(s.name) === n); return i > -1 ? document.getElementById((type === 'expertise' ? 'wSkillE' : 'wSkillT') + i) : null; }
+    if (type === 'arme') { for (const c of weaponCategories) { const i = c.items.findIndex(x => capNorm(x) === n); if (i > -1) return document.getElementById(`witem_${c.key}_${i}`); } return null; }
+    if (type === 'armure') { const i = armorCategories.findIndex(x => capNorm(x) === n); return i > -1 ? document.getElementById('warmor_' + i) : null; }
+    if (type === 'outil') { for (const c of toolCategories) { const i = c.items.findIndex(x => capNorm(x) === n); if (i > -1) return document.getElementById(`wtool_${c.key}_${i}`); } const g = generalToolItems.findIndex(x => capNorm(x) === n); return g > -1 ? document.getElementById('wtoolgen_' + g) : null; }
+    if (type === 'langue') { const i = languagesData.findIndex(x => capNorm(x) === n); return i > -1 ? document.getElementById('wlang_' + i) : null; }
+    return null;
+  }
+  // Coche et verrouille ce qui est accordé, avec sa source ; déverrouille ce qui ne l'est plus
+  function wizProfsApply() {
+    document.querySelectorAll('#wizardBody [data-grant]').forEach(el => {
+      el.disabled = false; el.removeAttribute('data-grant');
+      const tag = el.parentElement && el.parentElement.querySelector('.wiz-src'); if (tag) tag.remove();
+      if (el.dataset.wasGranted) { el.checked = false; delete el.dataset.wasGranted; }
+    });
+    wizGrants(false).forEach(g => {
+      const el = wizCheckboxFor(g.type, g.value);
+      if (!el) return;
+      if (!el.checked) el.dataset.wasGranted = '1';
+      el.checked = true; el.disabled = true; el.setAttribute('data-grant', '1');
+      if (g.type === 'expertise') { const t = wizCheckboxFor('competence', g.value); if (t) t.checked = true; }
+      if (el.parentElement && !el.parentElement.querySelector('.wiz-src')) el.parentElement.insertAdjacentHTML('beforeend', `<span class="wiz-src">${histEsc(g.source)}</span>`);
+    });
+    wizProfsBanners();
+  }
+  function wizProfsBanners() {
+    const reqs = wizRequirements();
+    Object.values(WIZ_TYPE_BOX).filter(Boolean).forEach(id => { const b = document.getElementById(id); if (b) b.innerHTML = ''; });
+    const granted = new Set(wizGrants(false).map(g => g.type + '|' + capNorm(g.value)));
+    const counted = new Set();
+    reqs.forEach(q => {
+      const box = document.getElementById(WIZ_TYPE_BOX[q.type]);
+      if (!box) return;
+      const chosen = q.candidates.filter(c => { const el = wizCheckboxFor(q.type, c); const key = q.type + '|' + capNorm(c); return el && el.checked && !granted.has(key) && !counted.has(key); });
+      const take = chosen.slice(0, q.count); take.forEach(c => counted.add(q.type + '|' + capNorm(c)));
+      const ok = take.length >= q.count;
+      box.insertAdjacentHTML('beforeend', `<span class="wiz-req ${ok ? 'ok' : ''}">${histEsc(q.label)} (${take.length} / ${q.count})${ok ? ' ✓' : ''}</span>`);
+    });
+    // Ce qui est déjà accordé, en rappel vert par section
+    const by = {};
+    wizGrants(false).forEach(g => { const id = WIZ_TYPE_BOX[g.type]; if (id) (by[id] = by[id] || new Set()).add(g.source); });
+    Object.entries(by).forEach(([id, srcs]) => { const b = document.getElementById(id); if (b) b.insertAdjacentHTML('afterbegin', `<span class="wiz-req ok">Accordé : ${histEsc([...srcs].join(', '))} ✓</span>`); });
+    return reqs;
+  }
+  function wizProfsMissing() {
+    const reqs = wizRequirements();
+    const granted = new Set(wizGrants(false).map(g => g.type + '|' + capNorm(g.value)));
+    return reqs.filter(q => q.candidates.filter(c => { const el = wizCheckboxFor(q.type, c); return el && el.checked && !granted.has(q.type + '|' + capNorm(c)); }).length < q.count);
+  }
+
+  /* ---- Page 4 : points de vie niveau par niveau ---- */
+  function wizHpRender() {
+    const box = document.getElementById('wHpBlock');
+    if (!box) return;
+    const p = wizPseudoPlayer();
+    const classes = [[p.classe1, p.niveau1], [p.classe2, p.niveau2]].filter(([c, n]) => c && n);
+    const total = p.level;
+    // ordre des niveaux : par défaut classe 1 puis classe 2 ; modifiable ligne par ligne
+    const def = classes.flatMap(([c, n]) => Array(n).fill(c));
+    if (wizHp.order.length !== total || wizHp.order.some((c, i) => !classes.some(([cc]) => cc === c))) wizHp.order = def;
+    const die = c => (classesData.find(x => x.name === c) || {}).hitDie || 8;
+    const conMod = wizMod(document.getElementById('wCon').value);
+    // bonus de capacités : « PV max : +1 par niveau » (race) ou « +1 par niveau de classe »
+    const bon = [];
+    wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
+      const r = capBase.find(x => x.id === it.baseId);
+      const m = r && String(r.effets || '').match(/PV max\s*:\s*\+(\d+)\s*par niveau( de classe)?/i);
+      if (m) bon.push({ v: +m[1], cls: m[2] ? capClassOf(r) : null, nom: r.nom });
+    });
+    const counts = {};
+    let sum = 0;
+    const rows = wizHp.order.map((c, i) => {
+      counts[c] = (counts[c] || 0) + 1;
+      const d = die(c), avg = Math.floor(d / 2) + 1;
+      const v = i === 0 ? d : (wizHp.rolls[i] != null ? wizHp.rolls[i] : avg);
+      const b = bon.filter(x => !x.cls || capNorm(x.cls) === capNorm(c)).reduce((s, x) => s + x.v, 0);
+      const lineTot = Math.max(1, v + conMod) + b;
+      sum += lineTot;
+      const sel = i === 0 || classes.length < 2 ? `<span>${histEsc(c)} ${counts[c]}</span>` : `<select onchange="wizHpOrder(${i}, this.value)" aria-label="Classe du niveau ${i + 1}">${classes.map(([cc]) => `<option ${cc === c ? 'selected' : ''}>${histEsc(cc)}</option>`).join('')}</select>`;
+      const pv = i === 0 ? `<strong>${d}</strong> <span class="field-hint">maximum</span>` : `<input type="number" min="1" max="${d}" value="${v}" onchange="wizHpRoll(${i}, this.value)" aria-label="PV du niveau ${i + 1}"> <button type="button" class="wizhp-avg" onclick="wizHpRoll(${i}, ${avg})">Moyenne (${avg})</button>`;
+      return `<div class="wizhp-row"><span class="wizhp-n">${i + 1}</span><span>${sel}</span><span>D${d}</span><span>${pv}</span><span>${wizSign(conMod)}</span><span>${b ? '+' + b : '—'}</span><strong>${lineTot}</strong></div>`;
+    }).join('');
+    const okOrder = classes.every(([c, n]) => wizHp.order.filter(x => x === c).length === n);
+    document.getElementById('wPV').value = sum;
+    box.innerHTML = `
+      <p class="wizard-hint">Niveau 1 : le maximum du dé de vie de la classe 1. Ensuite, les PV obtenus avec le dé de la classe qui prend le niveau (moyenne proposée, ou ton lancer), plus le modificateur de Constitution et les bonus de race ou de classe${bon.length ? ` (${histEsc(bon.map(x => x.nom).join(', '))})` : ''}. Indique dans quel ordre le personnage a pris ses niveaux.</p>
+      <div class="wizhp-row wizhp-head"><span>Niv.</span><span>Classe</span><span>Dé</span><span>PV du dé</span><span>Mod. Con</span><span>Bonus</span><span>Total</span></div>
+      ${rows}
+      ${okOrder ? '' : `<div class="wizard-error" style="margin-top:8px">L'ordre doit contenir ${classes.map(([c, n]) => `${n} niveau${n > 1 ? 'x' : ''} de ${c}`).join(' et ')}.</div>`}
+      <div class="wizhp-total"><span class="field-hint">PV maximum</span><strong>${sum}</strong></div>`;
+  }
+  function wizHpOrder(i, c) { wizHp.order[i] = c; wizHpRender(); }
+  function wizHpRoll(i, v) { wizHp.rolls[i] = Math.max(1, parseInt(v, 10) || 1); wizHpRender(); }
+
+  /* ---- Page 5 : sorts (une liste déroulante par sort à choisir) ---- */
+  function wizSpellOptions(q, current) {
+    const all = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).filter(s => q.levels.includes(parseInt(s.level, 10) || 0)
+      && (!q.classes.length || (s.classes || []).some(c => q.classes.some(k => capNorm(c) === capNorm(k))))
+      && (!q.schools.length || q.schools.some(sc => capNorm(s.school || '').startsWith(capNorm(sc).slice(0, 5)))));
+    const taken = new Set(Object.values(wizSpells).flat().filter(Boolean).map(capNorm));
+    const byLvl = {};
+    all.filter(s => !taken.has(capNorm(s.name)) || capNorm(s.name) === capNorm(current || '')).sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+      .forEach(s => (byLvl[s.level || 0] = byLvl[s.level || 0] || []).push(s));
+    return `<option value="">— choisir —</option>` + Object.keys(byLvl).sort((a, b) => a - b).map(l => `<optgroup label="${+l ? 'Niveau ' + l : 'Sorts mineurs'}">${byLvl[l].map(s => `<option ${capNorm(s.name) === capNorm(current || '') ? 'selected' : ''}>${histEsc(s.name)}</option>`).join('')}</optgroup>`).join('');
+  }
+  function wizSpellBlock(key, q, title) {
+    const picks = wizSpells[key] = wizSpells[key] || [];
+    const n = q.count || Math.max(1, picks.length + 1);
+    const selects = Array.from({ length: n }, (_, i) => `<select onchange="wizSpellPick('${key}', ${i}, this.value)" aria-label="${histEsc(title)} ${i + 1}">${wizSpellOptions(q, picks[i])}</select>`).join('');
+    const done = picks.filter(Boolean).length;
+    const badge = q.count ? `<span class="wiz-req ${done >= q.count ? 'ok' : ''}">${done} / ${q.count}${done >= q.count ? ' ✓' : ''}</span>` : `<span class="wiz-req">Liste libre</span>`;
+    return `<div class="wsp-blk"><div class="wsp-top"><strong>${histEsc(title)}</strong>${badge}</div><div class="wsp-sel">${selects}</div></div>`;
+  }
+  function wizSpellPick(key, i, v) {
+    const list = wizSpells[key] = wizSpells[key] || [];
+    list[i] = v || null;
+    wizSpellsRender();
+  }
+  function wizSpellsRender() {
+    const box = document.getElementById('wSpellsPage');
+    if (!box) return;
+    const p = wizPseudoPlayer();
+    let html = '';
+    [[p.classe1, p.niveau1], [p.classe2, p.niveau2]].forEach(([c, n]) => {
+      if (!c || !n) return;
+      const reqs = capClassSpellReqs(p, c, 0, n);
+      if (!reqs.length) return;
+      const ab = casterAbilityMap[c] || '';
+      const key = (WIZ_AB.find(x => x[1] === ab) || [])[0];
+      const mod = key ? wizMod(document.getElementById(WIZ_AB.find(x => x[0] === key)[2]).value) : 0;
+      const prof = 2 + Math.floor((p.level - 1) / 4);
+      html += `<div class="wsp-class"><div class="wsp-head"><h4>${histEsc(c)} ${n}</h4><span>${histEsc(ab)} · DD <strong>${8 + prof + mod}</strong> · attaque <strong>${wizSign(prof + mod)}</strong></span></div>
+        ${reqs.map((q, qi) => wizSpellBlock(`cls:${c}:${qi}`, q, q.label)).join('')}</div>`;
+    });
+    // Sorts accordés par les capacités
+    let granted = '';
+    wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
+      const r = capBase.find(x => x.id === it.baseId);
+      if (!r || !r.sorts) return;
+      capSpellReqs(r.sorts, p, r).forEach((q, qi) => {
+        if (q.kind === 'fixed') granted += `<div class="wsp-blk"><div class="wsp-top"><strong>${histEsc(r.nom)}</strong><span class="wiz-req ok">Imposés ✓</span></div><div class="wsp-fixed">${q.names.map(x => `<span>${histEsc(x)}</span>`).join('')}</div></div>`;
+        else if (q.kind === 'pick') granted += wizSpellBlock(`cap:${r.id}:${qi}`, q, `${r.nom} — ${q.label}`);
+        else granted += `<div class="wsp-blk"><div class="wsp-top"><strong>${histEsc(r.nom)}</strong></div><div class="field-hint">${histEsc(q.text)}</div></div>`;
+      });
+    });
+    box.innerHTML = (html || '<p class="wizard-hint">Aucune classe lanceuse de sorts.</p>')
+      + (granted ? `<div class="section-title">Sorts accordés par les capacités</div>${granted}` : '');
+  }
+  // Tous les sorts retenus (imposés + choisis) pour l'enregistrement
+  function wizSpellsFinal() {
+    const p = wizPseudoPlayer(), names = [];
+    wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
+      const r = capBase.find(x => x.id === it.baseId);
+      if (r && r.sorts) capSpellReqs(r.sorts, p, r).forEach(q => { if (q.kind === 'fixed') names.push(...q.names); });
+    });
+    Object.values(wizSpells).forEach(l => names.push(...l.filter(Boolean)));
+    return [...new Set(names.map(capSpellName))];
+  }
+  function wizSpellsMissing() {
+    const p = wizPseudoPlayer(); let miss = 0;
+    [[p.classe1, p.niveau1], [p.classe2, p.niveau2]].forEach(([c, n]) => { if (c && n) capClassSpellReqs(p, c, 0, n).forEach((q, qi) => { if (q.count) miss += Math.max(0, q.count - (wizSpells[`cls:${c}:${qi}`] || []).filter(Boolean).length); }); });
+    return miss;
+  }
+
+  function wizResetNewState(p) {
+    wizAb = { mode: p ? 'libre' : 'standard', base: {}, choice: [], asi: {} };
+    wizHp = { order: [], rolls: {} };
+    wizSpells = {};
   }
 
   /* ===================== LORE › CHRONIQUES (légendes, récits anciens…) ===================== */
