@@ -3141,6 +3141,7 @@
     overflow: hidden;
   }
 #page-inventaire .comp-hero img { width: 100%; height: 100%; object-fit: cover; }
+.speed-extra { font-size: 9.5px; color: var(--ink-faint); margin-top: 1px; text-transform: lowercase; }
 .comp-ident { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 10px 0 12px; }
 .comp-ident span { font-size: 11.5px; padding: 3px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--card-border); color: var(--ink-dim); }
 .comp-prof-line { font-size: 12.5px; color: var(--ink-dim); margin: 0 0 8px; line-height: 1.5; }
@@ -4362,7 +4363,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 05/10 (16)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 06/10 (18)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -5139,10 +5140,22 @@
 
   const potionRow = document.getElementById('potionRow');
 
+  // Reconnaît le type de potion de guérison d'après son nom (commune, majeure, supérieure, suprême)
+  function potionKindOf(it) {
+    if (!it) return null;
+    if (it.potionKind) return it.potionKind;
+    if (potionDefs.some(p => p.id === it.id)) return it.id;
+    const n = String(it.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    if (!/potion/.test(n) || !/(guerison|soin)/.test(n)) return null;
+    if (/supreme/.test(n)) return 'potion-supreme';
+    if (/superieure/.test(n)) return 'potion-superieure';
+    if (/majeure/.test(n)) return 'potion-majeure';
+    return 'potion-commune';
+  }
+  const potionQty = it => (it.qty === undefined || it.qty === null ? 1 : (parseInt(it.qty, 10) || 0));
   function getPotionCount(id) {
     const items = (window.AppData && window.AppData.items) || [];
-    const it = items.find(i => i.id === id);
-    return it ? (it.qty || 0) : 0;
+    return items.filter(i => potionKindOf(i) === id).reduce((n, i) => n + potionQty(i), 0);
   }
 
   function renderPotions() {
@@ -5187,15 +5200,20 @@
   let hpPopupMode = 'hp'; // 'hp' or 'temp'
 
   function usePotion(potionId) {
-    const items = (window.AppData && window.AppData.items) || [];
-    const it = items.find(i => i.id === potionId);
-    if (!it || !it.qty) return;
+    const list = (window.AppData && window.AppData.items) || [];
+    const it = list.find(i => potionKindOf(i) === potionId && potionQty(i) > 0);
+    if (!it) return;
     const def = potionDefs.find(p => p.id === potionId);
-    it.qty -= 1;
+    if (it.qty === undefined || it.qty === null || potionQty(it) <= 1) {
+      // dernière potion de cette pile : l'objet quitte l'inventaire
+      const i = list.indexOf(it); if (i > -1) list.splice(i, 1);
+    } else it.qty -= 1;
     const healed = rollDice(def.dice);
     healHp(healed);
     showToast(`Potion ${def.name} : +${healed} PV`);
     renderPotions();
+    if (typeof renderItemList === 'function') { renderItemList(); renderWeight(); }
+    if (typeof schedulePlayerStateSave === 'function') schedulePlayerStateSave();
   }
 
   renderPotions();
@@ -5316,12 +5334,13 @@
   let hitDiceDie = 10;
   let hitDiceUsed = 0;
   const hdContainer = document.getElementById('hitDiceBoxes');
+  let hitDiceList = []; // un dé par niveau, du type de la classe qui l'a donné (ex. 5 D10 + 1 D8)
   function renderHitDice() {
     hdContainer.innerHTML = '';
     for (let i = 0; i < hitDiceTotal; i++) {
       const box = document.createElement('div');
       box.className = 'hd-box' + (i < hitDiceUsed ? ' used' : '');
-      box.textContent = 'D' + hitDiceDie;
+      box.textContent = 'D' + (hitDiceList[i] || hitDiceDie);
       box.addEventListener('click', () => {
         box.classList.toggle('used');
         hitDiceUsed = hdContainer.querySelectorAll('.hd-box.used').length;
@@ -6500,6 +6519,15 @@
       ca = armor.armureCA + dexBonus;
     } else {
       ca = 10 + dexModifier;
+      // Défense sans armure (barbare, moine, lignée draconique…) : la meilleure formule s'applique
+      const shieldOn = items.some(it => it.equipped && (/bouclier/i.test(it.name || '') || (it.category === 'armure' && it.armureCA == null && it.caBonus)));
+      const ab = (window.AppData.attackProfile && window.AppData.attackProfile.abilities) || {};
+      const mod = k => Math.floor(((parseInt(ab[k], 10) || 10) - 10) / 2);
+      (window.AppData.unarmored || []).forEach(u => {
+        if (shieldOn && !u.shield) return;
+        const e = String(u.formula).replace(/MOD_(FOR|DEX|CON|INT|SAG|CHA)/g, (m, k) => `(${mod(k.toLowerCase())})`);
+        if (/^[\d\s+\-()]+$/.test(e)) { try { ca = Math.max(ca, Function('return ' + e)()); } catch (err) {} }
+      });
     }
     items.forEach(it => {
       if (it.equipped && it.caBonus) ca += it.caBonus;
@@ -7319,6 +7347,10 @@
       if (!entry || !entry.pid || !entry.item || consumedPending.has(entry.pid)) return;
       consumedPending.add(entry.pid);
       const it = { ...entry.item };
+      // Potions identiques : on empile au lieu de créer une deuxième ligne
+      const kind = potionKindOf(it);
+      const same = kind && items.find(x => potionKindOf(x) === kind && x.name === it.name);
+      if (same) { same.qty = potionQty(same) + potionQty(it); added++; lastName = it.name; return; }
       if (items.some(x => x.id === it.id)) it.id = it.id + '_' + entry.pid;
       items.push(it);
       added++; lastName = it.name;
@@ -7700,7 +7732,16 @@
       const speedByRace = { 'Nain des montagnes': 7.5, 'Nain des collines': 7.5, 'Halfelin': 7.5, 'Gnome': 7.5 };
       const speed = parseFloat(p.speed) || speedByRace[p.race] || 9;
       const speedCard = document.getElementById('speedTopCard');
-      if (speedCard) speedCard.querySelector('.top-value').textContent = Math.round(speed / 1.5) + ' cases';
+      if (speedCard) {
+        speedCard.querySelector('.top-value').textContent = Math.round(speed / 1.5) + ' cases';
+        // Autres déplacements accordés par les capacités (nage, escalade, vol…)
+        const other = Object.entries(((p.capEffects || {}).speeds) || {}).map(([k, v]) => `${k} ${Math.round(v / 1.5)} c.`);
+        let ex = speedCard.querySelector('.speed-extra');
+        if (!ex) { ex = document.createElement('div'); ex.className = 'speed-extra'; speedCard.appendChild(ex); }
+        ex.textContent = other.join(' · ');
+        ex.style.display = other.length ? '' : 'none';
+      }
+      window.AppData.unarmored = ((p.capEffects || {}).unarmored) || [];
       const levelTooltip = document.querySelector('#levelCard .tooltip-pop');
       if (levelTooltip) {
         const lv = Math.min(20, p.level || 1);
@@ -7723,6 +7764,8 @@
       const HIT_DIE_BY_CLASS = { Barbare: 12, Guerrier: 10, Paladin: 10, Rôdeur: 10, Barde: 8, Clerc: 8, Druide: 8, Moine: 8, Roublard: 8, Occultiste: 8, Magicien: 6, Ensorceleur: 6, Artificier: 8 };
       hitDiceTotal = p.level || 1;
       hitDiceDie = HIT_DIE_BY_CLASS[p.classe1] || 8;
+      { const n1 = parseInt(p.niveau1, 10) || 0, n2 = p.classe2 ? (parseInt(p.niveau2, 10) || 0) : 0;
+        hitDiceList = n1 + n2 === hitDiceTotal ? [...Array(n1).fill(hitDiceDie), ...Array(n2).fill(HIT_DIE_BY_CLASS[p.classe2] || 8)] : Array(hitDiceTotal).fill(hitDiceDie); }
       hitDiceUsed = 0;
       renderHitDice();
 
@@ -7730,6 +7773,7 @@
       window.AppData.attackProfile = { abilities: p.abilities || {}, profBonus: profBonusForLevel(p.level || 1), weaponProfs: p.weaponProfs || [] };
       try { if (typeof renderCombatList === 'function') renderCombatList(); } catch (e) { /* liste combat pas encore prête */ }
       if (p.abilities && p.abilities.dex != null) dexModifier = Math.floor(((parseInt(p.abilities.dex) || 10) - 10) / 2);
+      if (typeof updateComputedCA === 'function') updateComputedCA();
       Object.assign(maxSlots, computeSpellSlots(p));
       { const ps = computePactSlots(p); pactSlots.lvl = ps.lvl; pactSlots.max = ps.max; pactSlots.used = Math.min(pactSlots.used, ps.max); }
       for (let l = 1; l <= 9; l++) usedSlots[l] = Math.min(usedSlots[l] || 0, maxSlots[l]);
