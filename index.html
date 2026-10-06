@@ -2092,7 +2092,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 05/10 (41)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 05/10 (42)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -46224,7 +46224,10 @@
     if (row.choix === 'Sous-classe') return [...new Set(capSubRowsFor(capClassOf(row)).map(capSubName))].map(n => ({ name: n, sub: true }));
     const rows = capBase.filter(r => r.option_de === row.choix && (!r.reserve_a || !className || r.reserve_a.split(',').some(c => capNorm(c) === capNorm(className))));
     if (rows.length) return rows.map(r => ({ name: r.nom, row: r }));
-    return String(row.options || '').split('|').map(p => p.split('=')[0].trim()).filter(Boolean).map(n => ({ name: n }));
+    // Liste simple : « A, B, C » (virgules) ou options avec infos « A = type : feu | B = … » (barres verticales)
+    const raw = String(row.options || '');
+    const parts = /[|=]/.test(raw) ? raw.split('|') : raw.split(',');
+    return parts.map(p => p.split('=')[0].trim()).filter(Boolean).map(n => ({ name: n }));
   }
   function capLoreList(rows, level) {
     return rows.slice().sort((a, b) => (a.niveau || 0) - (b.niveau || 0)).map(r => {
