@@ -1832,7 +1832,8 @@
   .wst-pill.done { border-color: rgba(201,162,75,.5); color: var(--gold); }
   #wizardStepsTrack { display: flex; gap: 6px; flex-wrap: wrap; }
   .wiz-p1-top { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
-  .wiz-p1-top .photo-upload-block { flex: 0 0 300px; max-width: 100%; }
+  .wiz-p1-top .photo-upload-block { flex: 0 0 300px; max-width: 100%; margin-bottom: 0; }
+  .wiz-p1-top .photo-upload-block .photo-preview-box { aspect-ratio: auto; height: 214px; background-size: cover; background-position: center; }
   .wiz-grants { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 4px; }
   .wiz-tag { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(201,162,75,.45); background: var(--gold-soft); color: var(--gold); }
   .wab-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
@@ -2157,7 +2158,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">La Drôle de Taverne</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 06/10 (45)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 06/10 (46)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3957,7 +3958,7 @@
       <!-- PAGE 1 : IDENTITÉ, RACE, CARACTÉRISTIQUES, HISTOIRE -->
       <div class="wizard-step" data-step="1">
         <div class="wiz-p1-top">
-        <div class="photo-upload-block">
+        <div class="photo-upload-block"><div class="section-title" style="margin-top:0;">Portrait</div>
           <div class="photo-preview-box" id="wPhotoPreview" onclick="document.getElementById('wPhotoInput').click()">
             <div class="photo-preview-placeholder" id="wPhotoPlaceholder">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/></svg>
@@ -6454,7 +6455,7 @@
   ];
   const generalToolItems = ['Outils de faussaire', 'Outils de déguisement', "Outils d'herboriste", 'Outils de voleur', 'Kit de navigateur', 'Kit empoisonneur', 'Véhicules terrestres', 'Véhicules nautiques', 'Jeux de dés', 'Jeux de cartes'];
 
-  const languagesData = ['Commun', 'Elfique', 'Naine', 'Géant', 'Gnome', 'Halfelin', 'Orc', 'Abyssal', 'Céleste', 'Draconique', 'Infernal', 'Primordial', 'Sylvestre', 'Profond', 'Des morts-vivants', 'Jargon des voleurs', 'Druidique'];
+  const languagesData = ['Commun', 'Elfique', 'Naine', 'Géant', 'Gnome', 'Gobelin', 'Halfelin', 'Orc', 'Commun des profondeurs', 'Abyssal', 'Céleste', 'Draconique', 'Infernal', 'Primordial', 'Sylvestre', 'Profond', 'Des morts-vivants', 'Jargon des voleurs', 'Druidique'];
 
   // Table d'emplacements de sorts multiclasse (niveau de lanceur effectif -> emplacements par niveau de sort)
   const multiclassSlotTable = {
@@ -46527,7 +46528,10 @@
         const free = opts.filter(o => !have.includes(o.name));
         const prereq = o => o.row && o.row.prerequis ? ` <span class="capr-hint">(${histEsc(o.row.prerequis)})</span>` : '';
         html += `<div class="capr-label">${r.choix === 'Sous-classe' ? 'Sous-classe' : histEsc(r.choix)} — ${need} à choisir${have.length ? ` <span class="capr-hint">(déjà : ${histEsc(have.join(', '))})</span>` : ''}</div>
-          <div class="capr-opts" data-need="${need}" data-group="${histEsc(r.choix)}">${free.map(o => `<label class="capr-opt"><input type="${need === 1 ? 'radio' : 'checkbox'}" name="caprOpt" value="${histEsc(o.name)}"> <span>${histEsc(o.name)}${prereq(o)}${o.row ? `<span class="capr-opt-desc">${histEsc(capEval(o.row.description, ctx, o.row))}</span>` : ''}</span></label>`).join('') || '<div class="capr-hint">Aucune option disponible.</div>'}</div>`;
+          <div class="capr-opts" data-need="${need}" data-group="${histEsc(r.choix)}" onchange="capHumanoidToggle(this)">${free.map(o => `<label class="capr-opt"><input type="${need === 1 ? 'radio' : 'checkbox'}" name="caprOpt" value="${histEsc(o.name)}"> <span>${histEsc(o.name)}${prereq(o)}${o.row ? `<span class="capr-opt-desc">${histEsc(capEval(o.row.description, ctx, o.row))}</span>` : ''}</span></label>`).join('') || '<div class="capr-hint">Aucune option disponible.</div>'}</div>
+          ${free.some(o => /humano/i.test(o.name)) ? `<div class="capr-humanoids" style="display:none"><div class="capr-label">Les deux races d'humanoïdes</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><input list="caprHumList" class="capr-hum" placeholder="Première race (ex : Orc)"><input list="caprHumList" class="capr-hum" placeholder="Seconde race (ex : Gobelin)"></div>
+            <datalist id="caprHumList">${[...new Set([...racesDatabase.map(x => x.name), 'Gobelin', 'Hobgobelin', 'Gnoll', 'Kobold', 'Orc', 'Homme-lézard', 'Humain', 'Elfe', 'Nain', 'Drow', 'Bugbear', 'Kuo-toa', 'Sahuagin'])].sort((a, b) => a.localeCompare(b, 'fr')).map(x => `<option value="${histEsc(x)}">`).join('')}</datalist></div>` : ''}`;
       }
       // Maîtrises
       const ms = item.kind === 'cap' ? capParseMaitrises(r.maitrises, ctx, r) : [];
@@ -46552,6 +46556,18 @@
     }
     html += `<div class="capr-actions"><button class="capr-send" onclick="capReviewSend(${idx})">Envoyer à la fiche</button><button class="capr-skip" onclick="capReviewSkip(${idx})">Écarter</button></div></div>`;
     return html;
+  }
+  function capHumanoidToggle(box) {
+    const panel = box.closest('.capr-panel'), h = panel && panel.querySelector('.capr-humanoids');
+    if (h) h.style.display = [...box.querySelectorAll('input:checked')].some(i => /humano/i.test(i.value)) ? '' : 'none';
+  }
+  // Remplace « Deux races d'humanoïdes » par les deux races saisies
+  function capHumanoidPicks(panel, picks) {
+    const h = panel.querySelector('.capr-humanoids');
+    if (!h || !picks.some(x => /humano/i.test(x))) return picks;
+    const races = [...h.querySelectorAll('.capr-hum')].map(i => i.value.trim()).filter(Boolean);
+    if (races.length < 2) { showToast('Indique les deux races d\'humanoïdes'); return null; }
+    return picks.map(x => /humano/i.test(x) ? `Humanoïdes (${races.join(', ')})` : x);
   }
   function capReviewToggle(idx) { capReviewOpen = capReviewOpen === idx ? null : idx; renderLevelUpChecklist(); }
   function capReviewSkip(idx) {
@@ -46584,6 +46600,7 @@
       const need = +optBox.dataset.need;
       if (need && picks.length !== need && optBox.querySelector('input')) { showToast(`Choisis ${need} option${need > 1 ? 's' : ''}`); return; }
     }
+    picks = capHumanoidPicks(panel, picks); if (!picks) return;
     const mpicks = [];
     for (const box of panel.querySelectorAll('.capr-mopts')) {
       const vals = [...box.querySelectorAll('input:checked')].map(i => i.value);
@@ -46795,6 +46812,7 @@
       if (vals.length !== +b.dataset.need && b.querySelector('input')) { showToast(`Coche ${b.dataset.need} élément${+b.dataset.need > 1 ? 's' : ''}`); return; }
       mpicks[+b.dataset.mi] = vals;
     }
+    picks = capHumanoidPicks(panel, picks); if (!picks) return;
     const textEl = panel.querySelector('#caprText');
     const visEl = panel.querySelector('#caprVisible');
     if (visEl) it.visible = visEl.checked;
@@ -47035,7 +47053,7 @@
       if (n > 0) out.push({ kind: 'pick', count: n, levels: lv, classes: [cls], schools: [], label: `${n} sort${n > 1 ? 's' : ''} connu${n > 1 ? 's' : ''} de ${cls}` });
     } else if (prog.magie.type === 'grimoire') {
       const n = fromLvl < 1 ? 6 + 2 * (toLvl - 1) : 2 * (toLvl - fromLvl);
-      out.push({ kind: 'pick', count: n, levels: fromLvl < 1 ? [1] : lv, classes: [cls], schools: [], label: `${n} sorts à ajouter au grimoire` });
+      out.push({ kind: 'pick', count: n, levels: lv, classes: [cls], schools: [], label: `${n} sorts à ajouter au grimoire (jusqu'au niveau ${maxLvl})` });
     } else {
       out.push({ kind: 'pick', count: 0, levels: lv, classes: [cls], schools: [], label: `Sorts de ${cls} (nombre libre, jusqu'au niveau ${maxLvl})` });
     }
@@ -47406,6 +47424,7 @@
     });
     Object.values(WIZ_TYPE_BOX).filter(Boolean).forEach(id => { const b = document.getElementById(id); if (b) b.innerHTML = ''; });
     const granted = new Set(wizGrants(true).map(g => g.type + '|' + capNorm(g.value)));
+    languagesData.forEach((l, i) => { const el = document.getElementById('wlang_' + i); if (el && el.dataset.auto === '1') granted.add('langue|' + capNorm(l)); });
     const counted = new Set();
     reqs.forEach(q => {
       const box = document.getElementById(WIZ_TYPE_BOX[q.type]);
@@ -47413,7 +47432,15 @@
       const chosen = q.candidates.filter(c => { const el = wizCheckboxFor(q.type, c); const key = q.type + '|' + capNorm(c); return el && el.checked && !granted.has(key) && !counted.has(key); });
       const take = chosen.slice(0, q.count); take.forEach(c => counted.add(q.type + '|' + capNorm(c)));
       const ok = take.length >= q.count;
+      q.full = ok;
       box.insertAdjacentHTML('beforeend', `<span class="wiz-req ${ok ? 'ok' : ''}">${histEsc(q.label)} (${take.length} / ${q.count})${ok ? ' ✓' : ''}</span>`);
+    });
+    // Compétences : une fois les comptes atteints, les autres cases de ces listes se verrouillent (création seulement)
+    if (!currentEditingPlayerId) skillsData.forEach((sk, i) => {
+      const t = document.getElementById('wSkillT' + i);
+      if (!t || t.checked || t.hasAttribute('data-grant')) return;
+      const open = reqs.some(q => q.type === 'competence' && !q.full && q.candidates.some(c => capNorm(c) === capNorm(sk.name)));
+      t.disabled = !open; const row = t.closest('.skill-wizard-row'); if (row) row.classList.toggle('wiz-off', !open);
     });
     // Ce qui est déjà accordé, en rappel vert par section
     const by = {};
@@ -47424,6 +47451,7 @@
   function wizProfsMissing() {
     const reqs = wizRequirements();
     const granted = new Set(wizGrants(true).map(g => g.type + '|' + capNorm(g.value)));
+    languagesData.forEach((l, i) => { const el = document.getElementById('wlang_' + i); if (el && el.dataset.auto === '1') granted.add('langue|' + capNorm(l)); });
     return reqs.filter(q => q.candidates.filter(c => { const el = wizCheckboxFor(q.type, c); return el && el.checked && !granted.has(q.type + '|' + capNorm(c)); }).length < q.count);
   }
 
