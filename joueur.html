@@ -56,13 +56,13 @@
 
   // Munitions : « Carreaux (lot de 20) » → 20 carreaux empilés sur une seule ligne, poids à l'unité
   const ARKAN_AMMO = [
-    { key: 'fleche', re: /fl[eè]ches?/i, label: 'Flèches', weap: /\barcs?\b/i },
-    { key: 'carreau', re: /carreaux?/i, label: 'Carreaux', weap: /arbal[eè]te/i },
-    { key: 'bille', re: /billes?/i, label: 'Billes de fronde', weap: /fronde/i },
-    { key: 'aiguille', re: /aiguilles?/i, label: 'Aiguilles de sarbacane', weap: /sarbacane/i },
+    { key: 'fleche', re: /^\s*fl[eè]ches?\b/i, label: 'Flèches', weap: /\barcs?\b/i, lot: 20, unitW: 0.025 },
+    { key: 'carreau', re: /^\s*carreaux?\b/i, label: 'Carreaux', weap: /arbal[eè]te/i, lot: 20, unitW: 0.075 },
+    { key: 'bille', re: /^\s*billes?\b/i, label: 'Billes de fronde', weap: /fronde/i, lot: 20, unitW: 0.0375 },
+    { key: 'aiguille', re: /^\s*aiguilles?\b/i, label: 'Aiguilles de sarbacane', weap: /sarbacane/i, lot: 50, unitW: 0.01 },
   ];
   function arkanAmmoInfo(it) {
-    if (!it || it.category === 'arme' || it.category === 'potion') return null;
+    if (!it || it.category === 'potion') return null;
     if (!it.ammoKind && (it.magic || it.category === 'objet_magique')) return null; // flèches +1… : à part
     if (it.ammoKind) return ARKAN_AMMO.find(k => k.key === it.ammoKind) ? { ...ARKAN_AMMO.find(k => k.key === it.ammoKind), count: 1, done: true } : null;
     const n = String(it.name || '');
@@ -70,7 +70,8 @@
     const k = ARKAN_AMMO.find(x => x.re.test(n));
     if (!k) return null;
     const m = n.match(/lot\s+de\s+(\d+)|\((\d+)\)|(\d+)\s+(?:fl|car|bil|aig)/i);
-    return { ...k, count: m ? +(m[1] || m[2] || m[3]) : 1 };
+    // Sans nombre dans le nom : un lot standard (20 carreaux…), sauf si la ligne compte déjà des munitions à l'unité
+    return { ...k, count: m ? +(m[1] || m[2] || m[3]) : (it.qty != null ? 1 : k.lot) };
   }
   // Convertit un objet « lot » en munitions à l'unité ; renvoie l'objet (modifié)
   function arkanNormalizeAmmo(it) {
@@ -81,6 +82,7 @@
     it.weight = Math.round(w / a.count * 1000) / 1000;
     it.qty = a.count * lots;
     it.name = a.label; it.ammoKind = a.key;
+    if (it.category === 'arme') { it.category = 'objet'; it.equipable = false; it.equipped = false; it.inCombat = false; }
     if (!it.desc) it.desc = 'Munitions (' + a.label.toLowerCase() + ')';
     return it;
   }
@@ -89,6 +91,12 @@
     const seen = {};
     for (let i = 0; i < list.length; i++) {
       const it = arkanNormalizeAmmo(list[i]);
+      // Lot arrivé avec la 07/10 (19) compté « 1 » : un seul carreau ne pèse pas 1,5 kg → c'est un lot entier
+      if (it.ammoKind && !it.ammoLotFixed && parseInt(it.qty, 10) === 1) {
+        const k = ARKAN_AMMO.find(x => x.key === it.ammoKind);
+        if (k && (parseFloat(it.weight) || 0) > k.unitW * 3) { it.qty = k.lot; it.weight = Math.round((parseFloat(it.weight) || 0) / k.lot * 10000) / 10000; }
+        it.ammoLotFixed = true;
+      }
       if (!it.ammoKind || it.location === 'bag') continue;
       if (seen[it.ammoKind]) { seen[it.ammoKind].qty = (seen[it.ammoKind].qty || 0) + (it.qty || 0); list.splice(i, 1); i--; }
       else seen[it.ammoKind] = it;
@@ -109,6 +117,19 @@
     return out;
   }
 
+  // Téléphone en mode « Version pour ordinateur » (page rendue en ~980 px) : on remet la fiche à la largeur de l'écran
+  (function () {
+    function fit() {
+      try {
+        const land = !!(window.matchMedia && matchMedia('(orientation: landscape)').matches);
+        const sw = (land ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height)) || 0, vw = document.documentElement.clientWidth || window.innerWidth;
+        const z = sw && sw <= 820 && vw > sw * 1.25 ? vw / sw : 1;
+        document.documentElement.style.zoom = z === 1 ? '' : String(Math.round(z * 1000) / 1000);
+      } catch (e) {}
+    }
+    window.addEventListener('DOMContentLoaded', fit);
+    window.addEventListener('resize', () => { document.documentElement.style.zoom = ''; requestAnimationFrame(fit); });
+  })();
   // Raccourci « ArKan » : l'écran d'accueil rouvre la dernière fiche ouverte sur cet appareil
   (function () {
     try {
@@ -1292,7 +1313,9 @@
     letter-spacing: 0.5px;
     margin-bottom: 8px;
   }
+#page-personnage .cap-item .cap-choices { margin: -2px 0 6px; font-size: 13.5px; color: var(--ink); font-weight: 500; line-height: 1.5; }
 #page-personnage .cap-item p {
+    white-space: pre-line;
     font-size: 13px;
     color: var(--ink-dim);
     line-height: 1.55;
@@ -4483,7 +4506,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (19)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (20)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -5027,7 +5050,8 @@
         const el = document.createElement('div');
         el.className = 'cap-item';
         el.innerHTML = `
-          <h3>${cap.name}</h3>
+          <h3>${cap.choices && cap.choices.length ? cap.baseName : cap.name}</h3>
+          ${cap.choices && cap.choices.length ? `<div class="cap-choices">${cap.choices.map(x => `<div>${x}</div>`).join('')}</div>` : ''}
           <div class="cap-source">${cap.group}${cap.usesMax ? ` — ${cap.usesMax} utilisation${cap.usesMax > 1 ? 's' : ''}, ${({repos_court:'recharge au repos court', repos_long:'recharge au repos long', repos_court_ou_long:'recharge au repos court ou long'})[cap.recharge] || ''}` : ''}</div>
           <p>${cap.desc}</p>
           <div class="cap-toggle-row">
@@ -6660,7 +6684,11 @@
   function renderItemList() {
     const list = document.getElementById('itemList');
     list.innerHTML = '';
-    const filtered = items.filter(it => currentCategory === 'tous' || it.category === currentCategory);
+    const TYPE_ORDER = ['arme', 'munition', 'armure', 'potion', 'objet_magique', 'objet', 'outil', 'contenant'];
+    const rankOf = it => { const c = it.isContainer ? 'contenant' : (it.ammoKind ? 'munition' : it.category); const r = TYPE_ORDER.indexOf(c); return r < 0 ? 99 : r; };
+    // Rangement d'office par type d'objet (armes, munitions, armures, potions…), puis par nom
+    const filtered = items.filter(it => currentCategory === 'tous' || it.category === currentCategory)
+      .sort((a, b) => rankOf(a) - rankOf(b) || String(a.name || '').localeCompare(String(b.name || ''), 'fr', { sensitivity: 'base' }));
     if (filtered.length === 0) {
       list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-faint);font-size:12.5px;">Aucun objet dans cette catégorie</div>';
       return;
@@ -7839,7 +7867,10 @@
           if (c.hiddenForPlayer && !MJ_VIEW) return; // capacité dont le seul effet est une maîtrise : déjà cochée, inutile de l'afficher
           const groupLabel = c.source === 'Race' ? `Race — ${p.race || ''}` : c.source === 'Classe' ? `Classe — ${p.classe1 || ''}` : c.source === 'Historique' ? `Historique — ${p.historique || ''}` : (c.source || 'Autre');
           const usesMax = (c.recharge && c.recharge !== 'aucun' && parseInt(c.uses) > 0) ? parseInt(c.uses) : null;
-          capacities.push({ id: 'cap' + i, name: c.title || 'Capacité', group: groupLabel, desc: arkanTidyText(c.text || '', arkanModsOf(p), 2 + Math.floor(((p.level || 1) - 1) / 4)), inCombat: false,
+          const splitTop = t => { const out = []; let depth = 0, cur = ''; for (const ch of String(t || '')) { if (ch === '(') depth++; if (ch === ')') depth--; if (ch === ',' && !depth) { out.push(cur.trim()); cur = ''; } else cur += ch; } if (cur.trim()) out.push(cur.trim()); return out; };
+          const choices = Array.isArray(c.options) && c.options.length ? c.options : (c.choiceLabel ? splitTop(c.choiceLabel) : []);
+          const baseTitle = choices.length && c.choiceLabel && String(c.title || '').endsWith(' : ' + c.choiceLabel) ? String(c.title).slice(0, -(' : ' + c.choiceLabel).length) : (c.title || 'Capacité');
+          capacities.push({ id: 'cap' + i, name: c.title || 'Capacité', baseName: baseTitle, choices, group: groupLabel, desc: arkanTidyText(c.text || '', arkanModsOf(p), 2 + Math.floor(((p.level || 1) - 1) / 4)), inCombat: false,
             usesMax, usesLeft: usesMax, recharge: c.recharge || 'aucun' });
         });
         capGroups.length = 0;

@@ -2165,7 +2165,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (49)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (50)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4088,7 +4088,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (49)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (50)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -4951,7 +4951,7 @@
     Object.entries(objetsCategories).forEach(([cat, c]) => c.db.forEach(o => { if (norm(o.name).includes(q)) results.push({ cat, o, label: c.label }); }));
     results.sort((a, b) => a.o.name.localeCompare(b.o.name, 'fr'));
     list.innerHTML = results.slice(0, 60).map(({ cat, o, label }) => {
-      const canBuy = priceToPc(o.prix) != null;
+      const canBuy = true; // sans prix connu, la console le demande au moment de l'achat
       return `
       <div class="modal-list-row">
         <span>${o.name} <span style="color:var(--ink-faint);">(${label}${o.prix ? ' — ' + o.prix + (/^\s*\d+([.,]\d+)?\s*$/.test(String(o.prix)) ? ' PO' : '') : ''})</span></span>
@@ -4971,7 +4971,14 @@
   }
   // Achat : on vérifie la bourse actuelle du joueur, puis objet + paiement partent ensemble dans sa boîte de réception
   function sbAcheterObjet(p, cat, o) {
-    const cost = priceToPc(o.prix);
+    let cost = priceToPc(o.prix);
+    if (cost == null) {
+      const ans = prompt(`Prix de « ${o.name} » ? (ex. 50 po, 5 pa)\nAstuce : renseigne-le dans le module Objets pour ne plus avoir à le saisir.`, '');
+      if (ans == null) return;
+      cost = priceToPc(ans);
+      if (cost == null) { showToast('Prix non reconnu (ex. 50 po)'); return; }
+      o = { ...o, prix: /\d\s*(pp|po|pe|pa|pc)\b/i.test(ans) ? ans.trim() : ans.trim() + ' po' };
+    }
     if (!sb) { showToast('Hors ligne : achat impossible'); return; }
     sb.from('joueurs').select('data').eq('id', p.id).single().then(({ data, error }) => {
       if (error) { showToast(`⚠️ Impossible de lire la fiche de ${p.name}`); return; }
@@ -7214,7 +7221,8 @@
       origine: document.getElementById('wOrigine').value, avantAventure: document.getElementById('wAvantAventure').value, ellipse: document.getElementById('wEllipse').value,
       maxHp: parseInt(pv) || 1, currentHp: isEditing ? existingPlayer.currentHp : (parseInt(pv) || 1),
       knownSpellNames: [...new Set([...(isEditing ? (existingPlayer.knownSpellNames || []) : []), ...wizSpellsFinal()])],
-      hpLog: wizHp.order.length ? wizHp.order.map((c, i) => ({ niveau: i + 1, classe: c })) : undefined,
+      hpLog: wizHp.order.length ? wizHp.order.map((c, i) => ({ niveau: i + 1, classe: c, de: i === 0 ? null : (wizHp.rolls[i] != null ? wizHp.rolls[i] : null) })) : undefined,
+      wizSpellPicks: JSON.parse(JSON.stringify(wizSpells)),
       capChoix: wizCap.choix, subclasses: wizCap.subclasses, speedBase: null,
       items: isEditing ? existingPlayer.items : undefined, coins: isEditing ? existingPlayer.coins : undefined,
       photo: photoData ? photoData.src : (isEditing ? existingPlayer.photo : null),
@@ -7243,6 +7251,10 @@
           const identity = { ...newPlayer };
           GAME_STATE_KEYS.forEach(k => delete identity[k]);
           const merged = { ...fresh, ...identity, mjRev: Date.now() };
+          // Sorts modifiés dans le formulaire : ajoutés / retirés sur la fiche (le reste de ses sorts ne bouge pas)
+          { const finalN = wizSpellsFinal(), finalSet = new Set(finalN.map(capNorm)), base = wizSpellsBaseline || new Set();
+            const kept = (fresh.knownSpellNames || []).filter(n => !base.has(capNorm(n)) || finalSet.has(capNorm(n)));
+            merged.knownSpellNames = [...new Set([...kept, ...finalN])]; }
           if (merged.currentHp != null && merged.maxHp != null && merged.currentHp > merged.maxHp) merged.currentHp = merged.maxHp;
           GAME_STATE_KEYS.forEach(k => { if (fresh[k] !== undefined) existingPlayer[k] = fresh[k]; });
           writeRow(merged);
@@ -34187,8 +34199,8 @@
   }
 
   const AMMO_KINDS = [
-    { key: 'fleche', re: /fl[eè]ches?/i, label: 'Flèches' }, { key: 'carreau', re: /carreaux?/i, label: 'Carreaux' },
-    { key: 'bille', re: /billes?/i, label: 'Billes de fronde' }, { key: 'aiguille', re: /aiguilles?/i, label: 'Aiguilles de sarbacane' },
+    { key: 'fleche', re: /^\s*fl[eè]ches?\b/i, label: 'Flèches', lot: 20 }, { key: 'carreau', re: /^\s*carreaux?\b/i, label: 'Carreaux', lot: 20 },
+    { key: 'bille', re: /^\s*billes?\b/i, label: 'Billes de fronde', lot: 20 }, { key: 'aiguille', re: /^\s*aiguilles?\b/i, label: 'Aiguilles de sarbacane', lot: 50 },
   ];
   function ammoInfoOf(name) {
     const n = String(name || '');
@@ -34196,10 +34208,15 @@
     const k = AMMO_KINDS.find(x => x.re.test(n));
     if (!k) return null;
     const m = n.match(/lot\s+de\s+(\d+)|\((\d+)\)|(\d+)\s+(?:fl|car|bil|aig)/i);
-    return { ...k, count: m ? +(m[1] || m[2] || m[3]) : 1 };
+    return { ...k, count: m ? +(m[1] || m[2] || m[3]) : k.lot }; // sans nombre dans le nom : un lot standard (20 carreaux…)
   }
   function objetToPlayerItem(cat, o) {
     const base = { id: (o.id || ('obj' + Date.now())), name: o.name, equipped: false, inCombat: false };
+    // Munitions (quelle que soit la table : armes ou équipement) : un lot ajouté = 20 carreaux sur la même ligne
+    if (cat !== 'objetsMagiques' && cat !== 'armesMagiques' && !o.magique) {
+      const ammo = ammoInfoOf(o.name);
+      if (ammo) { const lotW = parseKg(o.poids) || 0; return { ...base, name: ammo.label, category: 'objet', ammoKind: ammo.key, ammoLot: true, qty: ammo.count, weight: Math.round(lotW / ammo.count * 10000) / 10000, price: o.prix || '—', equipable: false, magic: false, desc: `Munitions (${ammo.label.toLowerCase()})` }; }
+    }
     const recharge = o.recharge_repos_long ? 'repos_long' : (o.recharge_repos_court ? 'repos_court' : null);
     if (cat === 'armes') return { ...base, category: 'arme', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: true, magic: !!o.magique,
       ...weaponCombatInfo(o),
@@ -34207,9 +34224,6 @@
     if (cat === 'armures') return { ...base, category: 'armure', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: true, magic: !!o.magique,
       caFormula: o.ca_formule || '', ...parseArmorFormula(o.ca_formule, o.categorie), desc: o.ca_formule ? `CA ${o.ca_formule}` : '' };
     if (cat === 'equipement') {
-      // Munitions : un lot de 20 carreaux arrive comme 20 carreaux (empilés sur la fiche, poids à l'unité)
-      const ammo = ammoInfoOf(o.name);
-      if (ammo) { const lotW = parseKg(o.poids) || 0; return { ...base, name: ammo.label, category: 'objet', ammoKind: ammo.key, qty: ammo.count, weight: Math.round(lotW / ammo.count * 1000) / 1000, price: o.prix || '—', equipable: false, magic: !!o.magique, desc: `Munitions (${ammo.label.toLowerCase()})` }; }
       return { ...base, category: 'objet', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: !!o.equipable, magic: !!o.magique, desc: '' };
     }
     if (cat === 'outils') return { ...base, category: 'outil', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: false, magic: false, desc: o.categorie || '' };
@@ -47590,6 +47604,7 @@
     if (wizHp.order.length !== total || wizHp.order.some((c, i) => !classes.some(([cc]) => cc === c))) wizHp.order = def;
     const die = c => (classesData.find(x => x.name === c) || {}).hitDie || 8;
     const conMod = wizMod(document.getElementById('wCon').value);
+    if (!wizCap.items.length && capBase.length) wizCapBuild(); // page ouverte directement (modification d'une fiche)
     // bonus de capacités : « PV max : +1 par niveau » (race) ou « +1 par niveau de classe »
     const bon = [];
     wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
@@ -47597,6 +47612,15 @@
       const m = r && String(r.effets || '').match(/PV max\s*:\s*\+(\d+)\s*par niveau( de classe)?/i);
       if (m) bon.push({ v: +m[1], cls: m[2] ? capClassOf(r) : null, nom: r.nom });
     });
+    if (wizHp.fillFrom && wizHp.order.length > 1) {
+      // Répartit les PV max connus sur les niveaux 2 et suivants (à vérifier / corriger ligne par ligne)
+      const bonusOf = c => bon.filter(x => !x.cls || capNorm(x.cls) === capNorm(c)).reduce((s2, x) => s2 + x.v, 0);
+      let rest = wizHp.fillFrom - (die(wizHp.order[0]) + conMod + bonusOf(wizHp.order[0]));
+      const idx = wizHp.order.map((c, i) => i).slice(1);
+      idx.forEach(i => { rest -= conMod + bonusOf(wizHp.order[i]); });
+      idx.forEach((i, k) => { const left = idx.length - k; const v = Math.round(rest / left); const d = die(wizHp.order[i]); wizHp.rolls[i] = Math.min(d, Math.max(1, v)); rest -= wizHp.rolls[i]; });
+      wizHp.fillFrom = null;
+    }
     const counts = {};
     let sum = 0;
     const rows = wizHp.order.map((c, i) => {
@@ -47651,6 +47675,13 @@
     const box = document.getElementById('wSpellsPage');
     if (!box) return;
     const p = wizPseudoPlayer();
+    if (wizSpellsLegacy) {
+      const blocks = [];
+      [[p.classe1, p.niveau1], [p.classe2, p.niveau2]].forEach(([c, n]) => { if (c && n) capClassSpellReqs(p, c, 0, n).forEach((q, qi) => blocks.push([`cls:${c}:${qi}`, q])); });
+      wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => { const r = capBase.find(x => x.id === it.baseId); if (r && r.sorts) capSpellReqs(r.sorts, p, r).forEach((q, qi) => { if (q.kind === 'pick') blocks.push([`cap:${r.id}:${qi}`, q]); }); });
+      // Blocs à compte exact d'abord, listes libres ensuite
+      wizSpellsFromLegacy([...blocks.filter(b => b[1].count), ...blocks.filter(b => !b[1].count)]);
+    }
     let html = '';
     [[p.classe1, p.niveau1], [p.classe2, p.niveau2]].forEach(([c, n]) => {
       if (!c || !n) return;
@@ -47743,6 +47774,41 @@
     wizAb = { mode: p ? 'libre' : 'standard', base: {}, choice: [], asi: {} };
     wizHp = { order: [], rolls: {} };
     wizSpells = {};
+    wizSpellsLegacy = null; wizSpellsBaseline = null;
+    if (!p) return;
+    // Modification d'une fiche : on reprend les PV niveau par niveau…
+    if (Array.isArray(p.hpLog) && p.hpLog.length) {
+      wizHp.order = p.hpLog.map(x => x.classe);
+      p.hpLog.forEach((x, i) => { if (i > 0 && x.de != null) wizHp.rolls[i] = parseInt(x.de, 10) || 1; });
+    }
+    // (fiches créées avant la 07/10 (50) : les PV du dé n'étaient pas gardés, on les retrouve à partir des PV max)
+    if (!Object.keys(wizHp.rolls).length && p.maxHp) wizHp.fillFrom = parseInt(p.maxHp, 10) || null;
+    // …et les sorts choisis
+    if (p.wizSpellPicks && typeof p.wizSpellPicks === 'object') wizSpells = JSON.parse(JSON.stringify(p.wizSpellPicks));
+    else wizSpellsLegacy = (p.knownSpellNames || []).slice();
+    wizSpellsBaseline = new Set((p.knownSpellNames || []).map(capNorm));
+  }
+  let wizSpellsLegacy = null, wizSpellsBaseline = null;
+  // Un sort entre-t-il dans un bloc (niveaux, classes, écoles) ?
+  function wizSpellFits(q, name) {
+    const s = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).find(x => capNorm(x.name) === capNorm(name));
+    if (!s) return false;
+    return q.levels.includes(parseInt(s.level, 10) || 0)
+      && (!q.classes.length || (s.classes || []).some(c => q.classes.some(k => capNorm(c) === capNorm(k))))
+      && (!q.schools.length || q.schools.some(sc => capNorm(s.school || '').startsWith(capNorm(sc).slice(0, 5))));
+  }
+  // Fiche ancienne : on replace ses sorts connus dans les bons blocs
+  function wizSpellsFromLegacy(blocks) {
+    if (!wizSpellsLegacy) return;
+    const fixed = new Set(wizSpellsFixedNames().map(capNorm));
+    let pool = wizSpellsLegacy.filter(n => !fixed.has(capNorm(n)));
+    blocks.forEach(([key, q]) => {
+      if (wizSpells[key] && wizSpells[key].some(Boolean)) return;
+      const take = [];
+      pool = pool.filter(n => { if ((!q.count || take.length < q.count) && wizSpellFits(q, n)) { take.push(n); return false; } return true; });
+      if (take.length) wizSpells[key] = take;
+    });
+    wizSpellsLegacy = null;
   }
 
   /* ===================== LORE › CHRONIQUES (légendes, récits anciens…) ===================== */
