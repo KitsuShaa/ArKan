@@ -3,7 +3,121 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Elowen Vaelynn — Fiche de personnage</title>
+<title>ArKan</title>
+<meta name="application-name" content="ArKan">
+<meta name="apple-mobile-web-app-title" content="ArKan">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#131319">
+<link rel="manifest" href="manifest-joueur.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="arkan-icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="arkan-icon-180.png">
+<script>
+  // Mentions en clair (« mod. Sag », « votre modificateur de Dextérité », « bonus de maîtrise ») → vraie valeur du personnage.
+  // « 10 + mod. Dex + mod. Sag (16) » devient « 16 » ; « Utilisable mod. Sag fois » devient « Utilisable 2 fois » (minimum 1).
+  function arkanTidyText(text, mods, prof) {
+    if (!text || !mods) return text || '';
+    const AB = { for: 'for', force: 'for', dex: 'dex', 'dextérité': 'dex', dexterite: 'dex', con: 'con', constitution: 'con', int: 'int', intelligence: 'int', sag: 'sag', sagesse: 'sag', cha: 'cha', charisme: 'cha' };
+    const val = tok => {
+      let m = tok.match(/^\d+$/); if (m) return +tok;
+      m = tok.match(/^(?:(?:votre|son|le)\s+)?(?:modificateur\s+de\s+|mod\.\s*)([A-Za-zéÉ]+)$/i);
+      if (m) { const k = AB[m[1].toLowerCase()]; return k && mods[k] != null ? mods[k] : null; }
+      if (/^(?:(?:votre|son|le)\s+)?(?:bonus\s+de\s+)?ma[iî]trise$/i.test(tok)) return prof != null ? prof : null;
+      return undefined; // terme non calculable (niveau de classe…)
+    };
+    const ABN = '(?:Force|Dext[ée]rit[ée]|Constitution|Intelligence|Sagesse|Charisme|For|Dex|Con|Int|Sag|Cha)(?![A-Za-zÀ-ÿ])';
+    const TERM = `(?:(?<![A-Za-zÀ-ÿ])(?:(?:votre|son|le)\\s+)?(?:modificateur\\s+de\\s+${ABN}|mod\\.\\s*${ABN}|(?:bonus\\s+de\\s+)?ma[iî]trise(?![A-Za-zÀ-ÿ]))|(?<![A-Za-zÀ-ÿ])(?:(?:votre|son|le)\\s+)?niveau\\s+d(?:e\\s+|['’])[a-zA-ZÀ-ÿ]+|(?<![\\wD.,])\\d+(?![\\w,.]\\d))`;
+    const re = new RegExp(`${TERM}(?:\\s*[+\\-−]\\s*${TERM})*(?:\\s*\\((?:minimum|min\\.)\\s*1\\))?(?:\\s*\\(\\s*([+\\-−]?\\d+)\\s*\\))?`, 'gi');
+    const MODTOK = new RegExp(`(?<![A-Za-zÀ-ÿ])(?:(?:votre|son|le)\\s+)?(?:modificateur\\s+de\\s+${ABN}|mod\\.\\s*${ABN})`, 'gi');
+    const mark = n => `\u0001${n}\u0002`;
+    let out = String(text).replace(re, (all, paren) => {
+      const hasOp = /\s[+\-−]\s/.test(all.replace(/\(.*?\)/g, ''));
+      if (!/modificateur|mod\./i.test(all) && !(hasOp && /ma[iî]trise/i.test(all))) return all; // rien à calculer
+      const core = all.replace(/\s*\((?:minimum|min\.)\s*1\)/i, '').replace(/\s*\(\s*[+\-−]?\d+\s*\)\s*$/, '');
+      const parts = core.split(/\s*([+\-−])\s*(?=\S)/);
+      let total = 0, ok = true, sign = 1;
+      for (let i = 0; i < parts.length; i++) {
+        if (i % 2) { sign = parts[i] === '+' ? 1 : -1; continue; }
+        const v = val(parts[i].trim());
+        if (v === undefined || v === null) { ok = false; break; }
+        total += sign * v;
+      }
+      if (!ok) {
+        if (paren != null) return mark(parseInt(paren.replace('−', '-'), 10));
+        return all.replace(MODTOK, t => { const v = val(t.trim()); return v == null ? t : mark(v); });
+      }
+      if (/\((?:minimum|min\.)\s*1\)/i.test(all)) total = Math.max(1, total);
+      return mark(total);
+    });
+    out = out.replace(/\u0001(-?\d+)\u0002(?=\s+fois)/g, (m, n) => String(Math.max(1, +n))).replace(/[\u0001\u0002]/g, '');
+    return out.replace(/\+\s*-(\d)/g, '− $1');
+  }
+
+  // Munitions : « Carreaux (lot de 20) » → 20 carreaux empilés sur une seule ligne, poids à l'unité
+  const ARKAN_AMMO = [
+    { key: 'fleche', re: /fl[eè]ches?/i, label: 'Flèches', weap: /\barcs?\b/i },
+    { key: 'carreau', re: /carreaux?/i, label: 'Carreaux', weap: /arbal[eè]te/i },
+    { key: 'bille', re: /billes?/i, label: 'Billes de fronde', weap: /fronde/i },
+    { key: 'aiguille', re: /aiguilles?/i, label: 'Aiguilles de sarbacane', weap: /sarbacane/i },
+  ];
+  function arkanAmmoInfo(it) {
+    if (!it || it.category === 'arme' || it.category === 'potion') return null;
+    if (!it.ammoKind && (it.magic || it.category === 'objet_magique')) return null; // flèches +1… : à part
+    if (it.ammoKind) return ARKAN_AMMO.find(k => k.key === it.ammoKind) ? { ...ARKAN_AMMO.find(k => k.key === it.ammoKind), count: 1, done: true } : null;
+    const n = String(it.name || '');
+    if (/carquois|étui|etui/i.test(n)) return null;
+    const k = ARKAN_AMMO.find(x => x.re.test(n));
+    if (!k) return null;
+    const m = n.match(/lot\s+de\s+(\d+)|\((\d+)\)|(\d+)\s+(?:fl|car|bil|aig)/i);
+    return { ...k, count: m ? +(m[1] || m[2] || m[3]) : 1 };
+  }
+  // Convertit un objet « lot » en munitions à l'unité ; renvoie l'objet (modifié)
+  function arkanNormalizeAmmo(it) {
+    const a = arkanAmmoInfo(it);
+    if (!a || a.done) return it;
+    const lots = it.qty != null ? (parseInt(it.qty, 10) || 0) : 1;
+    const w = parseFloat(it.weight) || 0;
+    it.weight = Math.round(w / a.count * 1000) / 1000;
+    it.qty = a.count * lots;
+    it.name = a.label; it.ammoKind = a.key;
+    if (!it.desc) it.desc = 'Munitions (' + a.label.toLowerCase() + ')';
+    return it;
+  }
+  // Range toutes les munitions d'un même type sur une seule ligne (les quantités s'additionnent)
+  function arkanMergeAmmo(list) {
+    const seen = {};
+    for (let i = 0; i < list.length; i++) {
+      const it = arkanNormalizeAmmo(list[i]);
+      if (!it.ammoKind || it.location === 'bag') continue;
+      if (seen[it.ammoKind]) { seen[it.ammoKind].qty = (seen[it.ammoKind].qty || 0) + (it.qty || 0); list.splice(i, 1); i--; }
+      else seen[it.ammoKind] = it;
+    }
+    return list;
+  }
+  // Munition utilisée par une arme (arc → flèches, arbalète → carreaux…)
+  function arkanAmmoFor(weapon, list) {
+    const txt = [weapon.name, weapon.baseWeapon, weapon.base].filter(Boolean).join(' ');
+    const k = ARKAN_AMMO.find(x => x.weap.test(txt));
+    if (!k) return null;
+    const ammo = (list || []).find(x => x.ammoKind === k.key && (x.qty || 0) >= 0);
+    return ammo ? ammo.id : null;
+  }
+  function arkanModsOf(p) {
+    const ab = (p && p.abilities) || {}, out = {};
+    ['for', 'dex', 'con', 'int', 'sag', 'cha'].forEach(k => { if (ab[k] != null && ab[k] !== '') out[k] = Math.floor(((parseInt(ab[k], 10) || 10) - 10) / 2); });
+    return out;
+  }
+
+  // Raccourci « ArKan » : l'écran d'accueil rouvre la dernière fiche ouverte sur cet appareil
+  (function () {
+    try {
+      const q = new URLSearchParams(location.search);
+      if (q.get('j')) { if (q.get('vue') !== 'mj') localStorage.setItem('arkanLastPlayer', q.get('j')); }
+      else { const last = localStorage.getItem('arkanLastPlayer'); if (last) location.replace(location.pathname + '?j=' + encodeURIComponent(last)); }
+    } catch (e) {}
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Spectral+SC:wght@500;600&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -43,6 +157,9 @@
   html {
     scroll-padding-top: env(safe-area-inset-top, 0px);
     overflow-x: hidden;
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     width: 100%;
     max-width: 100vw;
   }
@@ -56,6 +173,7 @@
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
     overflow-x: hidden;
+    overflow-x: clip;
     width: 100%;
     max-width: 100vw;
     overscroll-behavior-x: none;
@@ -636,6 +754,8 @@
     touch-action: manipulation;
   }
 #page-personnage .theme-trigger svg { width: 17px; height: 17px; }
+#page-personnage .hero-photo { position: absolute; inset: 0; background-size: cover; background-position: center 22%; background-repeat: no-repeat; }
+#page-personnage .hero.has-photo .hero-glyph { display: none; }
 #page-personnage .hero::after {
     content: "";
     position: absolute;
@@ -4363,7 +4483,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 06/10 (18)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (19)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -5590,7 +5710,7 @@
           name: it.name,
           sub: it.combatSub || it.desc,
           usesMax: it.usesMax, usesLeft: it.usesLeft,
-          usesAmmo: it.usesAmmo,
+          usesAmmo: it.usesAmmo || (it.category === 'arme' ? arkanAmmoFor(it, appItems) : null),
           itemId: it.id,
         });
       }
@@ -7346,7 +7466,9 @@
     pend.forEach(entry => {
       if (!entry || !entry.pid || !entry.item || consumedPending.has(entry.pid)) return;
       consumedPending.add(entry.pid);
-      const it = { ...entry.item };
+      const it = arkanNormalizeAmmo({ ...entry.item });
+      // Munitions du même type : on ajoute à la ligne existante (20 carreaux de plus…)
+      if (it.ammoKind) { const sameA = items.find(x => x.ammoKind === it.ammoKind && x.location !== 'bag'); if (sameA) { sameA.qty = (parseInt(sameA.qty, 10) || 0) + (it.qty || 0); added++; lastName = `${it.qty} ${it.name.toLowerCase()}`; return; } }
       // Potions identiques : on empile au lieu de créer une deuxième ligne
       const kind = potionKindOf(it);
       const same = kind && items.find(x => potionKindOf(x) === kind && x.name === it.name);
@@ -7400,6 +7522,7 @@
     if (!saved) return;
     try {
       items.length = 0; if (saved.items) items.push(...saved.items); window.AppData.items = items;
+      try { arkanMergeAmmo(items); } catch (e) { console.warn('Munitions', e); }
       items.forEach(it => {
         if (typeof it.weight === 'string') {
           const m = it.weight.replace(',', '.').match(/(\d+(?:\.\d+)?)\s*(kg|g)?\b/i);
@@ -7647,6 +7770,15 @@
     if (!p) return;
     try {
       document.querySelector('.hero-glyph').textContent = (p.name || '').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+      { // Portrait du personnage (image cadrée envoyée depuis la console)
+        const hero = document.querySelector('#page-personnage .hero');
+        let ph = hero && hero.querySelector('.hero-photo');
+        if (hero && p.photo) {
+          if (!ph) { ph = document.createElement('div'); ph.className = 'hero-photo'; hero.insertBefore(ph, hero.firstChild); }
+          ph.style.backgroundImage = `url("${String(p.photo).replace(/"/g, '%22')}")`;
+          hero.classList.add('has-photo');
+        } else if (ph) { ph.remove(); hero.classList.remove('has-photo'); }
+      }
       document.querySelector('.name-plate h1').textContent = p.name || '';
       const chips = document.querySelectorAll('.chip-row .chip-value');
       if (chips[0]) chips[0].textContent = p.race || '';
@@ -7707,7 +7839,7 @@
           if (c.hiddenForPlayer && !MJ_VIEW) return; // capacité dont le seul effet est une maîtrise : déjà cochée, inutile de l'afficher
           const groupLabel = c.source === 'Race' ? `Race — ${p.race || ''}` : c.source === 'Classe' ? `Classe — ${p.classe1 || ''}` : c.source === 'Historique' ? `Historique — ${p.historique || ''}` : (c.source || 'Autre');
           const usesMax = (c.recharge && c.recharge !== 'aucun' && parseInt(c.uses) > 0) ? parseInt(c.uses) : null;
-          capacities.push({ id: 'cap' + i, name: c.title || 'Capacité', group: groupLabel, desc: c.text || '', inCombat: false,
+          capacities.push({ id: 'cap' + i, name: c.title || 'Capacité', group: groupLabel, desc: arkanTidyText(c.text || '', arkanModsOf(p), 2 + Math.floor(((p.level || 1) - 1) / 4)), inCombat: false,
             usesMax, usesLeft: usesMax, recharge: c.recharge || 'aucun' });
         });
         capGroups.length = 0;
@@ -7726,7 +7858,7 @@
       resetDeathSaves();
       document.querySelectorAll('.active-state, .state-tag, .active-tag').forEach(el => el.remove());
 
-      document.title = p.name ? `${p.name} — Fiche de personnage` : document.title;
+      document.title = 'ArKan'; // nom proposé pour le raccourci de l'écran d'accueil
 
       const profBonus = profBonusForLevel(p.level || 1);
       const speedByRace = { 'Nain des montagnes': 7.5, 'Nain des collines': 7.5, 'Halfelin': 7.5, 'Gnome': 7.5 };
@@ -7810,7 +7942,14 @@
       const fillProfList = (id, list) => {
         const el = document.getElementById(id);
         if (!el) return;
-        el.innerHTML = (list && list.length) ? list.map(x => `<li>${x}</li>`).join('') : '<li>Aucune</li>';
+        const ARM_ORDER = ['légères', 'intermédiaires', 'lourdes', 'boucliers'];
+        const armRank = x => { const i = ARM_ORDER.findIndex(a => String(x).toLowerCase().includes(a)); return i < 0 ? 9 : i; };
+        const sorted = (list || []).slice().sort((a, b) => {
+          if (id === 'profArmures') return armRank(a) - armRank(b) || String(a).localeCompare(String(b), 'fr');
+          if (id === 'profArmes') { const ca = /^armes /i.test(a) ? 0 : 1, cb = /^armes /i.test(b) ? 0 : 1; if (ca !== cb) return ca - cb; }
+          return String(a).localeCompare(String(b), 'fr', { sensitivity: 'base' });
+        });
+        el.innerHTML = sorted.length ? sorted.map(x => `<li>${x}</li>`).join('') : '<li>Aucune</li>';
       };
       fillProfList('profLangues', p.languages);
       fillProfList('profOutils', p.toolProfs);
