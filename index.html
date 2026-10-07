@@ -2165,7 +2165,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (54)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (55)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4088,7 +4088,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (54)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (55)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -4587,8 +4587,8 @@
             </div>
             <div class="qi-stat-block">
               <div class="qsb-bg-icon"><svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="8" cy="16" rx="6.5" ry="3"/><ellipse cx="8" cy="13" rx="6.5" ry="3"/><ellipse cx="16" cy="14" rx="6.5" ry="3"/><ellipse cx="16" cy="11" rx="6.5" ry="3"/></svg></div>
-              <div class="qsb-value">${p.wallet || 0}</div>
-              <div class="qsb-label">PO</div>
+              <div class="qsb-value" title="${(p.walletDetail || '').replace(/"/g, '&quot;')}">${p.wallet || 0}</div>
+              <div class="qsb-label" title="Valeur totale de la bourse, convertie en PO">PO</div>
             </div>
             <div class="qi-stat-block">
               <div class="qsb-bg-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7 2 3 6 3 11c0 3 1.5 5 3 6.5V20a1 1 0 001 1h2v-2h1v2h4v-2h1v2h2a1 1 0 001-1v-2.5c1.5-1.5 3-3.5 3-6.5 0-5-4-9-9-9z"/><circle cx="8.5" cy="11" r="1.6" fill="var(--card)"/><circle cx="15.5" cy="11" r="1.6" fill="var(--card)"/></svg></div>
@@ -4730,7 +4730,16 @@
     if (d.appData && d.appData.computedCA != null) p.ca = d.appData.computedCA;
     else if (d.ca != null) p.ca = d.ca;
     p.coins = d.coins || {};
-    p.wallet = parseInt(p.coins.po) || 0;
+    { // Bourse affichée : toutes les pièces (PP, PO, PE, PA, PC) converties en PO, y compris l'argent envoyé
+      // depuis la console que le joueur n'a pas encore reçu (fiche pas encore ouverte)
+      const pc = walletAfterPending(d);
+      const po = Math.max(0, pc) / 100;
+      p.wallet = (Math.round(po * 100) / 100).toLocaleString('fr-FR', { maximumFractionDigits: 2 });
+      const eff = { ...p.coins };
+      (d.pendingCoins || []).forEach(e => { if (e.add) COIN_KEYS.forEach(k => { eff[k] = (parseInt(eff[k]) || 0) + (parseInt(e.add[k]) || 0); }); });
+      const waiting = (d.pendingCoins || []).length;
+      p.walletDetail = fmtCoins(eff) + (waiting ? ` — ${waiting} mouvement${waiting > 1 ? 's' : ''} en attente (le joueur ne l'a pas encore reçu)` : '');
+    }
     ['states', 'exhaustion', 'xp', 'xpNext', 'level', 'classes', 'classe1', 'niveau1', 'classe2', 'niveau2', 'knownSpellNames',
      'capacites', 'items', 'themeColor', 'inspiration', 'huntBoard', 'pendingLevelUp', 'levelUpChecklist', 'abilities', 'capChoix', 'subclasses', 'race', 'skills', 'saveThrows', 'weaponProfs', 'armorProfs', 'toolProfs', 'languages']
       .forEach(k => { if (d[k] !== undefined) p[k] = d[k]; });
@@ -4752,7 +4761,7 @@
     if (document.querySelector('.modal-backdrop.open')) return; // pas de rafraîchissement pendant une saisie
     const { data, error } = await sb.from('joueurs').select('id, data');
     if (error || !data) return;
-    const snap = JSON.stringify(data.map(r => [r.id, r.data && r.data.currentHp, r.data && r.data.maxHp, r.data && r.data.coins,
+    const snap = JSON.stringify(data.map(r => [r.id, r.data && r.data.currentHp, r.data && r.data.maxHp, r.data && r.data.coins, r.data && r.data.pendingCoins,
       r.data && r.data.appData && r.data.appData.computedCA, r.data && r.data.states, r.data && r.data.exhaustion, r.data && r.data.xp,
       r.data && r.data.level, r.data && r.data.pendingLevelUp, (r.data && r.data.huntBoard || []).length, r.data && r.data.inspiration,
       r.data && r.data.companion && r.data.companion.hp, r.data && r.data.companionStates, (r.data && r.data.companionHuntBoard || []).length, r.data && r.data.companionDef && r.data.companionDef.nom]));
