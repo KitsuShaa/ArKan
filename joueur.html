@@ -86,10 +86,25 @@
     if (!it.desc) it.desc = 'Munitions (' + a.label.toLowerCase() + ')';
     return it;
   }
+  // Contenants magiques : reconnus à leur nom (capacité en kg)
+  const ARKAN_CONTAINERS = [
+    { re: /sac\s+sans\s+fond/i, cap: 250 },
+    { re: /havresac/i, cap: 60 },
+    { re: /sac\s+à\s+malice/i, cap: 0 },
+  ];
+  function arkanNormalizeContainer(it) {
+    if (!it || it.category === 'arme' || it.category === 'armure') return it;
+    const k = ARKAN_CONTAINERS.find(x => x.re.test(String(it.name || '')));
+    if (!k || !k.cap) return it;
+    it.isContainer = true; it.equipable = true;
+    if (!it.containerCapacity) it.containerCapacity = k.cap;
+    return it;
+  }
   // Range toutes les munitions d'un même type sur une seule ligne (les quantités s'additionnent)
   function arkanMergeAmmo(list) {
     const seen = {};
     for (let i = 0; i < list.length; i++) {
+      arkanNormalizeContainer(list[i]);
       const it = arkanNormalizeAmmo(list[i]);
       // Lot arrivé avec la 07/10 (19) compté « 1 » : un seul carreau ne pèse pas 1,5 kg → c'est un lot entier
       if (it.ammoKind && !it.ammoLotFixed && parseInt(it.qty, 10) === 1) {
@@ -2693,6 +2708,7 @@
     border-radius: 8px;
     overflow: hidden;
   }
+#page-inventaire .bag-fill.warn { background: var(--garnet, #b04a4a) !important; }
 #page-inventaire .bag-fill {
     height: 100%;
     background: var(--gold);
@@ -4510,7 +4526,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (22)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (23)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -6582,16 +6598,20 @@
   }
 
   /* ===================== WEIGHT ===================== */
-  function bagExists() {
-    return items.some(it => it.isContainer);
+  // Le sac sans fond ne sert que s'il est ÉQUIPÉ (porté) ; dans l'inventaire sans être équipé, c'est un objet comme un autre.
+  function activeBag() {
+    return items.find(it => it.isContainer && it.equipped) || null;
   }
+  function bagExists() { return !!activeBag(); }
 
-  // Un objet compte sur le perso s'il est équipé, ou s'il n'y a pas de sac pour le "ranger".
-  // Sinon (non équipé + un sac existe) il compte dans le sac.
+  // Sac équipé : son poids compte sur le perso ; les objets équipés (armure, anneau, cape…) aussi ;
+  // tout objet non équipé est rangé dans le sac (dès qu'on le déséquipe, il y retourne).
   function itemLocation(it) {
-    if (it.isContainer) return 'person'; // le sac lui-même est toujours porté
+    const bag = activeBag();
+    if (!bag || it === bag) return 'person';
     if (it.equipped) return 'person';
-    return bagExists() ? 'bag' : 'person';
+    if (it.isContainer) return 'person'; // un autre contenant ne va pas dans le sac
+    return 'bag';
   }
 
   function computeCarriedWeight() {
@@ -6617,13 +6637,15 @@
     document.getElementById('weightFill').classList.toggle('warn', carried > maxCarryWeight);
     document.getElementById('weightNumbers').innerHTML = `${fmt(carried)}<span class="sep">/</span>${fmt(maxCarryWeight)}<span class="unit">kg</span>`;
 
-    const bag = items.find(it => it.isContainer);
+    const bag = activeBag();
     if (bag) {
       const used = computeBagContents();
-      const pct2 = Math.min(100, (used / bag.containerCapacity) * 100);
+      const capKg = bag.containerCapacity || 250;
+      const pct2 = Math.min(100, (used / capKg) * 100);
       document.getElementById('bagName').textContent = bag.name;
       document.getElementById('bagFill').style.width = pct2 + '%';
-      document.getElementById('bagNumbers').textContent = `${fmt(used)} / ${fmt(bag.containerCapacity)} kg`;
+      document.getElementById('bagFill').classList.toggle('warn', used > capKg);
+      document.getElementById('bagNumbers').textContent = `${fmt(used)} / ${fmt(capKg)} kg${used > capKg ? ' — plein' : ''}`;
       document.getElementById('bagGauge').style.display = 'block';
     } else {
       document.getElementById('bagGauge').style.display = 'none';
@@ -6831,7 +6853,7 @@
   }
 
   function countEquippedMagic() {
-    return items.filter(it => it.magic && it.equipped).length;
+    return items.filter(it => it.magic && it.equipped && !it.isContainer).length; // le sac sans fond ne compte pas dans la limite
   }
 
   function toggleEquip(id) {
@@ -6845,7 +6867,9 @@
     renderItemList();
     renderWeight();
     updateComputedCA();
-    showToast(`${it.name} ${it.equipped ? 'équipé' : 'retiré'}`);
+    const bagNow = activeBag();
+    showToast(it.isContainer ? (it.equipped ? `${it.name} équipé : tes objets non équipés y sont rangés` : `${it.name} retiré : tes objets comptent de nouveau sur toi`)
+      : `${it.name} ${it.equipped ? 'équipé' : (bagNow ? 'retiré et rangé dans le sac' : 'retiré')}`);
     schedulePlayerStateSave();
   }
 
@@ -7134,7 +7158,7 @@
       renderWallet();
     }
     const wasOverweight = computeCarriedWeight() > maxCarryWeight;
-    const it = arkanNormalizeAmmo(JSON.parse(JSON.stringify(src)));
+    const it = arkanNormalizeContainer(arkanNormalizeAmmo(JSON.parse(JSON.stringify(src))));
     it.id = 'cat-' + src.id + '-' + Date.now();
     it.equipped = false; it.inCombat = false;
     const sameAmmo = it.ammoKind && items.find(x => x.ammoKind === it.ammoKind);
@@ -7223,7 +7247,7 @@
   }
 
   /* ===================== COMPANION ===================== */
-  let compCurrentHp = 0, compMaxHp = 1;
+  let compCurrentHp = 0, compMaxHp = 1, savedCompanionDef = null;
   let companionDef = null, compHpKnown = false;
   const COMP_SKILLS = { 'Acrobaties': 'dex', 'Arcanes': 'int', 'Athlétisme': 'for', 'Discrétion': 'dex', 'Dressage': 'sag', 'Escamotage': 'dex', 'Histoire': 'int', 'Intimidation': 'cha', 'Intuition': 'sag',
     'Investigation': 'int', 'Médecine': 'sag', 'Nature': 'int', 'Perception': 'sag', 'Persuasion': 'cha', 'Religion': 'int', 'Représentation': 'cha', 'Survie': 'sag', 'Tromperie': 'cha' };
@@ -7456,10 +7480,11 @@
       items: items, coins: coins, currentHp: currentHp, tempHp: tempHp, tempHpMax: tempHpMax,
       usedSlots: usedSlots, pactUsed: pactSlots.used, innateUsed: (window.ArkanInnate || {}).used || {}, hitDiceUsed: hitDiceUsed, concentrationSpellId: concentrationSpellId,
       deathSaves: { success: countFilled('#successDots'), fail: countFilled('#failDots') },
-      companion: {
+      companion: companionDef ? {
+        def: companionDef.nom || 'Compagnon',
         hp: compCurrentHp, hitDiceUsed: compHitDiceUsed,
         deathSaves: { success: countFilled('#compSuccessDots'), fail: countFilled('#compFailDots') },
-      },
+      } : null,
       capInCombat: capacities.filter(c => c.inCombat).map(c => c.name),
       capKnown: capacities.map(c => c.name),
       capUsesLeft: Object.fromEntries(capacities.filter(c => c.usesMax).map(c => [c.name, c.usesLeft])),
@@ -7518,7 +7543,7 @@
     pend.forEach(entry => {
       if (!entry || !entry.pid || !entry.item || consumedPending.has(entry.pid)) return;
       consumedPending.add(entry.pid);
-      const it = arkanNormalizeAmmo({ ...entry.item });
+      const it = arkanNormalizeContainer(arkanNormalizeAmmo({ ...entry.item }));
       // Munitions du même type : on ajoute à la ligne existante (20 carreaux de plus…)
       if (it.ammoKind) { const sameA = items.find(x => x.ammoKind === it.ammoKind && x.location !== 'bag'); if (sameA) { sameA.qty = (parseInt(sameA.qty, 10) || 0) + (it.qty || 0); added++; lastName = `${it.qty} ${it.name.toLowerCase()}`; return; } }
       // Potions identiques : on empile au lieu de créer une deuxième ligne
@@ -7607,8 +7632,12 @@
       renderHitDice();
       concentrationSpellId = saved.concentrationSpellId || null;
       if (saved.deathSaves) { setFilled('#successDots', saved.deathSaves.success || 0); setFilled('#failDots', saved.deathSaves.fail || 0); }
-      if (saved.companion) {
-        if (saved.companion.hp != null) { compCurrentHp = saved.companion.hp; compHpKnown = true; }
+      if (saved.companion && typeof saved.companion === 'object') {
+        // PV du compagnon : on ne reprend un 0 que s'il a vraiment été enregistré pour ce compagnon
+        // (avant la 07/10 (23), un « 0 » était enregistré avant même que le compagnon existe)
+        const sc = saved.companion, ds = sc.deathSaves || {};
+        const trusted = sc.def ? true : ((parseInt(sc.hp, 10) || 0) > 0 || (ds.success || 0) + (ds.fail || 0) > 0);
+        if (sc.hp != null && trusted) { compCurrentHp = sc.hp; compHpKnown = true; savedCompanionDef = sc.def || null; }
         compHitDiceUsed = saved.companion.hitDiceUsed || 0;
         if (saved.companion.deathSaves) { setFilled('#compSuccessDots', saved.companion.deathSaves.success || 0); setFilled('#compFailDots', saved.companion.deathSaves.fail || 0); }
       }
@@ -8021,6 +8050,7 @@
       renderHuntBoards(p);
       companionDef = p.companionDef || null;
       companionOwnerLevel = p.level || 1;
+      if (companionDef && compHpKnown && savedCompanionDef && savedCompanionDef !== (companionDef.nom || 'Compagnon')) compHpKnown = false; // nouveau compagnon
       if (companionDef && !compHpKnown) { compCurrentHp = companionDerive(companionDef, companionOwnerLevel).pvMax; compHpKnown = true; }
       renderCompanionSheet();
       concentrationSpellId = null;
