@@ -111,6 +111,10 @@
     const ammo = (list || []).find(x => x.ammoKind === k.key && (x.qty || 0) >= 0);
     return ammo ? ammo.id : null;
   }
+  // Sorts innés de race (ex. Représailles infernales du tieffelin) : lancements gratuits, rechargés au repos long
+  window.ArkanInnate = window.ArkanInnate || { list: [], used: {} };
+  function arkanInnateFor(name) { return (window.ArkanInnate.list || []).find(x => String(x.name).toLowerCase() === String(name).toLowerCase()) || null; }
+  function arkanInnateLeft(e) { return Math.max(0, (e.max || 1) - ((window.ArkanInnate.used || {})[e.name] || 0)); }
   function arkanModsOf(p) {
     const ab = (p && p.abilities) || {}, out = {};
     ['for', 'dex', 'con', 'int', 'sag', 'cha'].forEach(k => { if (ab[k] != null && ab[k] !== '') out[k] = Math.floor(((parseInt(ab[k], 10) || 10) - 10) / 2); });
@@ -4506,7 +4510,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (21)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (22)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -5230,6 +5234,7 @@
   function triggerLongRest() {
     if (window.CombatTab && window.CombatTab.longRest) window.CombatTab.longRest();
     if (window.SortsTab && window.SortsTab.resetSlots) window.SortsTab.resetSlots();
+    if (window.ArkanInnate) { window.ArkanInnate.used = {}; if (typeof renderAll === 'function') try { renderAll(); } catch (e) {} if (typeof schedulePlayerStateSave === 'function') schedulePlayerStateSave(); }
     if (typeof rechargeCapacities === 'function') rechargeCapacities('long');
     showToast('Repos long effectué');
   }
@@ -6270,6 +6275,7 @@
       let tagsHtml = `<span class="tag action">${s.action}</span>`;
       if (s.concentration) tagsHtml += `<span class="tag concentration">Concentration</span>`;
       if (s.ritual) tagsHtml += `<span class="tag ritual">Rituel</span>`;
+      { const inn = arkanInnateFor(s.name); if (inn) tagsHtml += `<span class="tag ritual" title="Sort de race : lancement gratuit, rechargé au repos long">Race ${arkanInnateLeft(inn)}/${inn.max || 1}</span>`; }
       row.innerHTML = `
         <div class="spell-icon">${schoolIcon(s.school)}</div>
         <div class="spell-info">
@@ -6357,6 +6363,12 @@
       actions.appendChild(b);
       return b;
     };
+    const inn = level > 0 ? arkanInnateFor(s.name) : null;
+    if (inn) {
+      const left = arkanInnateLeft(inn);
+      const b = mkBtn('cast-btn', left > 0 ? `Lancer — sort de race (Nv.${inn.level || level}) · ${left}/${inn.max || 1}` : 'Sort de race déjà utilisé (repos long)', left <= 0, () => attemptCast(s.id, level, inn.level || level, false, true));
+      b.style.marginBottom = '8px';
+    }
     if (level === 0) {
       mkBtn('cast-btn', 'Lancer', false, () => attemptCast(s.id, 0, 0));
     } else {
@@ -6403,7 +6415,7 @@
   }
 
   /* ===================== CASTING LOGIC ===================== */
-  function attemptCast(spellId, baseLevel, slotLevel, usePact) {
+  function attemptCast(spellId, baseLevel, slotLevel, usePact, innate) {
     const s = spells[baseLevel].find(sp => String(sp.id) === String(spellId));
     if (!s) return;
 
@@ -6412,27 +6424,31 @@
       const oldSpell = findSpell(concentrationSpellId).spell;
       document.getElementById('concModalOldSpell').textContent = oldSpell.name;
       document.getElementById('concModalNewSpell').textContent = s.name;
-      pendingCast = { spellId, baseLevel, slotLevel, usePact };
+      pendingCast = { spellId, baseLevel, slotLevel, usePact, innate };
       openModal('concModal');
       return;
     }
 
-    finalizeCast(spellId, baseLevel, slotLevel, usePact);
+    finalizeCast(spellId, baseLevel, slotLevel, usePact, innate);
   }
 
   function confirmConcentrationSwitch() {
     closeModal('concModal');
     if (pendingCast) {
-      finalizeCast(pendingCast.spellId, pendingCast.baseLevel, pendingCast.slotLevel, pendingCast.usePact);
+      finalizeCast(pendingCast.spellId, pendingCast.baseLevel, pendingCast.slotLevel, pendingCast.usePact, pendingCast.innate);
       pendingCast = null;
     }
   }
 
-  function finalizeCast(spellId, baseLevel, slotLevel, usePact) {
+  function finalizeCast(spellId, baseLevel, slotLevel, usePact, innate) {
     const s = spells[baseLevel].find(sp => String(sp.id) === String(spellId));
     if (!s) return;
 
-    if (usePact) {
+    if (innate) {
+      const u = window.ArkanInnate.used; u[s.name] = (u[s.name] || 0) + 1;
+      renderSpellList(baseLevel);
+      schedulePlayerStateSave();
+    } else if (usePact) {
       pactSlots.used = Math.min(pactSlots.max, pactSlots.used + 1);
       renderPips(pactSlots.lvl);
       schedulePlayerStateSave();
@@ -6447,7 +6463,7 @@
       updateConcBadge();
     }
 
-    showToast(`${s.name} lancé${slotLevel > baseLevel ? ` (emplacement Nv.${slotLevel})` : ''}`);
+    showToast(innate ? `${s.name} lancé (sort de race, Nv.${slotLevel}) — revient au repos long` : `${s.name} lancé${slotLevel > baseLevel ? ` (emplacement Nv.${slotLevel})` : ''}`);
     closeSpellPage();
   }
 
@@ -7438,7 +7454,7 @@
     // copie indépendante : jamais de référence vers les tableaux vivants (items, pièces, emplacements)
     return JSON.parse(JSON.stringify({
       items: items, coins: coins, currentHp: currentHp, tempHp: tempHp, tempHpMax: tempHpMax,
-      usedSlots: usedSlots, pactUsed: pactSlots.used, hitDiceUsed: hitDiceUsed, concentrationSpellId: concentrationSpellId,
+      usedSlots: usedSlots, pactUsed: pactSlots.used, innateUsed: (window.ArkanInnate || {}).used || {}, hitDiceUsed: hitDiceUsed, concentrationSpellId: concentrationSpellId,
       deathSaves: { success: countFilled('#successDots'), fail: countFilled('#failDots') },
       companion: {
         hp: compCurrentHp, hitDiceUsed: compHitDiceUsed,
@@ -7542,6 +7558,8 @@
     if (!d) return;
     renderHuntBoards(d);
     if (d.themeColor && d.themeColor !== lastThemeFromData) { lastThemeFromData = d.themeColor; applyTheme(d.themeColor, true); }
+    const newInnate = Array.isArray(d.innateSpells) ? d.innateSpells : [];
+    if (JSON.stringify(newInnate) !== JSON.stringify(window.ArkanInnate.list)) { window.ArkanInnate.list = newInnate; renderAll(); }
     const newKnown = d.knownSpellNames || [];
     if (JSON.stringify(newKnown) !== JSON.stringify(knownSpellNames)) {
       knownSpellNames.length = 0; knownSpellNames.push(...newKnown);
@@ -7573,6 +7591,7 @@
       Object.keys(usedSlots).forEach(k => usedSlots[k] = 0);
       if (saved.usedSlots) Object.keys(saved.usedSlots).forEach(k => { usedSlots[k] = Math.min(saved.usedSlots[k] || 0, maxSlots[k] || 0); });
       pactSlots.used = Math.min(saved.pactUsed || 0, pactSlots.max);
+      window.ArkanInnate.used = saved.innateUsed && typeof saved.innateUsed === 'object' ? { ...saved.innateUsed } : {};
       knownSpellNames.length = 0; if (saved.knownSpellNames) knownSpellNames.push(...saved.knownSpellNames);
       if (saved.appData) {
         const { exhaustionLevel: _oldExh, capacities: _oldCaps, ...rest } = saved.appData; // anciennes valeurs ignorées

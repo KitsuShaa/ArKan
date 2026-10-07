@@ -2165,7 +2165,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (51)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (52)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4088,7 +4088,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (51)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (52)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -7223,6 +7223,7 @@
       knownSpellNames: [...new Set([...(isEditing ? (existingPlayer.knownSpellNames || []) : []), ...wizSpellsFinal()])],
       hpLog: wizHp.order.length ? wizHp.order.map((c, i) => ({ niveau: i + 1, classe: c, de: i === 0 ? null : (wizHp.rolls[i] != null ? wizHp.rolls[i] : null) })) : undefined,
       wizSpellPicks: JSON.parse(JSON.stringify(wizSpells)),
+      innateSpells: capBase.length ? capInnateSpells(wizPseudoPlayer(), capacites) : undefined,
       capChoix: wizCap.choix, subclasses: wizCap.subclasses, speedBase: null,
       items: isEditing ? existingPlayer.items : undefined, coins: isEditing ? existingPlayer.coins : undefined,
       photo: photoData ? photoData.src : (isEditing ? existingPlayer.photo : null),
@@ -46574,7 +46575,7 @@
       const lvl = r.source === 'Classe' ? classLevel : p.level;
       if (r.source === 'Classe' && capNorm(capClassOf(r)) !== capNorm(className)) return;
       String(r.sorts).split(';').forEach(part => {
-        const m = part.match(/Dès niv\.\s*(\d+)\s*—\s*(.+)$/);
+        const m = part.trim().match(CAP_DES_RE);
         if (m && +m[1] === lvl) items.push({ kind: 'spell', baseId: r.id, label: `${r.nom} : ${m[2].trim()}`, spells: m[2].trim(), done: false });
       });
     });
@@ -46748,6 +46749,7 @@
       d.capacites = d.capacites || [];
       const ctx = () => capCtxFromPlayer({ ...p, ...d });
       if (spellNames.length) { d.knownSpellNames = [...new Set([...(d.knownSpellNames || []), ...spellNames])]; p.knownSpellNames = d.knownSpellNames; }
+      d.innateSpells = capInnateSpells({ ...p, ...d }, d.capacites); p.innateSpells = d.innateSpells;
       if (item.kind === 'spell') return;
       if (r.choix === 'Sous-classe' && picks[0]) {
         d.subclasses = { ...(d.subclasses || {}), [cls]: picks[0] };
@@ -47136,13 +47138,23 @@
     return Math.min(9, Math.ceil((p.level || 1) / 2));
   };
   // Lit « Sorts accordés » : sorts imposés et sorts à choisir (avec leurs filtres)
+  // « Dès niv. 3 — … » (tiret long, court, simple ou deux-points ; « Dès le niveau 3 »)
+  const CAP_DES_RE = /^\s*Dès\s+(?:le\s+)?niv(?:eau|\.)?\s*(\d+)\s*[—–\-:]\s*(.+)$/i;
+  // Patron d'occultiste : sa liste de sorts étendue s'AJOUTE aux sorts qu'il peut choisir (rien n'est imposé)
+  const capIsExtendedList = row => !!row && row.source === 'Classe' && capNorm(capClassOf(row)) === 'occultiste' && String(row.origine || '').includes('·');
+  const capSpellLevelOf = name => { const sp = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).find(x => capNorm(x.name) === capNorm(name)); return sp ? (parseInt(sp.level, 10) || 0) : null; };
   function capSpellReqs(spec, p, row) {
     const ctx = capCtxFromPlayer(p), out = [];
     const lvlFor = row && row.source === 'Classe' ? capLevelFor(ctx, row) : ctx.niv;
+    const extended = capIsExtendedList(row);
     String(spec || '').split(';').map(x => x.trim()).filter(Boolean).forEach(part => {
-      const dn = part.match(/^Dès niv\.\s*(\d+)\s*—\s*(.+)$/);
+      const dn = part.match(CAP_DES_RE);
       if (dn) { if (+dn[1] > lvlFor) return; part = dn[2].trim(); }
       if (/^Carac/i.test(part)) return;
+      if (/^Liste\s*(?:étendue|de sorts étendue)?\s*:/i.test(part)) {
+        out.push({ kind: 'extend', names: part.replace(/^[^:]*:/, '').split(',').map(x => x.replace(/\(.*?\)/g, '').trim()).filter(Boolean) });
+        return;
+      }
       let m = part.match(/^Sort selon (.+?)\s*:\s*(.+)$/i);
       if (m) {
         const chosen = ((p.capChoix || {})[m[1].trim()] || [])[0];
@@ -47164,8 +47176,46 @@
         out.push({ kind: 'pick', count, levels, classes, schools: school ? school.replace(/^école\s*/i, '').split(/\s+ou\s+|,/).map(x => x.trim()) : [], label: part });
         return;
       }
-      m = part.match(/^Sort( mineur)?\s*:\s*(.+)$/i);
-      if (m) out.push({ kind: 'fixed', names: m[2].split(',').map(x => x.replace(/\(.*?\)/g, '').trim()).filter(Boolean) });
+      m = part.match(/^Sorts?( mineurs?)?\s*:\s*(.+)$/i);
+      const body = m ? m[2] : (/[:=|]/.test(part) ? null : part); // nom(s) de sort seuls : « Représailles infernales (niveau 2, 1/repos long) »
+      if (body == null) return;
+      const raw = body.split(/,(?![^()]*\))/).map(x => x.trim()).filter(Boolean);
+      let names = raw.map(x => x.replace(/\(.*?\)/g, '').trim()).filter(Boolean);
+      // Sans « Sort : », on ne garde que de vrais noms de sorts du module Sorts
+      if (!m && typeof spellsDatabase !== 'undefined' && spellsDatabase.length) names = names.filter(n => capSpellLevelOf(n) !== null);
+      if (!names.length) return;
+      // Niveau de lancement précisé entre parenthèses (« niveau 2 »)
+      const castLvl = {}; raw.forEach((x, i) => { const c = x.match(/\(([^)]*)\)/); const l = c && c[1].match(/niv(?:eau|\.)?\s*(\d)/i); if (l) castLvl[names[i]] = +l[1]; });
+      if (extended) {
+        const cantrips = names.filter(n => capSpellLevelOf(n) === 0), leveled = names.filter(n => capSpellLevelOf(n) !== 0);
+        if (cantrips.length) out.push({ kind: 'fixed', names: cantrips });
+        if (leveled.length) out.push({ kind: 'extend', names: leveled });
+        return;
+      }
+      out.push({ kind: 'fixed', names, castLvl, innate: !!row && row.source === 'Race' });
+    });
+    return out;
+  }
+  // Sorts de la liste étendue d'un patron (selon la sous-classe choisie), jusqu'au niveau de classe
+  function capExtendedSpellsFor(p, cls) {
+    const sub = (p.subclasses || {})[cls];
+    if (!sub) return [];
+    const names = [];
+    capBase.filter(r => r.sorts && r.source === 'Classe' && capNorm(r.origine) === capNorm(`${cls} · ${sub}`))
+      .forEach(r => capSpellReqs(r.sorts, p, r).forEach(q => { if (q.kind === 'extend') names.push(...q.names); }));
+    return [...new Set(names)];
+  }
+  // Sorts innés de race (Ascendance infernale…) : 1 lancement gratuit par repos long, au niveau indiqué
+  function capInnateSpells(p, caps) {
+    const out = [];
+    (caps || []).forEach(c => {
+      const r = capBase.find(x => x.id === c.baseId);
+      if (!r || r.source !== 'Race' || !r.sorts) return;
+      const carac = (String(r.sorts).match(/Carac\w*\s*:\s*([A-Za-zéÉ]+)/i) || [])[1] || '';
+      capSpellReqs(r.sorts, p, r).forEach(q => {
+        if (q.kind !== 'fixed') return;
+        q.names.forEach(n => { const lv = capSpellLevelOf(n); if (lv) out.push({ name: capSpellName(n), level: (q.castLvl || {})[n] || lv, max: 1, recharge: 'repos_long', carac, source: r.nom }); });
+      });
     });
     return out;
   }
@@ -47191,16 +47241,24 @@
     } else {
       out.push({ kind: 'pick', count: 0, levels: lv, classes: [cls], schools: [], label: `Sorts de ${cls} (nombre libre, jusqu'au niveau ${maxLvl})` });
     }
+    // Patron d'occultiste : sa liste étendue s'ajoute aux sorts proposés
+    const extra = typeof capExtendedSpellsFor === 'function' ? capExtendedSpellsFor(p, cls) : [];
+    if (extra.length) out.forEach(q => { if (q.levels.some(l => l > 0)) { q.extra = extra; q.label += ` — liste étendue comprise (${extra.join(', ')})`; } });
     return out;
+  }
+  // Un sort entre dans un bloc (niveaux, classes ou liste étendue, écoles)
+  function capSpellInBlock(q, s) {
+    return q.levels.includes(parseInt(s.level, 10) || 0)
+      && (!q.classes.length || (s.classes || []).some(c => q.classes.some(k => capNorm(c) === capNorm(k))) || (q.extra || []).some(n => capNorm(n) === capNorm(s.name)))
+      && (!q.schools.length || q.schools.some(sc => capNorm(s.school || '').startsWith(capNorm(sc).slice(0, 5))));
   }
   function capSpellPickHtml(reqs, p) {
     const known = new Set((p.knownSpellNames || []).map(capNorm));
     return reqs.map((q, qi) => {
       if (q.kind === 'note') return `<div class="capr-info"><em>${histEsc(q.text)}</em></div>`;
-      if (q.kind === 'fixed') return `<div class="capr-info">Ajoutés d'office : <strong>${histEsc(q.names.join(', '))}</strong></div>`;
-      const list = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).filter(s => q.levels.includes(parseInt(s.level, 10) || 0)
-        && (!q.classes.length || (s.classes || []).some(c => q.classes.some(k => capNorm(c) === capNorm(k))))
-        && (!q.schools.length || q.schools.some(sc => capNorm(s.school || '').startsWith(capNorm(sc).slice(0, 5))))
+      if (q.kind === 'fixed') return `<div class="capr-info">Ajoutés d'office : <strong>${histEsc(q.names.join(', '))}</strong>${q.innate ? ' <em>(sorts de race : 1 lancement gratuit par repos long)</em>' : ''}</div>`;
+      if (q.kind === 'extend') return `<div class="capr-info">Ajoutés à la liste de sorts de l'occultiste (à choisir dans ses sorts connus, rien d'imposé) : <strong>${histEsc(q.names.join(', '))}</strong></div>`;
+      const list = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).filter(s => capSpellInBlock(q, s)
         && !known.has(capNorm(s.name))).sort((a, b) => (a.level - b.level) || a.name.localeCompare(b.name, 'fr'));
       return `<div class="capr-label">${histEsc(q.label)}${q.count ? ` — ${q.count} à choisir` : ''}</div>
         <div class="capr-spellpick" data-need="${q.count}" data-qi="${qi}">
@@ -47649,9 +47707,7 @@
 
   /* ---- Page 5 : sorts (une liste déroulante par sort à choisir) ---- */
   function wizSpellOptions(q, current) {
-    const all = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).filter(s => q.levels.includes(parseInt(s.level, 10) || 0)
-      && (!q.classes.length || (s.classes || []).some(c => q.classes.some(k => capNorm(c) === capNorm(k))))
-      && (!q.schools.length || q.schools.some(sc => capNorm(s.school || '').startsWith(capNorm(sc).slice(0, 5)))));
+    const all = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).filter(s => capSpellInBlock(q, s));
     const taken = new Set([...Object.values(wizSpells).flat().filter(Boolean), ...wizSpellsFixedNames()].map(capNorm));
     const byLvl = {}, seen = new Set();
     all.filter(s => !taken.has(capNorm(s.name)) || capNorm(s.name) === capNorm(current || '')).sort((a, b) => a.name.localeCompare(b.name, 'fr'))
@@ -47700,7 +47756,8 @@
       const r = capBase.find(x => x.id === it.baseId);
       if (!r || !r.sorts) return;
       capSpellReqs(r.sorts, p, r).forEach((q, qi) => {
-        if (q.kind === 'fixed') granted += `<div class="wsp-blk"><div class="wsp-top"><strong>${histEsc(r.nom)}</strong><span class="wiz-req ok">Imposés ✓</span></div><div class="wsp-fixed">${q.names.map(x => `<span>${histEsc(x)}</span>`).join('')}</div></div>`;
+        if (q.kind === 'fixed') granted += `<div class="wsp-blk"><div class="wsp-top"><strong>${histEsc(r.nom)}</strong><span class="wiz-req ok">Imposés ✓</span></div><div class="wsp-fixed">${q.names.map(x => `<span>${histEsc(x)}${q.innate && capSpellLevelOf(x) ? ` · niv. ${(q.castLvl || {})[x] || capSpellLevelOf(x)}, 1/repos long` : ''}</span>`).join('')}</div></div>`;
+        else if (q.kind === 'extend') granted += `<div class="wsp-blk"><div class="wsp-top"><strong>${histEsc(r.nom)}</strong><span class="wiz-req">Liste étendue</span></div><div class="field-hint">S'ajoutent aux sorts proposés à l'occultiste ci-dessus (rien d'imposé) : ${histEsc(q.names.join(', '))}</div></div>`;
         else if (q.kind === 'pick') granted += wizSpellBlock(`cap:${r.id}:${qi}`, q, `${r.nom} — ${q.label}`);
         else granted += `<div class="wsp-blk"><div class="wsp-top"><strong>${histEsc(r.nom)}</strong></div><div class="field-hint">${histEsc(q.text)}</div></div>`;
       });
@@ -47793,15 +47850,16 @@
   function wizSpellFits(q, name) {
     const s = (typeof spellsDatabase !== 'undefined' ? spellsDatabase : []).find(x => capNorm(x.name) === capNorm(name));
     if (!s) return false;
-    return q.levels.includes(parseInt(s.level, 10) || 0)
-      && (!q.classes.length || (s.classes || []).some(c => q.classes.some(k => capNorm(c) === capNorm(k))))
-      && (!q.schools.length || q.schools.some(sc => capNorm(s.school || '').startsWith(capNorm(sc).slice(0, 5))));
+    return capSpellInBlock(q, s);
   }
   // Fiche ancienne : on replace ses sorts connus dans les bons blocs
   function wizSpellsFromLegacy(blocks) {
     if (!wizSpellsLegacy) return;
     const fixed = new Set(wizSpellsFixedNames().map(capNorm));
+    const p0 = wizPseudoPlayer();
+    const ext = new Set([p0.classe1, p0.classe2].filter(Boolean).flatMap(c => capExtendedSpellsFor(p0, c)).map(capNorm));
     let pool = wizSpellsLegacy.filter(n => !fixed.has(capNorm(n)));
+    pool = [...pool.filter(n => !ext.has(capNorm(n))), ...pool.filter(n => ext.has(capNorm(n)))];
     blocks.forEach(([key, q]) => {
       if (wizSpells[key] && wizSpells[key].some(Boolean)) return;
       const take = [];
