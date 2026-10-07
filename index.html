@@ -2165,7 +2165,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (53)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (54)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4088,7 +4088,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (53)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (54)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -7595,8 +7595,10 @@
     let entry;
     if (currentObjetFormId) {
       entry = schema.db.find(x => x.id === currentObjetFormId);
+      const oldName = entry.name;
       Object.assign(entry, data);
       showToast(`« ${name} » mis à jour`);
+      sbPushItemUpdate(cat, entry, oldName);
     } else {
       entry = { id: schema.idPrefix + Date.now(), ...data };
       schema.db.push(entry);
@@ -7607,6 +7609,28 @@
     renderObjectsGrid();
   }
 
+  // Objet modifié dans le module Objets : la nouvelle version part chez tous les joueurs qui l'ont déjà
+  // (boîte « pendingItemUpdates » : la fiche met à jour nom, poids, prix, description… sans toucher à la quantité ni à l'équipement)
+  async function sbPushItemUpdate(cat, entry, oldName) {
+    if (!sb || !Array.isArray(players) || !players.length) return;
+    const item = objetToPlayerItem(cat, entry);
+    const upd = { pid: 'u' + Date.now() + Math.random().toString(36).slice(2, 7), match: { id: entry.id, names: [...new Set([oldName, entry.name].filter(Boolean))] }, item };
+    let n = 0;
+    for (const p of players) {
+      if (!p || !p.id || p.id === 'elowen') continue;
+      try {
+        const { data, error } = await sb.from('joueurs').select('data').eq('id', p.id).single();
+        if (error || !data) continue;
+        const d = data.data || {};
+        const has = (d.items || []).some(it => it && (String(it.id) === String(entry.id) || String(it.id).startsWith(`cat-${entry.id}-`) || String(it.id).startsWith(`${entry.id}_`) || upd.match.names.includes(it.name)));
+        if (!has) continue;
+        d.pendingItemUpdates = [...(d.pendingItemUpdates || []), upd].slice(-50);
+        const { error: e2 } = await sb.from('joueurs').update({ data: d }).eq('id', p.id);
+        if (!e2) n++;
+      } catch (e) { console.error('Mise à jour objet chez', p.name, e); }
+    }
+    if (n) showToast(`« ${entry.name} » mis à jour chez ${n} joueur${n > 1 ? 's' : ''}`);
+  }
   function sbSaveObjet(cat, entry) {
     if (!sb) return;
     const schema = objetsCategories[cat];
