@@ -2306,7 +2306,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (69)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (70)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4262,7 +4262,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (69)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (70)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -47338,6 +47338,10 @@
 
   /* ===================== CRÉATION : capacités proposées depuis la base ===================== */
   let wizCap = { items: [], subclasses: {}, choix: {}, extraCaps: [], extraSaves: [], spells: [], open: null };
+  // Capacités retenues + options choisies (« Option de ») : leurs sorts, effets et bonus comptent aussi
+  function wizActiveCaps() {
+    return [...wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped'), ...(wizCap.extraCaps || []).map(x => ({ baseId: x.baseId, extra: true }))];
+  }
   function wizCapReset(p) {
     wizCap = { items: [], subclasses: { ...((p && p.subclasses) || {}) }, choix: JSON.parse(JSON.stringify((p && p.capChoix) || {})),
       extraCaps: [], extraSaves: [], spells: [], open: null };
@@ -47862,18 +47866,27 @@
     const { race: r, parent } = typeof wizRaceLore === 'function' ? wizRaceLore(race) : {};
     // Pour la race puis la sous-race : la capacité « Augmentation de caractéristiques » de la base des capacités
     // si elle existe, sinon le premier trait du Lore (ancien format)
+    // Une ligne de sous-race qui « remplace » celle de la race (colonne Remplace) l'emporte : la ligne de la race est ignorée
+    const replacedBySub = new Set(r && r !== parent && typeof capRowsFor === 'function' ? capRowsFor(r.name).map(x => x.remplace).filter(Boolean) : []);
     const texts = [parent, r && r !== parent ? r : null].filter(Boolean).map(x => {
-      const row = typeof capRowsFor === 'function' ? capRowsFor(x.name).find(c => /augmentation de caract/i.test(c.nom || '')) : null;
+      const row = typeof capRowsFor === 'function' ? capRowsFor(x.name).find(c => /augmentation de caract/i.test(c.nom || '') && !replacedBySub.has(c.id)) : null;
+      if (!row && x === parent && replacedBySub.size && capRowsFor(x.name).some(c => replacedBySub.has(c.id) && /augmentation de caract/i.test(c.nom || ''))) return '';
       if (row) return String(row.description || '').split('\n')[0];
       return String(((x.traits || [])[0] || {}).text || '').split('\n')[0];
     });
-    const fixed = {}; let choice = 0;
+    const fixed = {}; let choice = 0, flex = false;
     texts.forEach(t => {
       if (/toutes de (\d)/i.test(t)) { const v = +t.match(/toutes de (\d)/i)[1]; WIZ_AB.forEach(([k]) => fixed[k] = (fixed[k] || 0) + v); return; }
       WIZ_AB.forEach(([k, label]) => { const m = t.match(new RegExp(label + '\\s+(?:augmente\\s+)?de\\s+(\\d)', 'i')); if (m) fixed[k] = (fixed[k] || 0) + (+m[1]); });
       const c = t.match(/(une|deux|trois)\s+(?:autres?\s+)?(?:valeurs?\s+de\s+)?caractéristiques?\s+(?:de votre choix|au choix)[^.]*?de\s+(\d)/i);
       if (c) choice += { une: 1, deux: 2, trois: 3 }[c[1].toLowerCase()] || 1;
+      // « Augmentez une valeur de 2 et une autre de 1, ou augmentez trois valeurs de 1 » (drakéides et kobold de Fizban…)
+      if (/de\s+2\s+et\s+(?:augmentez-en\s+)?une\s+autre\s+de\s+1/i.test(t) && /trois\s+valeurs\s+de\s+1/i.test(t)) flex = true;
     });
+    if (flex) {
+      const vals = wizAb.flex === '111' ? [1, 1, 1] : [2, 1];
+      return { fixed, choice: vals.length, vals, flex: true };
+    }
     // Races dont le Lore ne précise pas le bonus : valeurs du Manuel des joueurs / Volo
     if (!Object.keys(fixed).length && !choice) {
       const n = capNorm((parent || r || {}).name || race);
@@ -47894,7 +47907,7 @@
       if (wizAb.mode === 'libre') { tot[k] = parseInt(document.getElementById(id).value, 10) || null; return; }
       const b = wizAb.base[k];
       if (!b) { tot[k] = null; return; }
-      const ch = wizAb.choice.filter(x => x === k).length;
+      const ch = wizAb.choice.reduce((s2, x, i) => s2 + (x === k ? ((rb.vals || [])[i] || 1) : 0), 0);
       tot[k] = Math.min(20, b + (rb.fixed[k] || 0) + ch) + (asi[k] || 0);
     });
     return tot;
@@ -47922,11 +47935,12 @@
       } else {
         baseCell = `<input type="number" min="1" max="30" value="${histEsc(document.getElementById(id).value)}" oninput="document.getElementById('${id}').value = this.value; wizAbRefreshTotals()" aria-label="${label}">`;
       }
-      const bonus = std ? [(rb.fixed[k] ? `+${rb.fixed[k]}` : ''), wizAb.choice.filter(x => x === k).length ? `+${wizAb.choice.filter(x => x === k).length} (choix)` : '', asi[k] ? `+${asi[k]} (ASI)` : ''].filter(Boolean).join(' ') || '—' : '—';
+      const chv = wizAb.choice.reduce((s2, x, i) => s2 + (x === k ? ((rb.vals || [])[i] || 1) : 0), 0);
+      const bonus = std ? [(rb.fixed[k] ? `+${rb.fixed[k]}` : ''), chv ? `+${chv} (choix)` : '', asi[k] ? `+${asi[k]} (ASI)` : ''].filter(Boolean).join(' ') || '—' : '—';
       const t = tot[k];
       return `<div class="wab-row"><span>${label}</span><span>${baseCell}</span><span class="wab-bonus">${bonus}</span><span class="wab-total" data-tot="${k}">${t == null ? '—' : t}</span><span class="wab-total" data-mod="${k}">${t == null ? '—' : wizSign(wizMod(t))}</span></div>`;
     }).join('');
-    const choiceSel = std && rb.choice ? `<div class="wab-choice">Bonus racial au choix : ${Array.from({ length: rb.choice }, (_, i) => `<select onchange="wizAbChoice(${i}, this.value)" aria-label="Bonus au choix ${i + 1}"><option value="">+1 à…</option>${WIZ_AB.filter(([k]) => !rb.fixed[k]).map(([k, l]) => `<option value="${k}" ${wizAb.choice[i] === k ? 'selected' : ''}>${l}</option>`).join('')}</select>`).join(' ')}</div>` : '';
+    const choiceSel = std && rb.choice ? `<div class="wab-choice">Bonus racial au choix : ${rb.flex ? `<select onchange="wizAbFlex(this.value)" aria-label="Répartition"><option value="21" ${wizAb.flex !== '111' ? 'selected' : ''}>+2 et +1</option><option value="111" ${wizAb.flex === '111' ? 'selected' : ''}>+1, +1 et +1</option></select> ` : ''}${Array.from({ length: rb.choice }, (_, i) => `<select onchange="wizAbChoice(${i}, this.value)" aria-label="Bonus au choix ${i + 1}"><option value="">+${(rb.vals || [])[i] || 1} à…</option>${WIZ_AB.filter(([k]) => !rb.fixed[k] && !wizAb.choice.some((x, j) => j !== i && x === k)).map(([k, l]) => `<option value="${k}" ${wizAb.choice[i] === k ? 'selected' : ''}>${l}</option>`).join('')}</select>`).join(' ')}</div>` : '';
     box.innerHTML = `
       <div class="wab-top">
         <div class="wab-mode"><button type="button" class="${std ? 'on' : ''}" onclick="wizAbMode('standard')">Tableau standard</button><button type="button" class="${std ? '' : 'on'}" onclick="wizAbMode('libre')">Saisie libre</button></div>
@@ -47946,6 +47960,7 @@
   }
   function wizAbSet(k, v) { wizAb.base[k] = v ? parseInt(v, 10) : null; wizAbSync(); wizAbRender(); }
   function wizAbChoice(i, k) { wizAb.choice[i] = k || null; wizAbSync(); wizAbRender(); }
+  function wizAbFlex(v) { wizAb.flex = v; wizAb.choice = []; wizAbSync(); wizAbRender(); }
   function wizAbMode(mode) {
     if (mode === wizAb.mode) return;
     if (mode === 'libre') { WIZ_AB.forEach(([k, , id]) => { const t = wizAbTotals()[k]; if (t != null) document.getElementById(id).value = t; }); }
@@ -47956,7 +47971,7 @@
   function wizDerived(onlyRace) {
     const p = wizPseudoPlayer();
     const base = (() => { const r = getWizardRacesData().find(x => x.name === p.race); return r ? r.speed : 9; })();
-    let caps = wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').map(i => ({ baseId: i.baseId }));
+    let caps = wizActiveCaps().map(i => ({ baseId: i.baseId }));
     if (onlyRace) {
       const parent = typeof wizRaceLore === 'function' ? (wizRaceLore(p.race).parent || {}).name : '';
       caps = [...capRowsFor(p.race), ...(parent ? capRowsFor(parent) : [])].map(r => ({ baseId: r.id }));
@@ -48202,7 +48217,7 @@
     if (!wizCap.items.length && capBase.length) wizCapBuild(); // page ouverte directement (modification d'une fiche)
     // bonus de capacités : « PV max : +1 par niveau » (race) ou « +1 par niveau de classe »
     const bon = [];
-    wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
+    wizActiveCaps().forEach(it => {
       const r = capBase.find(x => x.id === it.baseId);
       const m = r && String(r.effets || '').match(/PV max\s*:\s*\+(\d+)\s*par niveau( de classe)?/i);
       if (m) bon.push({ v: +m[1], cls: m[2] ? capClassOf(r) : null, nom: r.nom });
@@ -48271,7 +48286,7 @@
     if (wizSpellsLegacy) {
       const blocks = [];
       [[p.classe1, p.niveau1], [p.classe2, p.niveau2]].forEach(([c, n]) => { if (c && n) capClassSpellReqs(p, c, 0, n).forEach((q, qi) => blocks.push([`cls:${c}:${qi}`, q])); });
-      wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => { const r = capBase.find(x => x.id === it.baseId); if (r && r.sorts) capSpellReqs(r.sorts, p, r).forEach((q, qi) => { if (q.kind === 'pick') blocks.push([`cap:${r.id}:${qi}`, q]); }); });
+      wizActiveCaps().forEach(it => { const r = capBase.find(x => x.id === it.baseId); if (r && r.sorts) capSpellReqs(r.sorts, p, r).forEach((q, qi) => { if (q.kind === 'pick') blocks.push([`cap:${r.id}:${qi}`, q]); }); });
       // Blocs à compte exact d'abord, listes libres ensuite
       wizSpellsFromLegacy([...blocks.filter(b => b[1].count), ...blocks.filter(b => !b[1].count)]);
     }
@@ -48289,7 +48304,7 @@
     });
     // Sorts accordés par les capacités
     let granted = '';
-    wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
+    wizActiveCaps().forEach(it => {
       const r = capBase.find(x => x.id === it.baseId);
       if (!r || !r.sorts) return;
       capSpellReqs(r.sorts, p, r).forEach((q, qi) => {
@@ -48304,7 +48319,7 @@
   }
   function wizSpellsFixedNames() {
     const p = wizPseudoPlayer(), names = [];
-    wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
+    wizActiveCaps().forEach(it => {
       const r = capBase.find(x => x.id === it.baseId);
       if (r && r.sorts) capSpellReqs(r.sorts, p, r).forEach(q => { if (q.kind === 'fixed') names.push(...q.names); });
     });
@@ -48313,7 +48328,7 @@
   // Tous les sorts retenus (imposés + choisis) pour l'enregistrement
   function wizSpellsFinal() {
     const p = wizPseudoPlayer(), names = [];
-    wizCap.items.filter(i => i.kind === 'cap' && i.status !== 'skipped').forEach(it => {
+    wizActiveCaps().forEach(it => {
       const r = capBase.find(x => x.id === it.baseId);
       if (r && r.sorts) capSpellReqs(r.sorts, p, r).forEach(q => { if (q.kind === 'fixed') names.push(...q.names); });
     });
