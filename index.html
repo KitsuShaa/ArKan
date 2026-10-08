@@ -592,6 +592,19 @@
     position: relative;
   }
   .spell-chip:hover { border-color: var(--gold); }
+  .spell-chip .herbe-ic { width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; background: var(--teal-soft); color: var(--teal); display: flex; align-items: center; justify-content: center; }
+  .herbe-ic svg { width: 21px; height: 21px; }
+  .herbe-legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 14px 0 10px; }
+  @media (max-width: 1000px) { .herbe-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .herbe-leg { display: flex; gap: 10px; align-items: flex-start; text-align: left; background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 10px 12px; cursor: pointer; color: var(--ink); font-family: var(--font-sans); }
+  .herbe-leg:hover { border-color: rgba(78,166,154,.6); }
+  .herbe-leg.active { border-color: var(--teal); background: var(--teal-soft); }
+  .herbe-leg .herbe-ic { width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; background: var(--teal-soft); color: var(--teal); display: flex; align-items: center; justify-content: center; }
+  .herbe-leg strong { display: block; font-size: 13px; margin-bottom: 2px; }
+  .herbe-leg em { display: block; font-style: normal; font-size: 11.5px; line-height: 1.4; color: var(--ink-dim); }
+  .herbe-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  .herbe-filters select { background: var(--card); border: 1px solid var(--card-border); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-size: 12.5px; font-family: var(--font-sans); }
+  .herbe-reset { background: none; border: 1px solid var(--card-border); color: var(--ink-dim); border-radius: 999px; padding: 6px 12px; font-size: 12.5px; cursor: pointer; }
   .sc-icon {
     width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
     background: var(--gold-soft); color: var(--gold);
@@ -2251,7 +2264,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (60)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (61)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4205,7 +4218,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (60)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (61)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -4248,6 +4261,10 @@
       { table: 'equipement_aventurier', target: equipementDatabase, map: r => ({
           id: r.id, name: r.nom, poids: parseKg(r.poids), prix: r.prix, equipable: r.equipable, magique: r.magique,
           consommable: r.consommable, emplacement: r.emplacement, infos: r.infos || '',
+        }) },
+      { table: 'herbes', target: herbesDatabase, map: r => ({
+          id: r.id, name: r.nom, type: r.type, categorie: r.categorie, genre: r.genre, lieu: r.lieu, saison: r.saison,
+          prix: r.prix, poids: parseKg(r.poids), description: r.description || '', effet: r.effet || '', cache_aux_joueurs: r.cache_aux_joueurs,
         }) },
       { table: 'outils', target: outilsDatabase, map: r => ({
           id: r.id, name: r.nom, prix: r.prix, poids: parseKg(r.poids), categorie: r.categorie,
@@ -7465,6 +7482,20 @@
   const outilsDatabase = [];
   const objetsMagiquesDatabase = [];
   const armesMagiquesDatabase = [];
+  const herbesDatabase = [];
+  // Herbes et champignons : listes des tables officielles
+  const HERBE_TYPES = ['altérant', 'antipoison', 'curatif', 'dopant', 'fortifiant'];
+  const HERBE_CATEGORIES = ['absorption directe', 'décoction', 'infusion', 'macération'];
+  const HERBE_GENRES = ['champignon', 'écorce', 'épines', 'plante', 'racines'];
+  const HERBE_LIEUX = ['arctique', 'désert', 'forêt', 'littoral', 'marais', 'montagne', 'outreterre', 'plaine'];
+  const HERBE_CAT_INFO = {
+    'absorption directe': { txt: "Se consomme telle quelle : on mâche ou on avale la plante crue, sans préparation.", svg: '<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l8-8"/>' },
+    'décoction': { txt: "La plante bout longuement dans l'eau pour en extraire les principes actifs ; on boit le liquide obtenu.", svg: '<path d="M3.5 10h17"/><path d="M5 10c0 5 3 8.5 7 8.5s7-3.5 7-8.5"/><path d="M8 18l-1 3M16 18l1 3"/><path d="M9.5 3.5c-.8 1 .8 1.8 0 3M14.5 3.5c-.8 1 .8 1.8 0 3"/>' },
+    'infusion': { txt: "La plante macère quelques minutes dans de l'eau chaude, comme un thé, puis on la boit.", svg: '<path d="M4 9h12v4.5a5.5 5.5 0 01-5.5 5.5h-1A5.5 5.5 0 014 13.5z"/><path d="M16 10.5h1.5a2.3 2.3 0 010 4.6H16"/><path d="M8 3c-.7 1 .7 1.7 0 3M12 3c-.7 1 .7 1.7 0 3"/><path d="M3 21h14"/>' },
+    'macération': { txt: "La plante est pilée au mortier puis mélangée à de l'huile, du vin ou de l'alcool ; la pâte ou la crème s'applique sur le corps.", svg: '<path d="M3.5 11.5h17l-1.8 5.6A3.5 3.5 0 0115.4 19.5H8.6a3.5 3.5 0 01-3.3-2.4z"/><path d="M9 21h6"/><path d="M13.5 11.5L19.5 3.5"/>' },
+  };
+  const herbeIcon = cat => { const c = HERBE_CAT_INFO[cat]; return c ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${c.svg}</svg>` : ''; };
+  let herbeFilters = { type: '', categorie: '', genre: '', lieu: '' };
 
   // "1,5 kg" / "2kg" / "500 g" / 3 -> 1.5 / 2 / 0.5 / 3 (null si vide ou "—")
   function parseKg(v) {
@@ -7606,7 +7637,23 @@
       ],
     },
   };
-  const objetsCategoryOrder = ['armes', 'armures', 'equipement', 'outils', 'objetsMagiques', 'armesMagiques'];
+  objetsCategories.herbes = {
+    label: 'Herbes et champignons', db: herbesDatabase, table: 'herbes', idPrefix: 'herbe', icon: 'objet',
+    subLabel: o => [o.type, o.categorie, o.lieu].filter(Boolean).join(' · '),
+    fields: [
+      { key: 'type', label: 'Type', type: 'select', options: HERBE_TYPES, col: 1 },
+      { key: 'categorie', label: 'Catégorie (préparation)', type: 'select', options: HERBE_CATEGORIES, col: 1 },
+      { key: 'genre', label: 'Genre', type: 'select', options: HERBE_GENRES, col: 1 },
+      { key: 'lieu', label: 'Lieu', type: 'select', options: HERBE_LIEUX, col: 1 },
+      { key: 'saison', label: 'Saison de cueillette', type: 'text', col: 1, placeholder: 'ex. printemps, automne' },
+      { key: 'prix', label: 'Prix', type: 'text', col: 1 },
+      { key: 'poids', label: 'Poids', type: 'kg', col: 1 },
+      { key: 'description', label: 'Description', type: 'textarea' },
+      { key: 'effet', label: 'Effet', type: 'textarea' },
+      { key: 'cache_aux_joueurs', label: 'Caché aux joueurs', type: 'checkbox' },
+    ],
+  };
+  const objetsCategoryOrder = ['armes', 'armures', 'equipement', 'outils', 'objetsMagiques', 'armesMagiques', 'herbes'];
   let currentObjetsTab = 'armes';
 
   function renderObjetsSubTabs() {
@@ -7637,13 +7684,16 @@
     } else {
       const k = currentObjetsTab;
       entries = objetsCategories[k].db.map(o => ({ cat: k, o }));
+      if (k === 'herbes') entries = entries.filter(({ o }) => Object.keys(herbeFilters).every(f => !herbeFilters[f] || o[f] === herbeFilters[f]));
     }
     entries.sort((a, b) => a.o.name.localeCompare(b.o.name, 'fr'));
+    renderHerbeFilters(!q && currentObjetsTab === 'herbes');
 
     document.getElementById('objectsResultCount').textContent = `${entries.length} objet${entries.length > 1 ? 's' : ''} trouvé${entries.length > 1 ? 's' : ''}${q ? ' (toutes catégories)' : ''}`;
 
     grid.innerHTML = entries.map(({ cat, o }) => `
       <div class="spell-chip" data-objet-cat="${cat}" data-objet-id="${o.id}">
+        ${cat === 'herbes' && HERBE_CAT_INFO[o.categorie] ? `<div class="herbe-ic" title="${o.categorie}">${herbeIcon(o.categorie)}</div>` : ''}
         <div class="sc-body">
           <div class="sc-name">${o.name}</div>
           <div class="sc-sub">${q ? objetsCategories[cat].label : (objetsCategories[cat].subLabel(o) || objetsCategories[cat].label)}</div>
@@ -7655,6 +7705,25 @@
     grid.querySelectorAll('[data-objet-id]').forEach(chip => {
       chip.addEventListener('click', () => openObjetForm(chip.dataset.objetCat, chip.dataset.objetId));
     });
+  }
+
+  // Filtres + légende des préparations (onglet Herbes et champignons)
+  function renderHerbeFilters(show) {
+    let box = document.getElementById('herbeFilters');
+    if (!box) {
+      box = document.createElement('div'); box.id = 'herbeFilters';
+      const ref = document.getElementById('objectsResultCount'); ref.parentNode.insertBefore(box, ref);
+    }
+    if (!show) { box.innerHTML = ''; box.style.display = 'none'; return; }
+    box.style.display = '';
+    const sel = (k, label, list) => `<select data-herbe-f="${k}"><option value="">${label} : tous</option>${list.map(v => `<option value="${v}" ${herbeFilters[k] === v ? 'selected' : ''}>${v}</option>`).join('')}</select>`;
+    box.innerHTML = `<div class="herbe-legend">${HERBE_CATEGORIES.map(c => `<button class="herbe-leg${herbeFilters.categorie === c ? ' active' : ''}" data-herbe-cat="${c}" title="${HERBE_CAT_INFO[c].txt.replace(/"/g, '&quot;')}">
+        <span class="herbe-ic">${herbeIcon(c)}</span><span><strong>${c.charAt(0).toUpperCase() + c.slice(1)}</strong><em>${HERBE_CAT_INFO[c].txt}</em></span></button>`).join('')}</div>
+      <div class="herbe-filters">${sel('type', 'Type', HERBE_TYPES)}${sel('genre', 'Genre', HERBE_GENRES)}${sel('lieu', 'Lieu', HERBE_LIEUX)}
+        ${Object.values(herbeFilters).some(Boolean) ? '<button class="herbe-reset" data-herbe-reset>Tout afficher</button>' : ''}</div>`;
+    box.querySelectorAll('[data-herbe-f]').forEach(el => el.addEventListener('change', () => { herbeFilters[el.dataset.herbeF] = el.value; renderObjectsGrid(); }));
+    box.querySelectorAll('[data-herbe-cat]').forEach(el => el.addEventListener('click', () => { herbeFilters.categorie = herbeFilters.categorie === el.dataset.herbeCat ? '' : el.dataset.herbeCat; renderObjectsGrid(); }));
+    const rs = box.querySelector('[data-herbe-reset]'); if (rs) rs.addEventListener('click', () => { herbeFilters = { type: '', categorie: '', genre: '', lieu: '' }; renderObjectsGrid(); });
   }
 
   let currentObjetFormCat = null;
@@ -34406,6 +34475,11 @@
     if (/sac\s+sans\s+fond|havresac/i.test(o.name || '')) {
       return { ...base, category: cat === 'objetsMagiques' ? 'objet_magique' : 'objet', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: true, magic: true,
         isContainer: true, containerCapacity: /havresac/i.test(o.name) ? 60 : 250, desc: o.description_complete || o.description || '' };
+    }
+    if (cat === 'herbes') {
+      const head = [o.type, o.categorie, o.genre, o.lieu].filter(Boolean).join(' · ') + (o.saison ? ` (${o.saison})` : '');
+      return { ...base, category: 'herbe', qty: 1, weight: parseKg(o.poids) || 0.05, price: o.prix || '—', equipable: false, magic: false,
+        herbeCat: o.categorie || '', desc: [head, o.description, o.effet ? 'Effet : ' + o.effet : ''].filter(Boolean).join('\n') };
     }
     if (cat === 'equipement') {
       return { ...base, category: 'objet', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: !!o.equipable, magic: !!o.magique, desc: o.infos || '' };
