@@ -2306,7 +2306,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (62)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (63)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4260,7 +4260,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (62)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (63)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -6309,6 +6309,7 @@
     anmfPhotoInput: 3 / 4, gmfPhotoInput: 3 / 4, glfPhotoInput: 3 / 4,
     anfPhotoInput: 16 / 10, anfConseilPhotoInput: 16 / 10, gcfPhotoInput: 16 / 10, gcfPhoto2Input: 16 / 10, gcfPhoto3Input: 16 / 10,
     gvfPhotoInput: 16 / 9, gvfPlanInput: 1, hcfPhotoInput: 4 / 3,
+    of_imageInput: 3 / 4, // image d'un objet (herbes : portrait)
   };
   function guessImportRatio(input) {
     const id = input.id || '';
@@ -7836,7 +7837,7 @@
       return `<div class="form-field"><label>${f.label} <span class="field-hint">(portrait conseillé)</span></label>
         <div class="of-image-row"><div class="of-image-prev" id="${id}_prev">${v ? `<img src="${v}" alt="">` : '<span>Aucune image</span>'}</div>
         <div class="of-image-actions"><input type="hidden" id="${id}" value="${v}">
-          <label class="of-image-btn">Choisir une image<input type="file" accept="image/*" style="display:none" onchange="onObjetImagePicked(event, '${id}')"></label>
+          <label class="of-image-btn">Choisir une image<input type="file" id="${id}Input" accept="image/*" style="display:none" onchange="onObjetImagePicked(event, '${id}')"></label>
           <button type="button" class="of-image-btn ghost" onclick="clearObjetImage('${id}')">Retirer</button></div></div></div>`;
     }
     if (f.type === 'kg') {
@@ -7856,6 +7857,9 @@
     const file = e.target.files && e.target.files[0]; e.target.value = '';
     if (!file) return;
     const set = url => { document.getElementById(id).value = url; document.getElementById(id + '_prev').innerHTML = `<img src="${url}" alt="">`; };
+    // L'image passe d'abord par l'outil de cadrage de la console, qui l'a déjà envoyée dans le stockage :
+    // on reprend son adresse au lieu de renvoyer un fichier vide.
+    if (file._icropUrl) { set(file._icropUrl); showToast('Image prête — pense à enregistrer'); return; }
     showToast('Envoi de l’image…');
     try { set(await uploadImageBlob(file, 'herbes')); showToast('Image prête — pense à enregistrer'); }
     catch (err) { warnStorageOnce(err); const r = new FileReader(); r.onload = () => set(r.result); r.readAsDataURL(file); }
