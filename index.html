@@ -2306,7 +2306,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (64)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (65)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3753,6 +3753,8 @@
   <div class="modal-box" style="max-width:520px;">
     <h3 id="srfTitle">Sous-race</h3>
     <div class="form-field"><label>Nom</label><input type="text" id="srfName"></div>
+    <div class="form-field"><label>Race liée *</label><select id="srfRaceParente"></select>
+      <div class="field-hint" style="margin-top:4px;">Le personnage de cette sous-race reçoit aussi les capacités, la vitesse et les langues de cette race.</div></div>
     <div class="photo-preview-box" id="srfPhotoPreview" onclick="document.getElementById('srfPhotoInput').click()">
       <div class="photo-preview-placeholder" id="srfPhotoPlaceholder"><span>Portrait</span></div>
     </div>
@@ -4260,7 +4262,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (64)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (65)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -4398,6 +4400,7 @@
         }) },
       { table: 'sous_races', target: sousracesDatabase, map: r => ({
           id: r.id, name: r.nom, origines: r.origines, description: r.description, traits: r.traits || [], taille: r.taille, poids: r.poids, photo: r.photo,
+          raceParente: r.race_parente || '',
         }) },
       { table: 'classes', target: classesLoreDatabase, map: r => ({
           id: r.id, name: r.nom, flavor: r.flavor, features: r.features || [], de_vie: r.de_vie,
@@ -6611,7 +6614,8 @@
     const races = racesDatabase.map(r => ({ name: r.name, speed: parseSpeed(r.vitesse) }));
     // Sous-race sans vitesse propre : celle de sa race (ex. "Nain des collines" -> "Nain")
     const parentSpeed = (subName) => {
-      const parent = races.filter(r => r.speed && norm(subName).includes(norm(r.name))).sort((a, b) => b.name.length - a.name.length)[0];
+      const pr = typeof sousraceParentOf === 'function' ? sousraceParentOf(subName) : null;
+      const parent = pr ? races.find(r => r.name === pr.name && r.speed) : races.filter(r => r.speed && norm(subName).includes(norm(r.name))).sort((a, b) => b.name.length - a.name.length)[0];
       return parent ? parent.speed : null;
     };
     const combined = [
@@ -6995,8 +6999,21 @@
     if (exact) return { race: exact, parent: exact };
     // Sous-race : sa propre ligne + la race parente (la plus longue dont le nom est contenu)
     const sub = sousracesDatabase.find(r => langNorm(r.name) === n);
-    const parent = racesDatabase.filter(r => n.includes(langNorm(r.name))).sort((a, b) => b.name.length - a.name.length)[0];
-    return { race: sub || null, parent: parent || null };
+    return { race: sub || null, parent: sousraceParentOf(sub || name) };
+  }
+  // Race parente d'une sous-race : le champ « Race liée » d'abord ; sinon la race dont le nom est contenu dans le sien
+  // (le plus long gagne), et « Drow » → Elfe pour les anciennes fiches.
+  function sousraceParentOf(subOrName) {
+    const sub = typeof subOrName === 'string' ? sousracesDatabase.find(r => langNorm(r.name) === langNorm(subOrName)) : subOrName;
+    const nm = langNorm(sub ? sub.name : subOrName);
+    if (sub && sub.raceParente) {
+      const exp = racesDatabase.find(r => langNorm(r.name) === langNorm(sub.raceParente));
+      if (exp) return exp;
+    }
+    const byName = racesDatabase.filter(r => nm.includes(langNorm(r.name))).sort((a, b) => b.name.length - a.name.length)[0];
+    if (byName) return byName;
+    const LEGACY = { drow: 'Elfe' };
+    return LEGACY[nm] ? racesDatabase.find(r => langNorm(r.name) === langNorm(LEGACY[nm])) || null : null;
   }
   function wizAutoLanguageSources() {
     const out = [];
@@ -36186,8 +36203,8 @@
     `).join('');
     fillSelect('pnjfClasse', pnjClassesList);
     document.getElementById('pnjfRace').innerHTML =
-      '<optgroup label="Races">' + pnjRacesList.map(r => `<option value="${r}">${r}</option>`).join('') + '</optgroup>' +
-      '<optgroup label="Sous-races">' + pnjSousRacesList.map(r => `<option value="${r}">${r}</option>`).join('') + '</optgroup>';
+      '<optgroup label="Races">' + (racesDatabase.length ? racesDatabase.map(r => r.name) : pnjRacesList).map(r => `<option value="${r}">${r}</option>`).join('') + '</optgroup>' +
+      '<optgroup label="Sous-races">' + (sousracesDatabase.length ? [...sousracesDatabase].sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(r => r.name) : pnjSousRacesList).map(r => `<option value="${r}">${r}</option>`).join('') + '</optgroup>';
   }
 
   function togglePnjFilterPanel() {
@@ -39950,6 +39967,11 @@
     document.getElementById('srfTaille').value = s ? s.taille : '';
     document.getElementById('srfPoids').value = s ? s.poids : '';
     document.getElementById('srfOrigines').value = s ? s.origines : '';
+    { // Race liée : liste des races du Lore, pré-remplie avec celle trouvée (champ ou nom)
+      const cur = s ? (sousraceParentOf(s) || {}).name || '' : '';
+      document.getElementById('srfRaceParente').innerHTML = '<option value="">— Choisir —</option>' + [...racesDatabase].sort((a, b) => a.name.localeCompare(b.name, 'fr'))
+        .map(r => `<option value="${r.name.replace(/"/g, '&quot;')}" ${r.name === cur ? 'selected' : ''}>${r.name}</option>`).join('');
+    }
     document.getElementById('srfDeleteBtn').style.display = s ? 'block' : 'none';
     const preview = document.getElementById('srfPhotoPreview');
     if (s && s.photo) { preview.style.backgroundImage = `url(${s.photo})`; document.getElementById('srfPhotoPlaceholder').style.display = 'none'; }
@@ -39968,8 +39990,10 @@
   function saveSousraceForm() {
     const name = document.getElementById('srfName').value.trim();
     if (!name) { showToast('Donne au moins un nom'); return; }
+    const raceParente = document.getElementById('srfRaceParente').value;
+    if (!raceParente) { showToast('Choisis la race liée'); return; }
     const data = {
-      name, taille: document.getElementById('srfTaille').value.trim(), poids: document.getElementById('srfPoids').value.trim(),
+      name, raceParente, taille: document.getElementById('srfTaille').value.trim(), poids: document.getElementById('srfPoids').value.trim(),
       origines: document.getElementById('srfOrigines').value.trim(),
       traits: readStatBlockList('srfTraitsList').map(t => ({ title: t.name, text: t.text })),
     };
@@ -39977,7 +40001,8 @@
     if (currentSousraceId) { Object.assign(sousracesDatabase.find(x => x.id === currentSousraceId), data); showToast(`« ${name} » mise à jour`); }
     else { sousracesDatabase.push({ id: 'sousrace' + Date.now(), photo: null, ...data }); showToast(`« ${name} » créée`); }
     const srEntry = sousracesDatabase.find(x => x.id === currentSousraceId) || sousracesDatabase[sousracesDatabase.length - 1];
-    if (sb) sb.from('sous_races').upsert({ id: srEntry.id, nom: srEntry.name, origines: srEntry.origines, traits: srEntry.traits || [], taille: srEntry.taille, poids: srEntry.poids, photo: srEntry.photo }).then(({error}) => { if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
+    if (sb) sb.from('sous_races').upsert({ id: srEntry.id, nom: srEntry.name, race_parente: srEntry.raceParente || null, origines: srEntry.origines, traits: srEntry.traits || [], taille: srEntry.taille, poids: srEntry.poids, photo: srEntry.photo }).then(({error}) => {
+      if (error && /race_parente/.test(error.message || '')) { showToast('⚠️ Race liée non enregistrée : lance le script sql_sous_races_race_liee.sql'); return; } if (error) { console.error(error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); } });
     closeModal('modalSousraceForm');
     renderSystemeContent();
   }
@@ -40154,8 +40179,10 @@
     currentSousraceId = id;
     const s = sousracesDatabase.find(x => x.id === id);
     document.getElementById('pnjvName').textContent = s.name;
-    document.getElementById('pnjvSub').textContent = 'Sous-race';
+    const parentR = sousraceParentOf(s);
+    document.getElementById('pnjvSub').textContent = parentR ? `Sous-race · ${parentR.name}` : 'Sous-race · ⚠️ race liée à choisir';
     const infoBoxes = [
+      { label: 'Race liée', value: parentR ? parentR.name : '—' },
       { label: 'Taille', value: s.taille || '—' }, { label: 'Poids', value: s.poids || '—' },
     ];
     useLoreLayout('sousrace');
