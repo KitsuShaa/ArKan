@@ -2306,7 +2306,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (65)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (66)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4262,7 +4262,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (65)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (66)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -47844,7 +47844,13 @@
   function wizRaceBonus() {
     const race = (document.getElementById('wRace') || {}).value || '';
     const { race: r, parent } = typeof wizRaceLore === 'function' ? wizRaceLore(race) : {};
-    const texts = [parent, r && r !== parent ? r : null].filter(Boolean).map(x => ((x.traits || [])[0] || {}).text || '').map(t => t.split('\n')[0]);
+    // Pour la race puis la sous-race : la capacité « Augmentation de caractéristiques » de la base des capacités
+    // si elle existe, sinon le premier trait du Lore (ancien format)
+    const texts = [parent, r && r !== parent ? r : null].filter(Boolean).map(x => {
+      const row = typeof capRowsFor === 'function' ? capRowsFor(x.name).find(c => /augmentation de caract/i.test(c.nom || '')) : null;
+      if (row) return String(row.description || '').split('\n')[0];
+      return String(((x.traits || [])[0] || {}).text || '').split('\n')[0];
+    });
     const fixed = {}; let choice = 0;
     texts.forEach(t => {
       if (/toutes de (\d)/i.test(t)) { const v = +t.match(/toutes de (\d)/i)[1]; WIZ_AB.forEach(([k]) => fixed[k] = (fixed[k] || 0) + v); return; }
