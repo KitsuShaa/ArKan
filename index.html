@@ -1287,6 +1287,38 @@
   .lore-sub-chip .lsc-soon { font-size: 8.5px; color: var(--ink-faint); text-transform: uppercase; margin-top: 3px; }
 
   .sub-pill-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+  /* ---- Module Règles ---- */
+  .rg-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 18px; align-items: start; }
+  .rg-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  @media (max-width: 980px) { .rg-layout { grid-template-columns: 1fr; } .rg-side { display: grid; grid-template-columns: 1fr 1fr; } }
+  .rg-card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 16px 18px; min-width: 0; }
+  .rg-title { font-family: var(--font-serif); font-size: 17px; color: var(--gold); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .rg-en { font-family: var(--font-sans); font-size: 11px; color: var(--ink-faint); font-style: italic; }
+  .rg-badge { margin-left: auto; font-family: var(--font-sans); font-size: 10px; letter-spacing: .4px; text-transform: uppercase; color: var(--gold); background: var(--gold-soft); border: 1px solid rgba(201,162,75,.4); border-radius: 999px; padding: 2px 8px; }
+  .rg-intro .rg-badge { margin-left: 0; }
+  .rg-dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; column-gap: 14px; row-gap: 8px; }
+  .rg-dl dt { font-weight: 600; color: var(--ink); font-size: 13px; }
+  .rg-dl dd { margin: 0; color: var(--ink-dim); font-size: 13px; line-height: 1.5; }
+  @media (max-width: 700px) { .rg-dl { grid-template-columns: 1fr; } .rg-dl dd { margin-bottom: 4px; } }
+  .rg-p { margin: 0 0 8px; color: var(--ink-dim); font-size: 13px; line-height: 1.55; }
+  .rg-intro { color: var(--ink-dim); font-size: 13px; line-height: 1.55; margin: 0 0 14px; }
+  .rg-ul { margin: 0; padding-left: 18px; color: var(--ink-dim); font-size: 13px; line-height: 1.5; }
+  .rg-ul li { margin-bottom: 5px; }
+  .rg-states { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; }
+  .rg-group { margin-bottom: 24px; }
+  .rg-group-title { font-family: var(--font-display); font-size: 18px; color: var(--ink); margin-bottom: 12px; }
+  .rg-info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; align-items: start; }
+  .rg-table-wrap { overflow-x: auto; }
+  .rg-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .rg-table th { text-align: left; font-weight: 600; color: var(--ink-faint); font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; padding: 6px 8px; border-bottom: 1px solid var(--card-border); }
+  .rg-table td { padding: 6px 8px; color: var(--ink); border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: top; }
+  .rg-table tbody tr:nth-child(odd) td { background: rgba(255,255,255,.02); }
+  .rg-table.rg-num td:last-child, .rg-table.rg-num th:last-child { text-align: right; }
+  .rg-info-grid .rg-table td:not(:first-child) { white-space: nowrap; }
+  .rg-info-grid .rg-table.rg-wrap td { white-space: normal; }
+  .rg-info-grid .rg-wide { grid-column: span 2; }
+  @media (max-width: 820px) { .rg-info-grid .rg-wide { grid-column: auto; } }
+  .rg-table.rg-num td:last-child strong { color: var(--gold); font-family: var(--font-serif); font-size: 15px; }
   .sub-pill-tabs button {
     background: var(--card); border: 1px solid var(--card-border); color: var(--ink-dim);
     border-radius: 20px; padding: 8px 16px; font-size: 12.5px; cursor: pointer; font-family: var(--font-sans);
@@ -2165,7 +2197,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (56)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (57)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -2292,6 +2324,27 @@
 </div>
 <style>@keyframes loadspin { to { transform: rotate(360deg); } }</style>
 
+<script>
+  // Taille d'affichage : la console s'agrandit sur un grand écran (réglable dans Paramètres › Affichage)
+  (function () {
+    const BASE_W = 1440, BASE_H = 860;
+    function apply() {
+      let pref = 'auto';
+      try { pref = localStorage.getItem('arkanUiScale') || 'auto'; } catch (e) {}
+      let z = 1;
+      if (pref === 'auto') {
+        const w = window.innerWidth, h = window.innerHeight; // taille réelle de la fenêtre (non affectée par le zoom CSS)
+        z = Math.max(1, Math.min(1.6, Math.min(w / BASE_W, h / BASE_H)));
+        z = Math.round(z * 20) / 20; // par pas de 5 %
+      } else z = parseFloat(pref) || 1;
+      document.documentElement.style.zoom = z === 1 ? '' : String(z);
+    }
+    window.arkanApplyUiScale = apply;
+    apply();
+    let t = null;
+    window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(apply, 150); });
+  })();
+</script>
 <div class="topbar">
   <div class="brand">ArKan</div>
   <div class="tab-strip" id="tabStrip"></div>
@@ -2490,6 +2543,12 @@
       <button class="new-spell-btn" style="margin-left:auto;" onclick="openTableForm(null)">+ Nouvelle table</button>
     </div>
     <div class="table-card-grid" id="tableCardGrid"></div>
+  </div>
+
+  <!-- ===== MODULE RÈGLES ===== -->
+  <div class="page" id="page-regles">
+    <div class="sub-pill-tabs" id="reglesSubTabs" style="margin-bottom:16px;"></div>
+    <div id="reglesSubContent"></div>
   </div>
 
   <!-- ===== MODULE LORE ===== -->
@@ -4088,7 +4147,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (56)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (57)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -4130,7 +4189,7 @@
         }) },
       { table: 'equipement_aventurier', target: equipementDatabase, map: r => ({
           id: r.id, name: r.nom, poids: parseKg(r.poids), prix: r.prix, equipable: r.equipable, magique: r.magique,
-          consommable: r.consommable, emplacement: r.emplacement,
+          consommable: r.consommable, emplacement: r.emplacement, infos: r.infos || '',
         }) },
       { table: 'outils', target: outilsDatabase, map: r => ({
           id: r.id, name: r.nom, prix: r.prix, poids: parseKg(r.poids), categorie: r.categorie,
@@ -4388,10 +4447,10 @@
     "Mort",
   ];
 
+  // États attribuables (alignés sur Règles › États ; « Neutralisé » = « Incapable d'agir », « Assommé » devient « Étourdi »)
   const stateList = [
-    "Aveuglé", "Charmé", "Assourdi", "Effrayé", "Agrippé",
-    "Entravé", "Incapable d'agir", "Invisible", "Neutralisé",
-    "Paralysé", "Pétrifié", "Empoisonné", "À terre", "Entravé (zone)", "Assommé",
+    "À terre", "Agrippé", "Assourdi", "Aveuglé", "Charmé", "Effrayé", "Empoisonné",
+    "Entravé", "Entravé (zone)", "Étourdi", "Incapable d'agir", "Inconscient", "Invisible", "Paralysé", "Pétrifié",
   ];
 
   const spellsDb = [
@@ -4457,6 +4516,7 @@
     if (id === 'combat' && typeof renderCombatModule === 'function') renderCombatModule();
     if (id === 'joueurs' && typeof renderPlayerDetail === 'function') renderPlayerDetail();
     if (id === 'lore' && typeof renderLoreModule === 'function') renderLoreModule();
+    if (id === 'regles' && typeof renderReglesModule === 'function') renderReglesModule();
     if (id === 'histoire' && typeof renderHistoireModule === 'function') renderHistoireModule();
     if (id === 'cartes' && typeof renderCartesModule === 'function') renderCartesModule();
     if (id === 'messagerie' && typeof renderMsgConvList === 'function') renderMsgConvList();
@@ -5186,6 +5246,7 @@
     { key: 'theme', label: 'Thème' },
     { key: 'liens', label: 'Liens du Tome' },
     { key: 'password', label: 'Mot de passe' },
+    { key: 'affichage', label: 'Affichage' },
   ];
   let currentParamSub = 'tags';
 
@@ -5250,6 +5311,21 @@
           <button class="modal-confirm-btn" onclick="saveHistLinkIgnore()">Enregistrer</button>
         </div>
       `;
+    }
+    if (currentParamSub === 'affichage') {
+      let pref = 'auto'; try { pref = localStorage.getItem('arkanUiScale') || 'auto'; } catch (e) {}
+      const opts = [['auto', 'Automatique (selon l\'écran)'], ['0.9', '90 %'], ['1', '100 %'], ['1.1', '110 %'], ['1.25', '125 %'], ['1.4', '140 %'], ['1.6', '160 %']];
+      c.innerHTML = `<div class="rg-card" style="max-width:560px;">
+        <div class="rg-title">Taille d'affichage de la console</div>
+        <p class="rg-p">En automatique, la console s'agrandit sur un grand écran pour garder les mêmes proportions que sur un écran d'ordinateur portable. Le réglage est propre à chaque appareil.</p>
+        <div class="sub-pill-tabs">${opts.map(([v, l]) => `<button class="${v === pref ? 'active' : ''}" data-ui-scale="${v}">${l}</button>`).join('')}</div>
+        <p class="rg-p" style="margin-top:10px;">Taille actuelle : <strong>${Math.round((parseFloat(document.documentElement.style.zoom) || 1) * 100)} %</strong></p></div>`;
+      c.querySelectorAll('[data-ui-scale]').forEach(b => b.addEventListener('click', () => {
+        try { localStorage.setItem('arkanUiScale', b.dataset.uiScale); } catch (e) {}
+        document.documentElement.style.zoom = '';
+        window.arkanApplyUiScale(); renderParamSubContent();
+      }));
+      return;
     }
     if (currentParamSub === 'password') {
       c.innerHTML = `
@@ -7399,7 +7475,7 @@
     },
     equipement: {
       label: 'Équipement aventurier', db: equipementDatabase, table: 'equipement_aventurier', idPrefix: 'equip', icon: 'objet',
-      subLabel: o => '',
+      subLabel: o => o.infos ? (o.infos.length > 70 ? o.infos.slice(0, 68) + '…' : o.infos) : '',
       fields: [
         { key: 'poids', label: 'Poids', type: 'kg', col: 1 },
         { key: 'prix', label: 'Prix', type: 'text', col: 1 },
@@ -7407,6 +7483,7 @@
         { key: 'magique', label: 'Magique', type: 'checkbox' },
         { key: 'consommable', label: 'Consommable', type: 'checkbox' },
         { key: 'emplacement', label: 'Emplacement', type: 'text' },
+        { key: 'infos', label: 'Infos supplémentaires', type: 'textarea' },
       ],
     },
     outils: {
@@ -7659,6 +7736,13 @@
         return sb.from(schema.table).upsert(p2).then(({ error: e2 }) => {
           if (e2) showToast('⚠️ Non sauvegardé en ligne (' + e2.message + ')');
           else showToast('Enregistré — ajoute la colonne degats_type à la table armes pour séparer le type');
+        });
+      }
+      if (error && /infos/.test(error.message || '') && cat === 'equipement') {
+        const p2 = { ...payload }; delete p2.infos;
+        return sb.from(schema.table).upsert(p2).then(({ error: e2 }) => {
+          if (e2) showToast('⚠️ Non sauvegardé en ligne (' + e2.message + ')');
+          else showToast('Enregistré sans les infos — lance le script sql_equipement_infos.sql');
         });
       }
       if (error) { console.error(`Supabase ${schema.table} upsert:`, error); showToast('⚠️ Non sauvegardé en ligne (' + error.message + ')'); }
@@ -34266,7 +34350,7 @@
         isContainer: true, containerCapacity: /havresac/i.test(o.name) ? 60 : 250, desc: o.description_complete || o.description || '' };
     }
     if (cat === 'equipement') {
-      return { ...base, category: 'objet', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: !!o.equipable, magic: !!o.magique, desc: '' };
+      return { ...base, category: 'objet', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: !!o.equipable, magic: !!o.magique, desc: o.infos || '' };
     }
     if (cat === 'outils') return { ...base, category: 'outil', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: false, magic: false, desc: o.categorie || '' };
     // Potions (de guérison ou autres) : catégorie « Potions », empilables, reconnues par les raccourcis du module Combat
@@ -34453,6 +34537,107 @@
   function editCurrentTableFromView() {
     closeModal('modalTableView');
     openTableForm(currentRollTableId);
+  }
+
+  /* ===================== MODULE RÈGLES ===================== */
+  const RG_ACTIONS = [
+    ['Aider', "Avantage au prochain jet de caractéristique ou au premier jet d'attaque d'une créature aidée par une autre."],
+    ['Attaquer', "Faire une attaque au corps à corps ou une attaque à distance."],
+    ['Chercher', "Éventuel jet de Perception ou d'Investigation."],
+    ['Esquiver', "Chaque jet d'attaque lancé contre la créature a un désavantage si l'attaquant est visible, et les JdS de Dextérité ont l'avantage, si la créature est capable d'agir et si sa vitesse est supérieure à 0."],
+    ['Foncer', "Mouvement supplémentaire pour le tour en cours, d'une distance supplémentaire égale à la vitesse."],
+    ['Lancer un sort', "Avec une armure, il est indispensable de maîtriser l'armure."],
+    ['Se cacher', "Jet de Discrétion pour tenter de se cacher. En cas de réussite on gagne certains avantages."],
+    ['Se désengager', "Le mouvement ne provoque pas d'attaques d'opportunité pour le reste du tour."],
+    ['Se tenir prêt', "Décider quelle circonstance déclenchera la réaction puis choisir l'action ou le déplacement qui aura lieu lorsqu'elle sera déclenchée. Quand le déclencheur est activé, utiliser la réaction ou l'ignorer. Une seule réaction par tour. Dans le cas d'un sort, l'énergie est retenue jusqu'à ce que le déclencheur soit activé."],
+    ['Utiliser un objet', "Par exemple, dégainer une épée. Certains objets nécessitent aussi cette action, ou bien pour utiliser plus d'un objet durant un tour."],
+  ];
+  const RG_BONUS_INTRO = ["Certains sorts ou certaines capacités peuvent être utilisés comme action bonus.", "Une action bonus peut être faite avant ou après l'action principale, peu importe."];
+  const RG_BONUS = [
+    ['Pour les sorts', "Il faut regarder dans le détail du sort s'il est noté Action bonus pour savoir comment il compte."],
+    ['Pour les armes', "Si le joueur souhaite utiliser deux armes (une dans chaque main), l'action principale sera l'attaque avec sa main dominante, tandis que l'action bonus sera l'attaque avec son autre main. Pour cette 2e attaque, le joueur lancera le dé de dégâts mais n'ajoutera pas son bonus de Force/Dex."],
+    ['Pour les capacités', "Il faut regarder dans le détail de la capacité, la description précisera s'il s'agit d'une action ou d'une action bonus."],
+    ['Pour les objets', "Il est possible de changer d'arme en cours de combat, de prendre une potion, de sortir quelque chose du sac à dos, etc."],
+  ];
+  const RG_BONUS_OUTRO = ["Le reste des actions « basiques », comme donner un objet à quelqu'un, ouvrir une porte, enlever ou mettre un bijou, ne prend pas d'action en particulier : c'est dans le flux du combat.", "De manière générale, si rien n'est précisé dans le détail, c'est une action principale."];
+  const RG_REACTION = ["Certains sorts ou certaines capacités peuvent être déclenchés par une situation particulière : c'est ce qu'on appelle une réaction.",
+    "Dans le même principe que les actions bonus, il faut regarder dans le détail des sorts ou capacités pour savoir s'il s'agit d'une réaction.",
+    "Les réactions sont à part des actions et actions bonus : elles peuvent être utilisées en plus.",
+    "Il s'agit d'un genre de réflexe qui se fait dans la foulée d'une situation."];
+  const RG_DD = [['Très facile', 5], ['Facile', 10], ['Moyenne', 15], ['Difficile', 20], ['Très difficile', 25], ['Quasi impossible', 30]];
+  const RG_MODS = [['2–3', '−4'], ['4–5', '−3'], ['6–7', '−2'], ['8–9', '−1'], ['10–11', '+0'], ['12–13', '+1'], ['14–15', '+2'], ['16–17', '+3'], ['18–19', '+4'], ['20', '+5']];
+  const RG_STATES = [
+    { n: 'À terre', en: 'Prone', l: ["La seule option de mouvement possible pour une créature à terre est de ramper, à moins qu'elle ne se relève et mette alors un terme à son état.", "La créature a un désavantage aux jets d'attaque.", "Un jet d'attaque contre la créature a un avantage si l'attaquant est à 1,50 mètre ou moins de la créature. Sinon, le jet d'attaque a un désavantage."] },
+    { n: 'Agrippé', en: 'Grappled', l: ["La vitesse d'une créature agrippée passe à 0, et elle ne peut bénéficier d'aucun bonus à sa vitesse.", "L'état prend fin si la créature qui agrippe est incapable d'agir (voir l'état).", "L'état se termine également si un effet met la créature agrippée hors de portée de la créature ou de l'effet qui l'agrippe, comme par exemple lorsqu'une créature est projetée par le sort <i>vague tonnante</i>."] },
+    { n: 'Assourdi', en: 'Deafened', l: ["Une créature assourdie n'entend pas et rate automatiquement tout jet de caractéristique qui nécessite l'ouïe."] },
+    { n: 'Aveuglé', en: 'Blinded', l: ["Une créature aveuglée ne voit pas et rate automatiquement tout jet de caractéristique qui nécessite la vue.", "Les jets d'attaque contre la créature ont un avantage, et les jets d'attaque de la créature ont un désavantage."] },
+    { n: 'Charmé', en: 'Charmed', l: ["Une créature charmée ne peut pas attaquer le charmeur ou le cibler avec des capacités ou des effets magiques nuisibles.", "Le charmeur a un avantage à ses jets de caractéristique pour interagir socialement avec la créature."] },
+    { n: 'Effrayé', en: 'Frightened', l: ["Une créature effrayée a un désavantage aux jets de caractéristique et aux jets d'attaque tant que la source de sa peur est dans sa ligne de vue.", "La créature ne peut se rapprocher volontairement de la source de sa peur."] },
+    { n: 'Empoisonné', en: 'Poisoned', l: ["Une créature empoisonnée a un désavantage aux jets d'attaque et aux jets de caractéristique."] },
+    { n: 'Entravé', en: 'Restrained', l: ["La vitesse d'une créature entravée passe à 0, et elle ne peut bénéficier d'aucun bonus à sa vitesse.", "Les jets d'attaque contre la créature ont un avantage, et les jets d'attaque de la créature ont un désavantage.", "La créature a un désavantage à ses jets de sauvegarde de Dextérité."] },
+    { n: 'Étourdi', en: 'Stunned', l: ["Une créature étourdie est incapable d'agir (voir l'état), ne peut plus bouger et parle de manière hésitante.", "La créature rate automatiquement ses jets de sauvegarde de Force et de Dextérité.", "Les jets d'attaque contre la créature ont un avantage."] },
+    { n: "Incapable d'agir", alias: 'Neutralisé', en: 'Incapacitated', l: ["Une créature incapable d'agir ne peut effectuer aucune action ni aucune réaction."] },
+    { n: 'Inconscient', en: 'Unconscious', l: ["Une créature inconsciente est incapable d'agir (voir l'état), ne peut plus bouger ni parler, et n'est plus consciente de ce qui se passe autour d'elle.", "La créature lâche ce qu'elle tenait et tombe à terre.", "La créature rate automatiquement ses jets de sauvegarde de Force et de Dextérité.", "Les jets d'attaque contre la créature ont un avantage.", "Toute attaque qui touche la créature est un coup critique si l'attaquant est à 1,50 mètre ou moins de la créature."] },
+    { n: 'Invisible', en: 'Invisible', l: ["Une créature invisible ne peut être vue sans l'aide de la magie ou un sens particulier. En ce qui concerne le fait de se cacher, la créature est considérée dans une zone à visibilité nulle. L'emplacement de la créature peut être détecté par un bruit qu'elle fait ou par les traces qu'elle laisse.", "Les jets d'attaque contre la créature ont un désavantage, et les jets d'attaque de la créature ont un avantage."] },
+    { n: 'Paralysé', en: 'Paralyzed', l: ["Une créature paralysée est incapable d'agir (voir l'état) et ne peut plus bouger ni parler.", "La créature rate automatiquement ses jets de sauvegarde de Force et de Dextérité.", "Les jets d'attaque contre la créature ont un avantage.", "Toute attaque qui touche la créature est un coup critique si l'attaquant est à 1,50 mètre ou moins de la créature."] },
+    { n: 'Pétrifié', en: 'Petrified', l: ["Une créature pétrifiée est transformée, ainsi que tout objet non magique qu'elle porte, en une substance inanimée solide (généralement en pierre). Son poids est multiplié par dix et son vieillissement cesse.", "La créature est incapable d'agir (voir l'état), ne peut plus bouger ni parler, et n'est plus consciente de ce qui se passe autour d'elle.", "Les jets d'attaque contre la créature ont un avantage.", "La créature rate automatiquement ses jets de sauvegarde de Force et de Dextérité.", "La créature obtient la résistance contre tous les types de dégâts.", "La créature est immunisée contre le poison et la maladie, mais un poison ou une maladie déjà dans son organisme est seulement suspendu, pas neutralisé."] },
+  ];
+  const RG_INFOS = [
+    { group: 'Voyage', blocks: [
+      { t: 'Montures', h: ['Monture', 'Vitesse', 'Capacité de chargement', 'Prix'], r: [['Âne ou mule', '12 m', '210 kg', '8 PO'], ['Chameau', '15 m', '240 kg', '50 PO'], ['Cheval de guerre', '18 m', '270 kg', '400 PO'], ['Cheval de selle', '18 m', '240 kg', '75 PO'], ['Cheval de trait', '12 m', '270 kg', '50 PO'], ['Éléphant', '12 m', '660 kg', '200 PO'], ['Molosse', '12 m', '95 kg', '25 PO'], ['Poney', '12 m', '115 kg', '30 PO']] },
+      { t: 'Rythme de voyage', h: ['Rythme', 'Par minute', 'Par heure', 'Par jour'], r: [['Rapide', '120 m', '6 km', '45 km'], ['Normal', '90 m', '4,5 km', '36 km'], ['Lent', '60 m', '3 km', '27 km']] },
+      { t: 'Équipement et véhicules', wrap: true, h: ['Équipement / véhicule', 'Poids', 'Prix'], r: [['Barde (armure pour monture)', '2× version homme', '4× version homme'], ['Carrosse', '300 kg', '100 PO'], ['Char', '50 kg', '250 PO'], ['Chariot', '200 kg', '35 PO'], ['Charrette', '100 kg', '15 PO'], ['Écurie (par jour)', '—', '5 PA'], ['Fontes (sacoches)', '4 kg', '4 PO'], ['Fourrage (par jour)', '5 kg', '5 PC'], ['Mors et bride', '500 g', '2 PO'], ['Selle', '12,5 kg', '10 PO'], ['Traîneau', '150 kg', '20 PO']] },
+      { t: 'Bateaux', wide: true, h: ['Bateau', 'Vitesse', 'Équipage', 'Passagers', 'Prix'], r: [['Barque (rames)', '2,25 km/h', '1', '3', '50 PO'], ['Bateau à fond plat (voiles)', '1,5 km/h', '1', '6', '3 000 PO'], ['Bateau à voiles', '3 km/h', '20', '20', '10 000 PO'], ['Drakkar', '4,5 km/h', '40', '150', '10 000 PO'], ['Galère', '6 km/h', '80', '—', '30 000 PO'], ['Navire de guerre', '3,75 km/h', '60', '60', '25 000 PO']] },
+      { t: 'Transport', h: ['Transport', 'Prix'], r: [['Transport en ville', '1 PC'], ['Transport entre 2 villes', '3 PC / 1,5 km'], ['Voyage en bateau', '1 PA / 1,5 km']] },
+    ] },
+    { group: 'Dépenses quotidiennes', blocks: [
+      { t: 'Objets et services', h: ['Objet / service', 'Prix'], r: [['Banquet (par personne)', '10 PO'], ['Bière (chope)', '4 PC'], ['Bière (cruche)', '2 PA'], ['Vin ordinaire (pichet)', '2 PA'], ['Vin fin (bouteille)', '10 PO'], ['Fromage (gros)', '1 PA'], ['Miche de pain', '2 PC'], ['Viande (gros)', '3 PA']] },
+      { t: 'Auberge et repas', h: ['Qualité', 'Prix auberge', 'Prix repas'], r: [['Sordide', '7 PC / jour / chambre', '3 PC / personne'], ['Pauvre', '1 PA / jour / chambre', '6 PC / personne'], ['Modeste', '5 PA / jour / chambre', '3 PA / personne'], ['Confortable', '8 PA / jour / chambre', '5 PA / personne'], ['Riche', '2 PO / jour / chambre', '8 PA / personne'], ['Aristocratique', '4 PO / jour / chambre', '2 PO / personne']] },
+      { t: 'Monnaie', h: ['Pièce', 'Valeur'], r: [['1 PP (platine)', '10 PO'], ['1 PO (or)', '10 PA = 100 PC'], ['1 PE (électrum)', '½ PO = 5 PA'], ['1 PA (argent)', '10 PC']] },
+    ] },
+    { group: 'Lumière et visibilité', blocks: [
+      { t: 'Sources de lumière', h: ['Source', 'Lumière vive', 'Lumière faible', 'Durée'], r: [['Bougie', '1,5 m', '+1,5 m', '1 h'], ['Lampe', '4,5 m', '+9 m', '6 h'], ['Lanterne à capote', '9 m', '+9 m', '6 h'], ['Lanterne sourde', '18 m (cône)', '+18 m', '6 h'], ['Torche', '6 m', '+6 m', '1 h']] },
+      { t: 'Visibilité', wide: true, wrap: true, h: ['Visibilité', 'Effet', 'Exemple'], r: [['Réduite', 'Désavantage aux jets de Sagesse (Perception) qui dépendent de la vue', 'Lumière faible, brouillard irrégulier, feuillage clairsemé'], ['Nulle', 'Vision bloquée, créatures considérées comme aveuglées', 'Ténèbres, épais brouillard, feuillage dense']] },
+    ] },
+    { group: 'Langues', blocks: [
+      { t: 'Langues et écritures', h: ['Langue', 'Race typique', 'Écriture'], r: [['Commun', 'Humains', 'Commun'], ['Elfique', 'Elfes', 'Elfique'], ['Géant', 'Ogres, géants', 'Nain'], ['Gnome', 'Gnomes', 'Nain'], ['Gobelin', 'Gobelinoïdes', 'Nain'], ['Halfelin', 'Halfelins', 'Commun'], ['Nain', 'Nains', 'Nain'], ['Orc', 'Orcs', 'Nain'], ['Abyssal', 'Démons', 'Infernal'], ['Céleste', 'Célestes', 'Céleste'], ['Commun des profondeurs', "Créatures de l'Outreterre", 'Elfique'], ['Draconique', 'Dragons, drakéides', 'Draconique'], ['Infernal', 'Diables', 'Infernal'], ['Primordial', 'Élémentaires', 'Nain'], ['Profond', 'Beholders, flagelleurs mentaux', '—'], ['Sylvestre', 'Créatures féeriques', 'Elfique']] },
+    ] },
+  ];
+  const reglesSubTabs = [{ key: 'jeu', label: 'Règles de jeu' }, { key: 'etats', label: 'États' }, { key: 'infos', label: 'Infos diverses' }];
+  let currentReglesSub = 'jeu';
+  function rgTable(h, rows, cls) {
+    return `<div class="rg-table-wrap"><table class="rg-table ${cls || ''}"><thead><tr>${h.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  }
+  function renderReglesModule() {
+    document.getElementById('reglesSubTabs').innerHTML = reglesSubTabs.map(s => `<button class="${s.key === currentReglesSub ? 'active' : ''}" data-regles-sub="${s.key}">${s.label}</button>`).join('');
+    document.querySelectorAll('[data-regles-sub]').forEach(b => b.addEventListener('click', () => { currentReglesSub = b.dataset.reglesSub; renderReglesModule(); }));
+    const c = document.getElementById('reglesSubContent');
+    if (currentReglesSub === 'jeu') {
+      c.innerHTML = `<div class="rg-layout">
+        <div class="rg-col">
+          <div class="rg-card"><div class="rg-title">Actions en combat</div>
+            <dl class="rg-dl">${RG_ACTIONS.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></div>
+          <div class="rg-card"><div class="rg-title">Action bonus</div>
+            ${RG_BONUS_INTRO.map(x => `<p class="rg-p">${x}</p>`).join('')}
+            <dl class="rg-dl">${RG_BONUS.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+            ${RG_BONUS_OUTRO.map(x => `<p class="rg-p">${x}</p>`).join('')}</div>
+          <div class="rg-card"><div class="rg-title">Réaction</div>${RG_REACTION.map(x => `<p class="rg-p">${x}</p>`).join('')}</div>
+        </div>
+        <div class="rg-col rg-side">
+          <div class="rg-card"><div class="rg-title">Degrés de difficulté</div>${rgTable(['Difficulté', 'DD'], RG_DD.map(([a, b]) => [a, `<strong>${b}</strong>`]), 'rg-num')}</div>
+          <div class="rg-card"><div class="rg-title">Modificateurs</div>${rgTable(['Caractéristique', 'Modificateur'], RG_MODS.map(([a, b]) => [a, `<strong>${b}</strong>`]), 'rg-num')}</div>
+        </div></div>`;
+    } else if (currentReglesSub === 'etats') {
+      const usable = new Set(stateList.map(s => s.toLowerCase()));
+      c.innerHTML = `<p class="rg-intro">Détail des états. La pastille <span class="rg-badge">À attribuer</span> indique ceux que tu peux donner aux joueurs depuis la console. « Entravé (zone) » est un état maison de la console (entravé par une zone, comme <i>enchevêtrement</i>), sans fiche dans les règles.</p>
+        <div class="rg-states">${RG_STATES.map(s => `<div class="rg-card rg-state"><div class="rg-title">${s.n}${s.alias ? ` / ${s.alias}` : ''} <span class="rg-en">${s.en}</span>${usable.has(s.n.toLowerCase()) ? '<span class="rg-badge">À attribuer</span>' : ''}</div>
+          <ul class="rg-ul">${s.l.map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('')}
+          <div class="rg-card rg-state"><div class="rg-title">Épuisement <span class="rg-en">Exhaustion</span><span class="rg-badge">À attribuer</span></div>
+          ${rgTable(['Niveau', 'Effet'], exhaustionEffects.map((e, i) => [String(i + 1), e]), '')}<p class="rg-p" style="margin-top:8px;">Les effets se cumulent. Un repos long (avec nourriture et eau) retire 1 niveau.</p></div>
+        </div>`;
+    } else {
+      c.innerHTML = RG_INFOS.map(g => `<div class="rg-group"><div class="rg-group-title">${g.group}</div><div class="rg-info-grid">${g.blocks.map(b => `<div class="rg-card${b.wide ? ' rg-wide' : ''}"><div class="rg-title">${b.t}</div>${rgTable(b.h, b.r, b.wrap ? 'rg-wrap' : '')}</div>`).join('')}</div></div>`).join('');
+    }
   }
 
   /* ===================== MODULE LORE ===================== */
@@ -48001,6 +48186,7 @@
   }
 
   const consoleTilesData = [
+    { id: 'regles', label: 'Règles', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 17l8 4 8-4"/></svg>' },
     { id: 'joueurs', label: 'Joueurs', notifId: 'tileJoueursNotif', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.3c2.6.4 4.5 2.2 4.5 4.7"/></svg>' },
     { id: 'combat', label: 'Combat', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4L11 13"/><path d="M9.2 11.2L12.8 14.8"/><path d="M11 13L8 16"/><circle cx="7" cy="17" r="1.15" fill="currentColor" stroke="none"/></svg>' },
     { id: 'sorts', label: 'Sorts', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5c-2-1.2-4.5-1.5-7-1v14c2.5-.5 5-.2 7 1 2-1.2 4.5-1.5 7-1V4c-2.5-.5-5-.2-7 1z"/><path d="M12 5v14"/></svg>' },

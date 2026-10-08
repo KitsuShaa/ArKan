@@ -4526,7 +4526,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (24)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (25)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -5587,17 +5587,20 @@
     "Charmé": "Vous ne pouvez pas attaquer le charmeur. Il a l'avantage à ses jets sociaux contre vous.",
     "Assourdi": "Échec automatique aux jets nécessitant l'ouïe.",
     "Effrayé": "Désavantage aux jets de caractéristique et d'attaque tant que la source est visible. Vous ne pouvez pas vous en approcher.",
-    "Agrippé": "Vitesse réduite à 0.",
+    "Agrippé": "Vitesse réduite à 0, sans bonus possible. Prend fin si celui qui agrippe est incapable d'agir ou si vous êtes mis hors de sa portée.",
     "Entravé": "Vitesse réduite à 0, désavantage aux jets d'attaque et de sauvegarde de Dextérité, les attaques contre vous ont l'avantage.",
     "Entravé (zone)": "Vitesse réduite à 0 dans la zone, désavantage aux jets d'attaque, les attaques contre vous ont l'avantage.",
     "Incapable d'agir": "Aucune action ni réaction possible.",
     "Neutralisé": "Aucune action ni réaction possible.",
     "Invisible": "Avantage à vos attaques, désavantage aux attaques contre vous.",
     "Paralysé": "Incapable d'agir, ni bouger ni parler. Échec auto aux JS de Force et Dextérité. Toute attaque à 1,50 m est un critique.",
-    "Pétrifié": "Transformé en pierre : incapable d'agir, résistance à tous les dégâts, immunisé au poison et aux maladies.",
+    "Pétrifié": "Transformé en pierre (poids ×10) : incapable d'agir, ni bouger ni parler. Avantage aux attaques contre vous, échec auto aux JS de Force et Dextérité, résistance à tous les dégâts, immunisé au poison et aux maladies.",
     "Empoisonné": "Désavantage aux jets d'attaque et de caractéristique.",
     "À terre": "Déplacement en rampant. Désavantage à vos attaques. Avantage aux attaques à 1,50 m contre vous, désavantage au-delà.",
     "Assommé": "Incapable d'agir, ne peut pas bouger, parle difficilement. Échec auto aux JS de Force et Dextérité.",
+    // Alignés sur Règles › États de la console
+    "Étourdi": "Incapable d'agir, ne peut plus bouger, parle de manière hésitante. Échec auto aux JS de Force et de Dextérité. Les attaques contre vous ont l'avantage.",
+    "Inconscient": "Incapable d'agir, ne peut ni bouger ni parler, inconscient de ce qui se passe. Vous lâchez ce que vous tenez et tombez à terre. Échec auto aux JS de Force et de Dextérité. Avantage aux attaques contre vous ; toute attaque qui touche à 1,50 m est un critique.",
   };
   let states = [];
 
@@ -7034,7 +7037,7 @@
     }
     if (table === 'armures') return { ...base, category: 'armure', weight: catParseKg(r.poids) || 0, price: r.prix || '—', equipable: true, magic: !!r.magique,
       caFormula: r.ca_formule || '', ...catParseArmor(r.ca_formule, r.categorie), desc: r.ca_formule ? `CA ${r.ca_formule}` : '' };
-    if (table === 'equipement_aventurier') return { ...base, category: 'objet', weight: catParseKg(r.poids) || 0, price: r.prix || '—', equipable: !!r.equipable, magic: !!r.magique, desc: '' };
+    if (table === 'equipement_aventurier') return { ...base, category: 'objet', weight: catParseKg(r.poids) || 0, price: r.prix || '—', equipable: !!r.equipable, magic: !!r.magique, desc: r.infos || '' };
     if (table === 'outils') return { ...base, category: 'outil', weight: catParseKg(r.poids) || 0, price: r.prix || '—', equipable: false, magic: false, desc: r.categorie || '' };
     if (table === 'objets_magiques' && /potion/i.test(r.nom || '')) return { ...base, category: 'potion', qty: 1, weight: catParseKg(r.poids) || 0.25, price: r.prix || '—', equipable: false, magic: true, desc: r.description_complete || '' };
     if (table === 'objets_magiques') return { ...base, category: 'objet_magique', weight: catParseKg(r.poids) || 0, price: r.prix || '—', equipable: !!r.emplacement_equipement, magic: true,
