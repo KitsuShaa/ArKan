@@ -1336,6 +1336,35 @@
   @media (max-width: 900px) { .rg-mcols { grid-template-columns: 1fr; } }
   .rg-mcols .rg-table td:not(:first-child) { white-space: nowrap; }
   .rg-mcols .rg-table.rg-wrap td { white-space: normal; }
+  /* Tour de combat */
+  .rg-turn { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; margin-bottom: 18px; }
+  @media (max-width: 1100px) { .rg-turn { grid-template-columns: 1fr; } }
+  .rg-turn-col { --acc: var(--gold); --acc-soft: var(--gold-soft); background: var(--card); border: 1px solid var(--card-border); border-top: 3px solid var(--acc); border-radius: var(--radius-md); overflow: hidden; }
+  .rg-c-bonus { --acc: var(--teal); --acc-soft: var(--teal-soft); }
+  .rg-c-reaction { --acc: var(--violet); --acc-soft: var(--violet-soft); }
+  .rg-turn-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--acc-soft); }
+  .rg-turn-num { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--acc); color: var(--acc); display: flex; align-items: center; justify-content: center; font-family: var(--font-serif); font-size: 16px; flex-shrink: 0; }
+  .rg-turn-title { font-family: var(--font-serif); font-size: 18px; color: var(--ink); line-height: 1.2; }
+  .rg-turn-sub { font-size: 11.5px; color: var(--ink-dim); margin-top: 2px; }
+  .rg-turn-body { padding: 6px 16px 14px; }
+  .rg-turn-item { padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .rg-turn-item:last-child { border-bottom: none; }
+  .rg-turn-name { font-weight: 600; font-size: 13px; color: var(--acc); margin-bottom: 2px; }
+  .rg-turn-text { font-size: 12.5px; line-height: 1.5; color: var(--ink-dim); }
+  .rg-turn-lead { margin: 8px 0 4px; font-size: 12.5px; line-height: 1.5; color: var(--ink); }
+  .rg-turn-note { margin-top: 10px; padding: 9px 11px; border: 1px dashed var(--card-border); border-radius: var(--radius-sm); font-size: 12px; line-height: 1.5; color: var(--ink-dim); }
+  .rg-strips { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 10fr); gap: 16px; }
+  @media (max-width: 1100px) { .rg-strips { grid-template-columns: 1fr; } }
+  .rg-chips { display: grid; gap: 8px; }
+  .rg-chips-dd { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .rg-chips-mod { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+  @media (max-width: 700px) { .rg-chips-dd { grid-template-columns: repeat(3, 1fr); } .rg-chips-mod { grid-template-columns: repeat(5, 1fr); } }
+  .rg-chip { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px; border-radius: var(--radius-sm); background: var(--bg-elevated); border: 1px solid var(--card-border); text-align: center; }
+  .rg-chip strong { font-family: var(--font-serif); font-size: 20px; color: var(--gold); line-height: 1; }
+  .rg-chip span { font-size: 10.5px; color: var(--ink-dim); line-height: 1.25; }
+  .rg-chip.rg-neg strong { color: #c98a8a; }
+  .rg-chip.rg-zero strong { color: var(--ink); }
+  .rg-chip.rg-pos strong { color: #8cc7a0; }
   .rg-coins { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
   @media (max-width: 700px) { .rg-coins { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .rg-coin { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 12px 8px; border-radius: var(--radius-md); background: var(--card); border: 1px solid var(--card-border); }
@@ -2222,7 +2251,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (58)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (59)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4176,7 +4205,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (58)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (59)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -34651,21 +34680,23 @@
     const c = document.getElementById('reglesSubContent');
     const tile = (k, v, n) => `<div class="rg-tile"><div class="rg-tile-head">${n != null ? `<span class="rg-tile-num">${n}</span>` : ''}${k}</div><div class="rg-tile-text">${v}</div></div>`;
     if (currentReglesSub === 'jeu') {
-      c.innerHTML = `<div class="rg-layout">
-        <div class="rg-col">
-          <div class="rg-card"><div class="rg-title">Actions en combat</div>
-            <div class="rg-tiles">${RG_ACTIONS.map(([k, v]) => tile(k, v)).join('')}</div></div>
-          <div class="rg-card"><div class="rg-title">Action bonus</div>
-            <div class="rg-lead">${RG_BONUS_INTRO.join(' ')}</div>
-            <div class="rg-tiles rg-tiles-2">${RG_BONUS.map(([k, v]) => tile(k.replace(/^Pour les /, '').replace(/^./, m => m.toUpperCase()), v)).join('')}</div>
-            <div class="rg-note">${RG_BONUS_OUTRO.join('<br>')}</div></div>
-          <div class="rg-card"><div class="rg-title">Réaction</div>
-            <div class="rg-tiles rg-tiles-2">${RG_REACTION.map(([k, v]) => tile(k, v)).join('')}</div></div>
+      // Un tour de combat lu de gauche à droite : Action → Action bonus → Réaction
+      const col = (cls, num, title, sub, body) => `<div class="rg-turn-col ${cls}">
+        <div class="rg-turn-head"><span class="rg-turn-num">${num}</span><div><div class="rg-turn-title">${title}</div><div class="rg-turn-sub">${sub}</div></div></div>
+        <div class="rg-turn-body">${body}</div></div>`;
+      const item = (k, v) => `<div class="rg-turn-item"><div class="rg-turn-name">${k}</div><div class="rg-turn-text">${v}</div></div>`;
+      c.innerHTML = `
+        <div class="rg-turn">
+          ${col('rg-c-action', '1', 'Action', 'Une par tour, au choix parmi :', RG_ACTIONS.map(([k, v]) => item(k, v)).join(''))}
+          ${col('rg-c-bonus', '2', 'Action bonus', 'En plus de l\'action, si un sort, une capacité ou une arme le permet', `<div class="rg-turn-lead">${RG_BONUS_INTRO.join(' ')}</div>` + RG_BONUS.map(([k, v]) => item(k.replace(/^Pour les /, '').replace(/^./, m => m.toUpperCase()), v)).join('') + `<div class="rg-turn-note">${RG_BONUS_OUTRO.join('<br>')}</div>`)}
+          ${col('rg-c-reaction', '3', 'Réaction', 'Un réflexe, déclenché par une situation', RG_REACTION.map(([k, v]) => item(k, v)).join(''))}
         </div>
-        <div class="rg-col rg-side">
-          <div class="rg-card"><div class="rg-title">Degrés de difficulté</div>${rgTable(['Difficulté', 'DD'], RG_DD.map(([a, b]) => [a, `<strong>${b}</strong>`]), 'rg-num')}</div>
-          <div class="rg-card"><div class="rg-title">Modificateurs</div>${rgTable(['Caractéristique', 'Modificateur'], RG_MODS.map(([a, b]) => [a, `<strong>${b}</strong>`]), 'rg-num')}</div>
-        </div></div>`;
+        <div class="rg-strips">
+          <div class="rg-card"><div class="rg-title">Degrés de difficulté</div>
+            <div class="rg-chips rg-chips-dd">${RG_DD.map(([a2, b2]) => `<div class="rg-chip"><strong>${b2}</strong><span>${a2}</span></div>`).join('')}</div></div>
+          <div class="rg-card"><div class="rg-title">Modificateurs <span class="rg-en">valeur de caractéristique → modificateur</span></div>
+            <div class="rg-chips rg-chips-mod">${RG_MODS.map(([a2, b2]) => `<div class="rg-chip${b2.startsWith('+') && b2 !== '+0' ? ' rg-pos' : (b2 === '+0' ? ' rg-zero' : ' rg-neg')}"><strong>${b2}</strong><span>${a2}</span></div>`).join('')}</div></div>
+        </div>`;
     } else if (currentReglesSub === 'etats') {
       c.innerHTML = `<div class="rg-states">${RG_STATES.map(s => `<div class="rg-card rg-state"><div class="rg-title">${s.n}${s.alias ? ` / ${s.alias}` : ''} <span class="rg-en">${s.en}</span></div>
           <ul class="rg-ul">${s.l.map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('')}
