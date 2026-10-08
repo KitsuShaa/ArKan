@@ -2306,7 +2306,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (68)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (69)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4262,7 +4262,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (68)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (69)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -43356,7 +43356,9 @@
   function lvRichText(x) {
     return String(x || '').split('\n').map(ln => {
       const g = ln.length > 8 ? splitGluedHead(ln) : null;
-      return g && g[0].split(/\s+/).length <= 6 ? `<strong>${g[0]}</strong> — ${g[1]}` : ln;
+      // Pas de titre collé si la « tête » est une phrase (« Vous obtenez… ») ou une abréviation (« JdS », « PV »…)
+      const ok = g && g[0].split(/\s+/).length <= 6 && !HEAD_STOP.test(g[0]) && /[a-zà-ÿ'’]/.test(g[1].charAt(1) || '');
+      return ok ? `<strong>${g[0]}</strong> — ${g[1]}` : ln;
     }).join('<br>');
   }
   function lvSubBlocks(list, two) {
