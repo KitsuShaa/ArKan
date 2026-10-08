@@ -3056,6 +3056,8 @@
   }
 #page-inventaire .fact-item .f-label { font-size: 10px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.3px; }
 #page-inventaire .fact-item .f-value { font-size: 13px; color: var(--ink); margin-top: 2px; }
+#page-inventaire .detail-img { margin: 4px 0 12px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line, rgba(255,255,255,.08)); }
+#page-inventaire .detail-img img { display: block; width: 100%; max-height: 60vh; object-fit: contain; background: rgba(0,0,0,.2); }
 #page-inventaire .detail-desc {
     white-space: pre-line; font-size: 13.5px; line-height: 1.65; color: var(--ink-dim); margin-bottom: 16px; }
 #page-inventaire .toggle-row {
@@ -4527,7 +4529,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (26)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (27)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -6803,6 +6805,7 @@
         <div class="wa-line"><strong>Dégâts :</strong> ${atk.damage}</div>
         <div class="wa-detail">${atk.damageDetail}</div>
       </div>`;
+    if (it.image) html += `<div class="detail-img"><img src="${String(it.image).replace(/"/g, '%22')}" alt=""></div>`;
     html += `<div class="detail-desc">${it.desc}</div>`;
 
     if (it.equipable) {
@@ -7042,7 +7045,7 @@
     if (table === 'herbes') {
       const head = [r.type, r.categorie, r.genre, r.lieu].filter(Boolean).join(' · ') + (r.saison ? ` (${r.saison})` : '');
       return { ...base, category: 'herbe', qty: 1, weight: catParseKg(r.poids) || 0.05, price: r.prix || '—', equipable: false, magic: false,
-        herbeCat: r.categorie || '', desc: [head, r.description, r.effet ? 'Effet : ' + r.effet : ''].filter(Boolean).join('\n') };
+        herbeCat: r.categorie || '', image: r.image || '', desc: [head, r.description, r.effet ? 'Effet : ' + r.effet : ''].filter(Boolean).join('\n') };
     }
     if (table === 'equipement_aventurier') return { ...base, category: 'objet', weight: catParseKg(r.poids) || 0, price: r.prix || '—', equipable: !!r.equipable, magic: !!r.magique, desc: r.infos || '' };
     if (table === 'outils') return { ...base, category: 'outil', weight: catParseKg(r.poids) || 0, price: r.prix || '—', equipable: false, magic: false, desc: r.categorie || '' };

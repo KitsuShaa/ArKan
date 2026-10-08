@@ -602,6 +602,48 @@
   .herbe-leg .herbe-ic { width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; background: var(--teal-soft); color: var(--teal); display: flex; align-items: center; justify-content: center; }
   .herbe-leg strong { display: block; font-size: 13px; margin-bottom: 2px; }
   .herbe-leg em { display: block; font-style: normal; font-size: 11.5px; line-height: 1.4; color: var(--ink-dim); }
+  .herbe-season-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+  .hs-chip { cursor: pointer; }
+  .hs-chip input { display: none; }
+  .hs-chip span { display: inline-flex; flex-direction: column; align-items: center; padding: 6px 12px; border-radius: 12px; border: 1px solid var(--card-border); background: var(--bg-elevated); font-size: 12.5px; color: var(--ink-dim); line-height: 1.2; }
+  .hs-chip span em { font-style: normal; font-size: 10px; color: var(--ink-faint); }
+  .hs-chip input:checked + span { border-color: var(--teal); background: var(--teal-soft); color: var(--ink); }
+  .hs-chip.hs-magic input:checked + span { border-color: var(--violet); background: var(--violet-soft); }
+  .of-image-row { display: flex; gap: 12px; align-items: center; }
+  .of-image-prev { width: 72px; height: 96px; border-radius: 10px; border: 1px dashed var(--card-border); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--bg-elevated); }
+  .of-image-prev img { width: 100%; height: 100%; object-fit: cover; }
+  .of-image-prev span { font-size: 10.5px; color: var(--ink-faint); text-align: center; padding: 4px; }
+  .of-image-actions { display: flex; flex-direction: column; gap: 6px; }
+  .of-image-btn { display: inline-block; text-align: center; cursor: pointer; padding: 7px 12px; border-radius: 10px; border: 1px solid var(--gold); color: var(--gold); background: var(--gold-soft); font-size: 12.5px; font-family: var(--font-sans); }
+  .of-image-btn.ghost { border-color: var(--card-border); color: var(--ink-dim); background: none; }
+  .modal-box.herbe-view { max-width: 860px; width: calc(100% - 32px); }
+  .hv-grid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 22px; align-items: start; }
+  .hv-grid.hv-noimg { grid-template-columns: 1fr; }
+  @media (max-width: 720px) { .hv-grid { grid-template-columns: 1fr; } }
+  .hv-img { border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--card-border); background: var(--bg-elevated); }
+  .hv-img img { display: block; width: 100%; height: auto; max-height: calc(70 * var(--vh, 1vh)); object-fit: contain; }
+  .hv-head { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
+  .hv-head .herbe-ic { width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; background: var(--teal-soft); color: var(--teal); display: flex; align-items: center; justify-content: center; }
+  .hv-head h3 { margin: 0; font-family: var(--font-serif); font-size: 22px; color: var(--ink); }
+  .hv-sub { font-size: 12.5px; color: var(--ink-dim); margin-top: 3px; }
+  .hv-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .hv-facts > div { background: var(--bg-elevated); border: 1px solid var(--card-border); border-radius: 10px; padding: 8px 10px; }
+  .hv-facts span { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--ink-faint); margin-bottom: 2px; }
+  .hv-facts strong { font-size: 13px; color: var(--ink); font-weight: 600; }
+  @media (max-width: 520px) { .hv-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .hv-seasons { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .hv-season { font-size: 11.5px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--card-border); color: var(--ink-faint); opacity: .55; }
+  .hv-season.on { opacity: 1; color: var(--ink); border-color: var(--teal); background: var(--teal-soft); }
+  .hv-season.on.hs-magic { border-color: var(--violet); background: var(--violet-soft); }
+  .hv-block { margin-bottom: 12px; }
+  .hv-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .6px; color: var(--ink-faint); margin-bottom: 4px; }
+  .hv-block p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--ink-dim); }
+  .hv-effet { background: var(--teal-soft); border-left: 3px solid var(--teal); border-radius: 8px; padding: 10px 12px; }
+  .hv-effet p { color: var(--ink); }
+  .hv-prep { font-size: 12px; color: var(--ink-faint); font-style: italic; }
+  .hv-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+  .hv-actions .modal-cancel-btn { width: auto; padding: 10px 16px; border: 1px solid var(--card-border); border-radius: 12px; }
+  .hv-actions .modal-confirm-btn { width: auto; padding: 10px 20px; }
   .herbe-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
   .herbe-filters select { background: var(--card); border: 1px solid var(--card-border); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-size: 12.5px; font-family: var(--font-sans); }
   .herbe-reset { background: none; border: 1px solid var(--card-border); color: var(--ink-dim); border-radius: 999px; padding: 6px 12px; font-size: 12.5px; cursor: pointer; }
@@ -2264,7 +2306,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (61)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 07/10 (62)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4218,7 +4260,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (61)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 07/10 (62)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -4264,7 +4306,7 @@
         }) },
       { table: 'herbes', target: herbesDatabase, map: r => ({
           id: r.id, name: r.nom, type: r.type, categorie: r.categorie, genre: r.genre, lieu: r.lieu, saison: r.saison,
-          prix: r.prix, poids: parseKg(r.poids), description: r.description || '', effet: r.effet || '', cache_aux_joueurs: r.cache_aux_joueurs,
+          prix: r.prix, poids: parseKg(r.poids), description: r.description || '', effet: r.effet || '', cache_aux_joueurs: r.cache_aux_joueurs, image: r.image || '',
         }) },
       { table: 'outils', target: outilsDatabase, map: r => ({
           id: r.id, name: r.nom, prix: r.prix, poids: parseKg(r.poids), categorie: r.categorie,
@@ -7486,7 +7528,13 @@
   // Herbes et champignons : listes des tables officielles
   const HERBE_TYPES = ['altérant', 'antipoison', 'curatif', 'dopant', 'fortifiant'];
   const HERBE_CATEGORIES = ['absorption directe', 'décoction', 'infusion', 'macération'];
-  const HERBE_GENRES = ['champignon', 'écorce', 'épines', 'plante', 'racines'];
+  const HERBE_GENRES = ['champignon', 'écorce', 'plante', 'racines'];
+  // Saisons du monde (dans l'ordre de l'année) ; Éclivance : saison magique à part
+  const HERBE_SAISONS = [
+    { n: 'Verdelune', eq: 'printemps' }, { n: 'Solambre', eq: 'été' }, { n: 'Pluvéal', eq: 'automne' },
+    { n: 'Doréclin', eq: 'automne' }, { n: 'Nivéal', eq: 'hiver' }, { n: 'Éclivance', eq: 'saison magique', magic: true },
+  ];
+  const herbeSaisonsOf = o => String(o && o.saison || '').split(',').map(x => x.trim()).filter(Boolean);
   const HERBE_LIEUX = ['arctique', 'désert', 'forêt', 'littoral', 'marais', 'montagne', 'outreterre', 'plaine'];
   const HERBE_CAT_INFO = {
     'absorption directe': { txt: "Se consomme telle quelle : on mâche ou on avale la plante crue, sans préparation.", svg: '<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19l8-8"/>' },
@@ -7495,7 +7543,7 @@
     'macération': { txt: "La plante est pilée au mortier puis mélangée à de l'huile, du vin ou de l'alcool ; la pâte ou la crème s'applique sur le corps.", svg: '<path d="M3.5 11.5h17l-1.8 5.6A3.5 3.5 0 0115.4 19.5H8.6a3.5 3.5 0 01-3.3-2.4z"/><path d="M9 21h6"/><path d="M13.5 11.5L19.5 3.5"/>' },
   };
   const herbeIcon = cat => { const c = HERBE_CAT_INFO[cat]; return c ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${c.svg}</svg>` : ''; };
-  let herbeFilters = { type: '', categorie: '', genre: '', lieu: '' };
+  let herbeFilters = { type: '', categorie: '', genre: '', lieu: '', saison: '' };
 
   // "1,5 kg" / "2kg" / "500 g" / 3 -> 1.5 / 2 / 0.5 / 3 (null si vide ou "—")
   function parseKg(v) {
@@ -7645,7 +7693,8 @@
       { key: 'categorie', label: 'Catégorie (préparation)', type: 'select', options: HERBE_CATEGORIES, col: 1 },
       { key: 'genre', label: 'Genre', type: 'select', options: HERBE_GENRES, col: 1 },
       { key: 'lieu', label: 'Lieu', type: 'select', options: HERBE_LIEUX, col: 1 },
-      { key: 'saison', label: 'Saison de cueillette', type: 'text', col: 1, placeholder: 'ex. printemps, automne' },
+      { key: 'saison', label: 'Saisons de cueillette', type: 'seasons' },
+      { key: 'image', label: 'Image', type: 'image' },
       { key: 'prix', label: 'Prix', type: 'text', col: 1 },
       { key: 'poids', label: 'Poids', type: 'kg', col: 1 },
       { key: 'description', label: 'Description', type: 'textarea' },
@@ -7684,7 +7733,7 @@
     } else {
       const k = currentObjetsTab;
       entries = objetsCategories[k].db.map(o => ({ cat: k, o }));
-      if (k === 'herbes') entries = entries.filter(({ o }) => Object.keys(herbeFilters).every(f => !herbeFilters[f] || o[f] === herbeFilters[f]));
+      if (k === 'herbes') entries = entries.filter(({ o }) => Object.keys(herbeFilters).every(f => !herbeFilters[f] || (f === 'saison' ? herbeSaisonsOf(o).includes(herbeFilters[f]) : o[f] === herbeFilters[f])));
     }
     entries.sort((a, b) => a.o.name.localeCompare(b.o.name, 'fr'));
     renderHerbeFilters(!q && currentObjetsTab === 'herbes');
@@ -7703,8 +7752,43 @@
     `).join('') || '<p style="color:var(--ink-faint); font-size:13px;">Aucun objet ne correspond.</p>';
 
     grid.querySelectorAll('[data-objet-id]').forEach(chip => {
-      chip.addEventListener('click', () => openObjetForm(chip.dataset.objetCat, chip.dataset.objetId));
+      chip.addEventListener('click', () => chip.dataset.objetCat === 'herbes' ? openHerbeView(chip.dataset.objetId) : openObjetForm(chip.dataset.objetCat, chip.dataset.objetId));
     });
+  }
+  // Fiche de lecture d'une herbe : image à gauche, infos à droite
+  function openHerbeView(id) {
+    const o = herbesDatabase.find(x => String(x.id) === String(id));
+    if (!o) return;
+    currentObjetFormCat = 'herbes'; currentObjetFormId = o.id;
+    let m = document.getElementById('modalHerbeView');
+    if (!m) { m = document.createElement('div'); m.className = 'modal-backdrop'; m.id = 'modalHerbeView'; m.addEventListener('click', e => { if (e.target === m) closeModal('modalHerbeView'); }); document.body.appendChild(m); }
+    const cap = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : '—';
+    const seasons = herbeSaisonsOf(o);
+    const info = HERBE_CAT_INFO[o.categorie];
+    m.innerHTML = `<div class="modal-box herbe-view">
+      <div class="hv-grid${o.image ? '' : ' hv-noimg'}">
+        ${o.image ? `<div class="hv-img"><img src="${o.image}" alt="${o.name}"></div>` : ''}
+        <div class="hv-info">
+          <div class="hv-head">${info ? `<span class="herbe-ic">${herbeIcon(o.categorie)}</span>` : ''}<div><h3>${o.name}</h3>
+            <div class="hv-sub">${cap(o.type)} · ${o.prix || '—'}${o.cache_aux_joueurs ? ' · <span class="sc-badge hidden">Caché</span>' : ''}</div></div></div>
+          <div class="hv-facts">
+            <div><span>Préparation</span><strong>${cap(o.categorie)}</strong></div>
+            <div><span>Genre</span><strong>${cap(o.genre)}</strong></div>
+            <div><span>Lieu</span><strong>${cap(o.lieu)}</strong></div>
+            <div><span>Poids</span><strong>${o.poids != null ? String(o.poids).replace('.', ',') + ' kg' : '—'}</strong></div>
+          </div>
+          <div class="hv-seasons">${HERBE_SAISONS.map(x => `<span class="hv-season${seasons.includes(x.n) ? ' on' : ''}${x.magic ? ' hs-magic' : ''}" title="${x.eq}">${x.n}</span>`).join('')}</div>
+          ${o.description ? `<div class="hv-block"><div class="hv-label">Description</div><p>${o.description}</p></div>` : ''}
+          ${o.effet ? `<div class="hv-block hv-effet"><div class="hv-label">Effet</div><p>${o.effet}</p></div>` : ''}
+          ${info ? `<div class="hv-prep">${info.txt}</div>` : ''}
+        </div>
+      </div>
+      <div class="hv-actions">
+        <button class="modal-cancel-btn" onclick="closeModal('modalHerbeView')">Fermer</button>
+        <button class="modal-cancel-btn" style="color:var(--gold);" onclick="closeModal('modalHerbeView'); openAttribuerObjet()">Attribuer à un joueur</button>
+        <button class="modal-confirm-btn" style="margin:0;" onclick="closeModal('modalHerbeView'); openObjetForm('herbes', '${o.id}')">Modifier</button>
+      </div></div>`;
+    openModal('modalHerbeView');
   }
 
   // Filtres + légende des préparations (onglet Herbes et champignons)
@@ -7719,11 +7803,11 @@
     const sel = (k, label, list) => `<select data-herbe-f="${k}"><option value="">${label} : tous</option>${list.map(v => `<option value="${v}" ${herbeFilters[k] === v ? 'selected' : ''}>${v}</option>`).join('')}</select>`;
     box.innerHTML = `<div class="herbe-legend">${HERBE_CATEGORIES.map(c => `<button class="herbe-leg${herbeFilters.categorie === c ? ' active' : ''}" data-herbe-cat="${c}" title="${HERBE_CAT_INFO[c].txt.replace(/"/g, '&quot;')}">
         <span class="herbe-ic">${herbeIcon(c)}</span><span><strong>${c.charAt(0).toUpperCase() + c.slice(1)}</strong><em>${HERBE_CAT_INFO[c].txt}</em></span></button>`).join('')}</div>
-      <div class="herbe-filters">${sel('type', 'Type', HERBE_TYPES)}${sel('genre', 'Genre', HERBE_GENRES)}${sel('lieu', 'Lieu', HERBE_LIEUX)}
+      <div class="herbe-filters">${sel('type', 'Type', HERBE_TYPES)}${sel('genre', 'Genre', HERBE_GENRES)}${sel('lieu', 'Lieu', HERBE_LIEUX)}${sel('saison', 'Saison', HERBE_SAISONS.map(x => x.n))}
         ${Object.values(herbeFilters).some(Boolean) ? '<button class="herbe-reset" data-herbe-reset>Tout afficher</button>' : ''}</div>`;
     box.querySelectorAll('[data-herbe-f]').forEach(el => el.addEventListener('change', () => { herbeFilters[el.dataset.herbeF] = el.value; renderObjectsGrid(); }));
     box.querySelectorAll('[data-herbe-cat]').forEach(el => el.addEventListener('click', () => { herbeFilters.categorie = herbeFilters.categorie === el.dataset.herbeCat ? '' : el.dataset.herbeCat; renderObjectsGrid(); }));
-    const rs = box.querySelector('[data-herbe-reset]'); if (rs) rs.addEventListener('click', () => { herbeFilters = { type: '', categorie: '', genre: '', lieu: '' }; renderObjectsGrid(); });
+    const rs = box.querySelector('[data-herbe-reset]'); if (rs) rs.addEventListener('click', () => { herbeFilters = { type: '', categorie: '', genre: '', lieu: '', saison: '' }; renderObjectsGrid(); });
   }
 
   let currentObjetFormCat = null;
@@ -7743,6 +7827,18 @@
     if (f.type === 'textarea') {
       return `<div class="form-field"><label>${f.label}</label><textarea id="${id}" style="min-height:90px;">${val || ''}</textarea></div>`;
     }
+    if (f.type === 'seasons') {
+      const cur = herbeSaisonsOf({ saison: val });
+      return `<div class="form-field"><label>${f.label}</label><div class="herbe-season-pick" id="${id}">${HERBE_SAISONS.map(x => `<label class="hs-chip${x.magic ? ' hs-magic' : ''}"><input type="checkbox" value="${x.n}" ${cur.includes(x.n) ? 'checked' : ''}><span>${x.n}<em>${x.eq}</em></span></label>`).join('')}</div></div>`;
+    }
+    if (f.type === 'image') {
+      const v = val ? String(val).replace(/"/g, '&quot;') : '';
+      return `<div class="form-field"><label>${f.label} <span class="field-hint">(portrait conseillé)</span></label>
+        <div class="of-image-row"><div class="of-image-prev" id="${id}_prev">${v ? `<img src="${v}" alt="">` : '<span>Aucune image</span>'}</div>
+        <div class="of-image-actions"><input type="hidden" id="${id}" value="${v}">
+          <label class="of-image-btn">Choisir une image<input type="file" accept="image/*" style="display:none" onchange="onObjetImagePicked(event, '${id}')"></label>
+          <button type="button" class="of-image-btn ghost" onclick="clearObjetImage('${id}')">Retirer</button></div></div></div>`;
+    }
     if (f.type === 'kg') {
       return `<div class="form-field"><label>${f.label}</label><div class="of-unit-wrap"><input type="number" step="0.01" min="0" id="${id}" value="${val != null ? val : ''}" ><span class="of-unit">kg</span></div></div>`;
     }
@@ -7755,6 +7851,16 @@
     const ph = f.placeholder ? ` placeholder="${f.placeholder}"` : '';
     return `<div class="form-field"><label>${f.label}</label><input type="${f.type}" id="${id}" value="${val != null ? String(val).replace(/"/g, '&quot;') : ''}"${ph}></div>`;
   }
+  // Image d'un objet : envoyée dans le stockage d'images (sinon gardée dans la fiche)
+  async function onObjetImagePicked(e, id) {
+    const file = e.target.files && e.target.files[0]; e.target.value = '';
+    if (!file) return;
+    const set = url => { document.getElementById(id).value = url; document.getElementById(id + '_prev').innerHTML = `<img src="${url}" alt="">`; };
+    showToast('Envoi de l’image…');
+    try { set(await uploadImageBlob(file, 'herbes')); showToast('Image prête — pense à enregistrer'); }
+    catch (err) { warnStorageOnce(err); const r = new FileReader(); r.onload = () => set(r.result); r.readAsDataURL(file); }
+  }
+  function clearObjetImage(id) { document.getElementById(id).value = ''; document.getElementById(id + '_prev').innerHTML = '<span>Aucune image</span>'; }
   function objetToggleHtml(f, val) {
     return `<label class="of-toggle"><input type="checkbox" id="of_${f.key}" ${val ? 'checked' : ''}><span class="of-switch"></span><span>${f.label}</span></label>`;
   }
@@ -7800,6 +7906,7 @@
     schema.fields.forEach(f => {
       const el = document.getElementById('of_' + f.key);
       if (!el) return;
+      if (f.type === 'seasons') { data[f.key] = [...el.querySelectorAll('input:checked')].map(x => x.value).join(', '); return; }
       if (f.type === 'checkbox') data[f.key] = el.checked;
       else if (f.type === 'number' || f.type === 'kg') data[f.key] = el.value === '' ? null : Number(el.value);
       else data[f.key] = el.value.trim ? el.value.trim() : el.value;
@@ -34479,7 +34586,7 @@
     if (cat === 'herbes') {
       const head = [o.type, o.categorie, o.genre, o.lieu].filter(Boolean).join(' · ') + (o.saison ? ` (${o.saison})` : '');
       return { ...base, category: 'herbe', qty: 1, weight: parseKg(o.poids) || 0.05, price: o.prix || '—', equipable: false, magic: false,
-        herbeCat: o.categorie || '', desc: [head, o.description, o.effet ? 'Effet : ' + o.effet : ''].filter(Boolean).join('\n') };
+        herbeCat: o.categorie || '', image: o.image || '', desc: [head, o.description, o.effet ? 'Effet : ' + o.effet : ''].filter(Boolean).join('\n') };
     }
     if (cat === 'equipement') {
       return { ...base, category: 'objet', weight: parseKg(o.poids) || 0, price: o.prix || '—', equipable: !!o.equipable, magic: !!o.magique, desc: o.infos || '' };
