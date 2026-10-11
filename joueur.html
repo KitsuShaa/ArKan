@@ -629,6 +629,13 @@
   .org-zoom-wrap { position: relative; overflow: auto; -webkit-overflow-scrolling: touch; max-height: 72vh; border: 1px solid var(--card-border); border-radius: var(--radius-md); background: var(--card); touch-action: pan-x pan-y; }
   @media (orientation: landscape) { .org-zoom-wrap { max-height: 82vh; } }
   .org-zoom-sizer { position: relative; overflow: hidden; }
+  .guild-orgchart > .org-zoom-wrap { align-self: stretch; width: 100%; max-width: 100%; box-sizing: border-box; }
+  .org-zoom-inner { width: max-content; }
+  #guildContent-organigramme:fullscreen { background: var(--bg); padding: 10px; overflow: hidden; box-sizing: border-box; }
+  #guildContent-organigramme:fullscreen .org-zoom-wrap { max-height: calc(100vh - 64px); }
+  #guildContent-organigramme:fullscreen .org-landscape-hint, #guildContent-organigramme:fullscreen .guild-title { display: none; }
+  #guildContent-organigramme:-webkit-full-screen { background: var(--bg); padding: 10px; overflow: hidden; box-sizing: border-box; }
+  #guildContent-organigramme:-webkit-full-screen .org-zoom-wrap { max-height: calc(100vh - 64px); }
   .org-zoom-inner { display: inline-flex; flex-direction: column; align-items: center; padding: 20px; transform-origin: top left; transition: transform 0.1s ease-out; }
   .org-zoom-controls { position: sticky; top: 8px; float: right; display: flex; gap: 6px; margin: 8px; z-index: 2; }
   .org-zoom-btn {
@@ -1674,8 +1681,8 @@
     align-items: flex-end;
     justify-content: center;
   }
-#page-combat .hp-popup-backdrop.open { display: flex; }
-#page-combat .hp-popup {
+.hp-popup-backdrop.open { display: flex; }
+.hp-popup-backdrop .hp-popup {
     width: 100%;
     max-width: 480px;
     background: var(--bg-elevated);
@@ -1683,20 +1690,20 @@
     border-radius: 20px 20px 0 0;
     padding: 20px 20px calc(24px + env(safe-area-inset-bottom, 0px));
   }
-#page-combat .hp-popup h3 {
+.hp-popup-backdrop .hp-popup h3 {
     font-family: var(--font-serif);
     font-size: 15px;
     margin: 0 0 14px;
     text-align: center;
     color: var(--ink-dim);
   }
-#page-combat .hp-popup-input-row {
+.hp-popup-backdrop .hp-popup-input-row {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 14px;
   }
-#page-combat .hp-popup-input-row input {
+.hp-popup-backdrop .hp-popup-input-row input {
     flex: 1;
     background: var(--card);
     border: 1px solid var(--card-border);
@@ -1707,7 +1714,7 @@
     text-align: center;
     font-family: var(--font-display);
   }
-#page-combat .hp-btn {
+.hp-popup-backdrop .hp-btn {
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -1716,9 +1723,9 @@
     font-weight: 700;
     cursor: pointer;
   }
-#page-combat .hp-btn.minus { background: var(--garnet-soft); color: var(--garnet); }
-#page-combat .hp-btn.plus { background: var(--success-soft); color: var(--success); }
-#page-combat .hp-popup-confirm {
+.hp-popup-backdrop .hp-btn.minus { background: var(--garnet-soft); color: var(--garnet); }
+.hp-popup-backdrop .hp-btn.plus { background: var(--success-soft); color: var(--success); }
+.hp-popup-backdrop .hp-popup-confirm {
     width: 100%;
     background: var(--gold);
     color: #201a0c;
@@ -1729,7 +1736,7 @@
     font-size: 14px;
     cursor: pointer;
   }
-#page-combat .hp-popup-cancel {
+.hp-popup-backdrop .hp-popup-cancel {
     width: 100%;
     background: none;
     border: none;
@@ -4428,6 +4435,7 @@
     <div class="org-zoom-controls">
       <button class="org-zoom-btn" onclick="orgZoomBtn(-0.2)">−</button>
       <button class="org-zoom-btn" onclick="orgZoomBtn(0.2)">+</button>
+      <button class="org-zoom-btn" id="orgFsBtn" onclick="orgToggleLandscape()" title="Plein écran en paysage" style="width:auto;padding:0 10px;font-size:12px;">⤢ Paysage</button>
     </div>
     <div class="guild-orgchart" id="organigrammeChart"></div>
   </div>
@@ -4545,7 +4553,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 08/10 (28)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 08/10 (29)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -5057,6 +5065,27 @@
     orgZoomLevel = Math.max(0.5, Math.min(2.5, orgZoomLevel + delta));
     applyOrgZoom();
   }
+  // Plein écran + paysage (Android : l'écran tourne même si l'appli installée était bloquée en portrait)
+  async function orgToggleLandscape() {
+    const el = document.getElementById('guildContent-organigramme');
+    const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+    try {
+      if (fsEl) {
+        try { screen.orientation && screen.orientation.unlock && screen.orientation.unlock(); } catch (e) {}
+        await (document.exitFullscreen ? document.exitFullscreen() : document.webkitExitFullscreen());
+        return;
+      }
+      if (el.requestFullscreen) await el.requestFullscreen(); else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else { showToast('Tourne ton téléphone pour passer en paysage'); return; }
+      if (screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape').catch(() => showToast('Tourne ton téléphone pour passer en paysage'));
+    } catch (e) { showToast('Tourne ton téléphone pour passer en paysage'); }
+  }
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(ev => document.addEventListener(ev, () => {
+    const on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    const b = document.getElementById('orgFsBtn'); if (b) b.textContent = on ? '✕ Quitter' : '⤢ Paysage';
+    if (!on) { try { screen.orientation && screen.orientation.unlock && screen.orientation.unlock(); } catch (e) {} }
+    setTimeout(() => { if (document.getElementById('orgZoomInner')) { applyOrgZoom(); drawPlayerOrgLines(); } }, 250);
+  }));
   // Rotation du téléphone : on recalcule la zone de défilement et les traits
   window.addEventListener('resize', () => { if (document.getElementById('orgZoomInner')) { applyOrgZoom(); requestAnimationFrame(drawPlayerOrgLines); } });
 
@@ -5538,6 +5567,9 @@
 
   function openHpPopup(mode) {
     hpPopupMode = mode;
+    // La fenêtre est rangée dans l'onglet Combat : on la sort pour qu'elle s'affiche aussi par-dessus la fiche du compagnon
+    const bd = document.getElementById('hpBackdrop');
+    if (bd && bd.parentElement !== document.body) document.body.appendChild(bd);
     document.getElementById('hpInput').value = 0;
     document.querySelector('.hp-popup h3').textContent = mode === 'temp' ? 'Modifier les PV temporaires'
       : (mode === 'comp' ? `Modifier les PV de ${(companionDef && companionDef.nom) || 'ton compagnon'}` : 'Modifier les PV');
