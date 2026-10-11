@@ -10,7 +10,17 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#131319">
-<link rel="manifest" href="manifest-joueur.webmanifest">
+<link rel="manifest" href="manifest-joueur.webmanifest" id="arkanManifest">
+<script>
+  // iPhone / iPad : iOS ouvre le raccourci sur l'adresse du manifeste (sans ?j=…) et sa mémoire est séparée de Safari.
+  // Sans manifeste, iOS garde l'adresse complète de la fiche du joueur au moment de l'ajout à l'écran d'accueil.
+  (function () {
+    try {
+      const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (ios) { const m = document.getElementById('arkanManifest'); if (m) m.remove(); }
+    } catch (e) {}
+  })();
+</script>
 <link rel="icon" type="image/png" sizes="192x192" href="arkan-icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="arkan-icon-180.png">
 <script>
@@ -616,7 +626,9 @@
   }
   .org-landscape-hint svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--gold); }
 
-  .org-zoom-wrap { position: relative; overflow: auto; border: 1px solid var(--card-border); border-radius: var(--radius-md); background: var(--card); touch-action: pan-x pan-y; }
+  .org-zoom-wrap { position: relative; overflow: auto; -webkit-overflow-scrolling: touch; max-height: 72vh; border: 1px solid var(--card-border); border-radius: var(--radius-md); background: var(--card); touch-action: pan-x pan-y; }
+  @media (orientation: landscape) { .org-zoom-wrap { max-height: 82vh; } }
+  .org-zoom-sizer { position: relative; overflow: hidden; }
   .org-zoom-inner { display: inline-flex; flex-direction: column; align-items: center; padding: 20px; transform-origin: top left; transition: transform 0.1s ease-out; }
   .org-zoom-controls { position: sticky; top: 8px; float: right; display: flex; gap: 6px; margin: 8px; z-index: 2; }
   .org-zoom-btn {
@@ -3353,6 +3365,9 @@
     padding: 12px 14px;
     margin-bottom: 12px;
   }
+.comp-states-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.comp-states-row:empty { display: none; }
+.comp-state-chip { padding: 5px 11px; border-radius: 999px; background: rgba(164,56,63,.16); border: 1px solid rgba(164,56,63,.45); color: var(--ink); font-size: 12px; cursor: pointer; }
 #page-inventaire .comp-hp-bar {
     position: relative;
     height: 38px;
@@ -4138,12 +4153,13 @@
       <div class="comp-top-card"><div class="ctc-value" id="compPerc">—</div><div class="ctc-label">Perception passive</div></div>
     </div>
 
+    <div class="comp-states-row" id="compStatesRow"></div>
     <div class="comp-hp-card">
       <div class="comp-hp-bar">
         <div class="comp-hp-fill" id="compHpFill" style="width:100%;"></div>
         <div class="comp-hp-row">
           <button class="comp-hp-btn minus" onclick="adjustCompHp(-1)">−</button>
-          <div class="comp-hp-numbers" id="compHpNumbers"></div>
+          <div class="comp-hp-numbers" id="compHpNumbers" onclick="openHpPopup('comp')" style="cursor:pointer;"></div>
           <button class="comp-hp-btn plus" onclick="adjustCompHp(1)">+</button>
         </div>
       </div>
@@ -4529,7 +4545,7 @@
   <div class="theme-box">
     <h3>Couleur d'accent</h3>
     <div class="theme-sub">Choisis la couleur qui te plaît, elle remplace le doré partout dans l'appli.</div>
-    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 07/10 (27)</p>
+    <div class="theme-grid" id="themeGrid"></div><p style="font-size:10.5px;opacity:.5;text-align:center;margin-top:10px;">version du 08/10 (28)</p>
     <button class="theme-close-btn" onclick="closeThemePicker()">Terminé</button>
   </div>
 </div>
@@ -4759,11 +4775,33 @@
   }
 
   /* ===================== GUILDE ===================== */
+  let guildSig = '', guildPollTimer = null;
+  function guildSignature() { return JSON.stringify([antennesData.map(a => [a.id, a.unlocked, a.photo, a.name]), organigrammeData]); }
+  function refreshGuild(force) {
+    return loadGuildFromSupabase().then(ok => {
+      if (!ok) return;
+      const sig = guildSignature();
+      if (force || sig !== guildSig) {
+        guildSig = sig;
+        renderAntennesGrid();
+        const wrap = document.getElementById('orgZoomWrap');
+        const keep = wrap ? { l: wrap.scrollLeft, t: wrap.scrollTop, z: orgZoomLevel } : null;
+        renderOrganigramme();
+        if (keep) { orgZoomLevel = keep.z; applyOrgZoom(); const w2 = document.getElementById('orgZoomWrap'); if (w2) { w2.scrollLeft = keep.l; w2.scrollTop = keep.t; } }
+      }
+    });
+  }
   function openGuilde() {
     document.getElementById('guildeOverlay').classList.add('open');
     renderAntennesGrid();
     renderOrganigramme();
-    loadGuildFromSupabase().then(ok => { if (ok) { renderAntennesGrid(); renderOrganigramme(); } });
+    refreshGuild(true);
+    // Tant que la guilde est ouverte : ce que le MJ rend visible apparaît sans recharger
+    clearInterval(guildPollTimer);
+    guildPollTimer = setInterval(() => {
+      if (!document.getElementById('guildeOverlay').classList.contains('open')) { clearInterval(guildPollTimer); return; }
+      if (document.visibilityState === 'visible') refreshGuild(false);
+    }, 5000);
   }
 
   // Ce que le MJ a rendu visible dans sa console (Astelorn > Antennes / Organigramme)
@@ -4905,7 +4943,7 @@
     const groupBox = (label, id) => `<div class="org-box org-box-group" data-org-id="${id}"><div class="org-box-group-label">${label}</div></div>`;
 
     chart.innerHTML = `
-      <div class="org-zoom-wrap" id="orgZoomWrap">
+      <div class="org-zoom-wrap" id="orgZoomWrap"><div class="org-zoom-sizer" id="orgZoomSizer">
         <div class="org-zoom-inner" id="orgZoomInner">
           <svg class="org-svg" id="orgSvgPlayer"></svg>
           <div class="org-row" id="porgFondateurs">${organigrammeData.fondateurs.map(f => box(f)).join('')}</div>
@@ -4926,7 +4964,7 @@
           <div class="org-connector"></div>
           <div class="org-row org-row-bottom">${groupBox('Aventuriers Confirmés', 'confirmes')}${groupBox('Aspirants', 'aspirants')}</div>
         </div>
-      </div>
+      </div></div>
     `;
     initOrgZoom();
     requestAnimationFrame(drawPlayerOrgLines);
@@ -4986,12 +5024,14 @@
     wrap.addEventListener('touchstart', (e) => { if (e.touches.length === 2) lastDist = pinchDist(e); }, { passive: true });
     wrap.addEventListener('touchmove', (e) => {
       if (e.touches.length === 2 && lastDist) {
+        e.preventDefault(); // le pincement zoome l'organigramme, pas toute la page
         const d = pinchDist(e);
         orgZoomLevel = Math.max(0.5, Math.min(2.5, orgZoomLevel * (d / lastDist)));
         lastDist = d;
-        applyOrgZoom();
+        const r = wrap.getBoundingClientRect();
+        applyOrgZoom({ x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left, y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top });
       }
-    }, { passive: true });
+    }, { passive: false });
     wrap.addEventListener('touchend', () => { lastDist = null; });
   }
   function pinchDist(e) {
@@ -4999,14 +5039,26 @@
     const dy = e.touches[0].clientY - e.touches[1].clientY;
     return Math.sqrt(dx * dx + dy * dy);
   }
-  function applyOrgZoom() {
+  // Le bloc « sizer » prend la taille de l'organigramme zoomé : la zone de défilement suit le zoom, on peut se déplacer partout
+  function applyOrgZoom(anchor) {
     const inner = document.getElementById('orgZoomInner');
-    if (inner) inner.style.transform = `scale(${orgZoomLevel})`;
+    const sizer = document.getElementById('orgZoomSizer');
+    const wrap = document.getElementById('orgZoomWrap');
+    if (!inner) return;
+    const prev = parseFloat(inner.dataset.z || '1');
+    let cx = 0, cy = 0;
+    if (wrap) { cx = (wrap.scrollLeft + (anchor ? anchor.x : wrap.clientWidth / 2)) / prev; cy = (wrap.scrollTop + (anchor ? anchor.y : wrap.clientHeight / 2)) / prev; }
+    inner.style.transform = `scale(${orgZoomLevel})`;
+    inner.dataset.z = orgZoomLevel;
+    if (sizer) { sizer.style.width = Math.ceil(inner.offsetWidth * orgZoomLevel) + 'px'; sizer.style.height = Math.ceil(inner.offsetHeight * orgZoomLevel) + 'px'; }
+    if (wrap) { wrap.scrollLeft = cx * orgZoomLevel - (anchor ? anchor.x : wrap.clientWidth / 2); wrap.scrollTop = cy * orgZoomLevel - (anchor ? anchor.y : wrap.clientHeight / 2); }
   }
   function orgZoomBtn(delta) {
     orgZoomLevel = Math.max(0.5, Math.min(2.5, orgZoomLevel + delta));
     applyOrgZoom();
   }
+  // Rotation du téléphone : on recalcule la zone de défilement et les traits
+  window.addEventListener('resize', () => { if (document.getElementById('orgZoomInner')) { applyOrgZoom(); requestAnimationFrame(drawPlayerOrgLines); } });
 
 
 
@@ -5190,6 +5242,21 @@
     } else {
       window.AppData.exhaustionDeathAcknowledged = false;
     }
+    // Armure portée : désavantage en Discrétion, Force insuffisante
+    let worn = null;
+    try { worn = items.find(it => it.equipped && it.category === 'armure' && it.armureCA != null); } catch (e) { return; } // inventaire pas encore prêt
+    if (worn && typeof armorRules === 'function') {
+      const rules = armorRules(worn);
+      if (rules.stealthDis) {
+        document.querySelectorAll('#skillsGrid .skill-name').forEach(nameEl => {
+          if (/^\s*Discrétion/.test(nameEl.textContent)) nameEl.appendChild(makeWarnBadge(`Désavantage aux jets de Discrétion (${worn.name})`));
+        });
+      }
+      if (rules.forceMin && playerStrength() < rules.forceMin) {
+        const cap = document.querySelector('#speedTopCard .top-caption');
+        if (cap) cap.appendChild(makeWarnBadge(`Vitesse réduite de 3 m : ${worn.name} demande Force ${rules.forceMin}`));
+      }
+    }
   }
 
   function showExhaustionDeathAlert() {
@@ -5208,10 +5275,13 @@
   // Seuils D&D 5e (identiques à la console MJ) : XP_TABLE[n] = XP pour atteindre le niveau n
   const XP_TABLE = [0, 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000];
   // Remplit le cercle selon la progression dans le niveau actuel (début du niveau -> niveau suivant)
+  function levelForXpJ(xp) { let l = 1; while (l < 20 && (parseInt(xp) || 0) >= XP_TABLE[l + 1]) l++; return l; }
+  // Niveau affiché : celui que permet l'XP, sans attendre la validation du MJ (qui apporte PV, dés de vie, capacités…)
+  function shownLevelOf(p) { return Math.max(parseInt(p.level) || 1, levelForXpJ(p.xp)); }
   function updateXpRing(xp, level) {
     const ring = document.getElementById('xpRing');
     if (!ring) return;
-    const lvl = Math.min(20, Math.max(1, parseInt(level) || 1));
+    const lvl = Math.min(20, Math.max(1, Math.max(parseInt(level) || 1, levelForXpJ(xp))));
     const x = Math.max(0, parseInt(xp) || 0);
     let progress = 1;
     if (lvl < 20) {
@@ -5267,7 +5337,7 @@
   }
 
   // ---- Level-up burst demo (explosion dorée depuis le centre) ----
-  function triggerLevelUp() {
+  function triggerLevelUp(newLevel) {
     const overlay = document.createElement('div');
     overlay.className = 'burst-overlay';
     (document.getElementById('page-personnage') || document.body).appendChild(overlay);
@@ -5293,7 +5363,7 @@
     }
 
     setTimeout(() => overlay.remove(), 1000);
-    showToast(`Niveau ${(window.AppData && window.AppData.totalCharacterLevel) || ''} atteint !`);
+    showToast(`Niveau ${newLevel || (window.AppData && window.AppData.totalCharacterLevel) || ''} atteint !`);
   }
 
   /* ============ COMBAT SCRIPT ============ */
@@ -5395,6 +5465,17 @@
     document.getElementById('tempNumbers').innerHTML = `PV temp. ${tempHp}<span class="sep">/</span>${tempHpMax}`;
     document.getElementById('tempFill').style.width = (tempHpMax > 0 ? (tempHp / tempHpMax * 100) : 0) + '%';
     tempBar.classList.toggle('inactive', tempHpMax === 0);
+    // À 0 PV, le personnage est inconscient : la concentration tombe sans jet
+    try {
+      if (currentHp <= 0 && concentrationSpellId && findSpell(concentrationSpellId)) {
+        const name = findSpell(concentrationSpellId).spell.name;
+        concentrationSpellId = null;
+        updateConcBadge();
+        closeModal('saveModal');
+        showToast(`Inconscient : concentration perdue sur ${name}`);
+        schedulePlayerStateSave();
+      }
+    } catch (e) {} // sorts pas encore chargés au démarrage
   }
 
   function damageHp(val) {
@@ -5417,6 +5498,7 @@
     if (typeof findSpell !== 'function') return;
     const found = findSpell(concentrationSpellId);
     if (!found) return;
+    if (currentHp <= 0) return; // inconscient : la concentration tombe d'elle-même (updateHpDisplay)
     const dd = Math.max(10, Math.floor(damageTaken / 2));
     document.getElementById('saveModalSpell').textContent = found.spell.name;
     document.getElementById('saveModalDD').textContent = dd;
@@ -5457,7 +5539,8 @@
   function openHpPopup(mode) {
     hpPopupMode = mode;
     document.getElementById('hpInput').value = 0;
-    document.querySelector('.hp-popup h3').textContent = mode === 'temp' ? 'Modifier les PV temporaires' : 'Modifier les PV';
+    document.querySelector('.hp-popup h3').textContent = mode === 'temp' ? 'Modifier les PV temporaires'
+      : (mode === 'comp' ? `Modifier les PV de ${(companionDef && companionDef.nom) || 'ton compagnon'}` : 'Modifier les PV');
     document.getElementById('hpBackdrop').classList.add('open');
   }
   function closeHpPopup() {
@@ -5470,28 +5553,32 @@
   function applyHpDamage() {
     const val = parseInt(document.getElementById('hpInput').value || 0);
     if (val > 0) {
-      if (hpPopupMode === 'temp') {
+      if (hpPopupMode === 'comp') {
+        adjustCompHp(-val);
+      } else if (hpPopupMode === 'temp') {
         tempHp = Math.max(0, tempHp - val);
         if (tempHp === 0) tempHpMax = 0;
         updateHpDisplay();
       } else {
         damageHp(val);
       }
-      showToast(`-${val}${hpPopupMode === 'temp' ? ' PV temp.' : ' PV'}`);
+      showToast(`-${val}${hpPopupMode === 'temp' ? ' PV temp.' : ' PV'}${hpPopupMode === 'comp' ? ' (compagnon)' : ''}`);
     }
     closeHpPopup();
   }
   function applyHpHeal() {
     const val = parseInt(document.getElementById('hpInput').value || 0);
     if (val > 0) {
-      if (hpPopupMode === 'temp') {
+      if (hpPopupMode === 'comp') {
+        adjustCompHp(val);
+      } else if (hpPopupMode === 'temp') {
         tempHp += val;
         if (tempHp > tempHpMax) tempHpMax = tempHp;
         updateHpDisplay();
       } else {
         healHp(val);
       }
-      showToast(`+${val}${hpPopupMode === 'temp' ? ' PV temp.' : ' PV'}`);
+      showToast(`+${val}${hpPopupMode === 'temp' ? ' PV temp.' : ' PV'}${hpPopupMode === 'comp' ? ' (compagnon)' : ''}`);
     }
     closeHpPopup();
   }
@@ -6660,6 +6747,14 @@
   }
 
   /* ===================== CATEGORY FILTER ===================== */
+  function itemInCategory(it, cat) {
+    if (cat === 'tous') return true;
+    if (cat === 'contenant') return !!it.isContainer;
+    if (cat === 'arme') return it.category === 'arme' || !!it.ammoKind; // les munitions avec les armes
+    if (cat === 'objet_magique') return it.category === 'objet_magique' || (!!it.magic && it.category !== 'potion' && it.category !== 'arme' && it.category !== 'armure');
+    if (cat === 'objet') return it.category === 'objet' && !it.isContainer && !it.ammoKind;
+    return it.category === cat;
+  }
   function renderCategories() {
     const row = document.getElementById('categoryRow');
     row.innerHTML = '';
@@ -6697,13 +6792,31 @@
     Object.assign(it, parseArmorFormula(it.caFormula || it.desc, /bouclier/i.test(it.name) ? 'bouclier' : ''));
   }
 
+  // Armures du Manuel des joueurs : Force requise et désavantage en Discrétion (pour les armures déjà dans l'inventaire)
+  const ARMOR_RULES = [
+    [/harnois/i, 15, true], [/clibanion/i, 15, true], [/cotte\s+de\s+mailles/i, 13, true], [/broigne/i, 0, true],
+    [/demi-?plate/i, 0, true], [/cotte\s+d['’]\s*[ée]cailles/i, 0, true], [/matelass[ée]e/i, 0, true],
+  ];
+  function armorRules(it) {
+    const r = ARMOR_RULES.find(([re]) => re.test(it.name || '')) || [null, 0, false];
+    const fm = it.forceMin != null && it.forceMin !== '' ? parseInt(it.forceMin, 10) || 0 : r[1];
+    return { forceMin: fm, stealthDis: it.stealthDis != null ? !!it.stealthDis : r[2] };
+  }
+  const isBodyArmor = it => it.category === 'armure' && it.armureCA != null;
+  const isShieldItem = it => /bouclier/i.test(it.name || '') || (it.category === 'armure' && it.armureCA == null && !!it.caBonus);
+  function playerStrength() {
+    const ab = (window.AppData && window.AppData.attackProfile && window.AppData.attackProfile.abilities) || {};
+    return parseInt(ab.for, 10) || 10;
+  }
+
   function updateComputedCA() {
     window.AppData = window.AppData || {};
     items.forEach(ensureArmorStats);
-    const armor = items.find(it => it.category === 'armure' && it.equipped && it.armureCA != null);
+    const armor = items.find(it => isBodyArmor(it) && it.equipped);
     let ca;
     if (armor) {
-      const dexBonus = armor.armureDexMax != null ? Math.min(dexModifier, armor.armureDexMax) : dexModifier;
+      // Lourde (sans Dex) : la Dextérité est ignorée, même négative. Intermédiaire : bonus plafonné, malus complet. Légère : Dex complète.
+      const dexBonus = armor.armureDexMax === 0 ? 0 : (armor.armureDexMax != null ? Math.min(dexModifier, armor.armureDexMax) : dexModifier);
       ca = armor.armureCA + dexBonus;
     } else {
       ca = 10 + dexModifier;
@@ -6723,6 +6836,7 @@
     window.AppData.computedCA = ca;
     const caEl = document.getElementById('caValue');
     if (caEl) caEl.textContent = ca;
+    if (typeof updateExhaustionWarnings === 'function') updateExhaustionWarnings(); // avertissements d'armure (Discrétion, Force)
   }
 
   function renderItemList() {
@@ -6731,7 +6845,7 @@
     const TYPE_ORDER = ['arme', 'munition', 'armure', 'potion', 'herbe', 'objet_magique', 'objet', 'outil', 'contenant'];
     const rankOf = it => { const c = it.isContainer ? 'contenant' : (it.ammoKind ? 'munition' : it.category); const r = TYPE_ORDER.indexOf(c); return r < 0 ? 99 : r; };
     // Rangement d'office par type d'objet (armes, munitions, armures, potions…), puis par nom
-    const filtered = items.filter(it => currentCategory === 'tous' || it.category === currentCategory)
+    const filtered = items.filter(it => itemInCategory(it, currentCategory))
       .sort((a, b) => rankOf(a) - rankOf(b) || String(a.name || '').localeCompare(String(b.name || ''), 'fr', { sensitivity: 'base' }));
     if (filtered.length === 0) {
       list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-faint);font-size:12.5px;">Aucun objet dans cette catégorie</div>';
@@ -6870,11 +6984,28 @@
       showBlockModal('Limite d\'objets magiques atteinte', `Vous portez déjà ${equippedMagicLimit} objets magiques. Retirez-en un avant d'en équiper un nouveau.`);
       return;
     }
+    if (!it.equipped) {
+      ensureArmorStats(it);
+      // Une seule armure et un seul bouclier à la fois
+      const sameSlot = isBodyArmor(it) ? items.find(x => x !== it && x.equipped && isBodyArmor(x))
+        : (isShieldItem(it) ? items.find(x => x !== it && x.equipped && isShieldItem(x)) : null);
+      if (sameSlot) {
+        showBlockModal(isBodyArmor(it) ? 'Tu portes déjà une armure' : 'Tu portes déjà un bouclier',
+          `Retire d'abord « ${sameSlot.name} » avant d'équiper « ${it.name} ».`);
+        return;
+      }
+    }
     it.equipped = !it.equipped;
     openItemDetail(id);
     renderItemList();
     renderWeight();
     updateComputedCA();
+    if (it.equipped && isBodyArmor(it)) {
+      const rules = armorRules(it), str = playerStrength();
+      if (rules.forceMin && str < rules.forceMin) {
+        showBlockModal('Armure trop lourde', `« ${it.name} » demande une Force de ${rules.forceMin} (tu as ${str}). Tant que tu la portes, ta vitesse est réduite de 3 m.`);
+      }
+    }
     const bagNow = activeBag();
     showToast(it.isContainer ? (it.equipped ? `${it.name} équipé : tes objets non équipés y sont rangés` : `${it.name} retiré : tes objets comptent de nouveau sur toi`)
       : `${it.name} ${it.equipped ? 'équipé' : (bagNow ? 'retiré et rangé dans le sac' : 'retiré')}`);
@@ -6968,26 +7099,48 @@
     pendingActionItemId = id;
     document.getElementById('transferItemText').textContent = `À qui donner « ${it.name} » ?`;
     const list = document.getElementById('transferPlayerList');
-    list.innerHTML = groupPlayers.map(p => `
-      <div class="transfer-player-row" data-player="${p.id}">
-        <div class="tp-avatar">${p.name.split(' ').map(w => w[0]).join('').slice(0,2)}</div>
-        ${p.name}
-      </div>
-    `).join('');
-    list.querySelectorAll('.transfer-player-row').forEach(row => {
-      row.addEventListener('click', () => confirmTransferItem(row.dataset.player));
-    });
+    list.innerHTML = '<div style="padding:12px;color:var(--ink-faint);font-size:12.5px;">Chargement des joueurs…</div>';
     openModal('transferModal');
+    loadGroupPlayers().then(players => {
+      if (!players.length) { list.innerHTML = '<div style="padding:12px;color:var(--ink-faint);font-size:12.5px;">Aucun autre joueur trouvé.</div>'; return; }
+      const esc = t => String(t || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      list.innerHTML = players.map(p => `
+      <div class="transfer-player-row" data-player="${esc(p.id)}">
+        <div class="tp-avatar"${p.photo ? ` style="background-image:url('${esc(p.photo)}');background-size:cover;background-position:center;color:transparent;"` : ''}>${esc(String(p.nom || '?').split(' ').map(w => w[0]).join('').slice(0,2))}</div>
+        ${esc(p.nom)}
+      </div>`).join('');
+      list.querySelectorAll('.transfer-player-row').forEach(row => {
+        row.addEventListener('click', () => confirmTransferItem(row.dataset.player));
+      });
+    });
+  }
+  // Joueurs actifs du groupe (fonction SQL liste_joueurs_groupe, sans les codes)
+  let groupPlayersCache = null;
+  async function loadGroupPlayers() {
+    if (!sb || !window._gatePlayerId) return [];
+    const { data, error } = await sb.rpc('liste_joueurs_groupe', { p_joueur: window._gatePlayerId });
+    if (error) { console.error('liste_joueurs_groupe', error); showToast('⚠️ Liste des joueurs indisponible'); return []; }
+    groupPlayersCache = data || [];
+    return groupPlayersCache;
   }
 
-  function confirmTransferItem(playerId) {
+  async function confirmTransferItem(playerId) {
     if (!pendingActionItemId) return;
     const it = items.find(i => i.id === pendingActionItemId);
-    const player = groupPlayers.find(p => p.id === playerId);
+    const player = (groupPlayersCache || []).find(p => String(p.id) === String(playerId));
+    if (!it || !player) return;
     closeModal('transferModal');
-    removeItem(pendingActionItemId);
-    showToast(`${it.name} transféré à ${player.name}`);
+    // Un objet empilé (potions, munitions…) : on n'en donne qu'un
+    const stack = (parseInt(it.qty, 10) || 1) > 1 && !it.ammoKind;
+    const gift = JSON.parse(JSON.stringify({ ...it, equipped: false, inCombat: false, location: undefined }));
+    if (stack) gift.qty = 1;
+    const { data: ok, error } = await sb.rpc('donner_objet', { p_de: window._gatePlayerId, p_a: String(player.id), p_objet: gift });
+    if (error || ok !== true) { console.error('donner_objet', error); showToast(`⚠️ Don impossible${error ? ' (' + error.message + ')' : ''}`); return; }
+    if (stack) { it.qty = (parseInt(it.qty, 10) || 1) - 1; renderItemList(); renderWeight(); }
+    else removeItem(it.id);
     pendingActionItemId = null;
+    showToast(`${it.name} donné à ${player.nom}`);
+    schedulePlayerStateSave();
   }
 
   /* ===================== BLOCKING MODAL ===================== */
@@ -7041,7 +7194,8 @@
         damage: dmg, desc: [dmg, r.proprietes].filter(Boolean).join(' — ') };
     }
     if (table === 'armures') return { ...base, category: 'armure', weight: catParseKg(r.poids) || 0, price: r.prix || '—', equipable: true, magic: !!r.magique,
-      caFormula: r.ca_formule || '', ...catParseArmor(r.ca_formule, r.categorie), desc: r.ca_formule ? `CA ${r.ca_formule}` : '' };
+      caFormula: r.ca_formule || '', ...catParseArmor(r.ca_formule, r.categorie), desc: r.ca_formule ? `CA ${r.ca_formule}` : '',
+      forceMin: parseInt(r.force_min, 10) || 0, stealthDis: !!r.desavantage_discretion };
     if (table === 'herbes') {
       const head = [r.type, r.categorie, r.genre, r.lieu].filter(Boolean).join(' · ') + (r.saison ? ` (${r.saison})` : '');
       return { ...base, category: 'herbe', qty: 1, weight: catParseKg(r.poids) || 0.05, price: r.prix || '—', equipable: false, magic: false,
@@ -7065,10 +7219,12 @@
     }
     return null;
   }
-  async function loadCatalog() {
-    if (catalogStatus === 'loading' || catalogStatus === 'ok') return;
+  let catalogAt = 0;
+  async function loadCatalog(force) {
+    if (catalogStatus === 'loading' || (catalogStatus === 'ok' && !force)) return;
     if (!sb) { catalogStatus = 'error'; renderSearchResults(); return; }
-    catalogStatus = 'loading';
+    if (!(force && catalog.length)) catalogStatus = 'loading'; // rafraîchissement discret : la liste reste affichée
+    catalogAt = Date.now();
     const tables = ['armes', 'armures', 'equipement_aventurier', 'outils', 'objets_magiques', 'armes_magiques', 'herbes'];
     try {
       const res = await Promise.all(tables.map(t => sb.from(t).select('*')));
@@ -7101,6 +7257,7 @@
   function openAddItem() {
     document.getElementById('searchInput').value = '';
     if (catalogStatus !== 'ok') { catalogStatus = catalogStatus === 'loading' ? 'loading' : 'idle'; loadCatalog(); }
+    else if (Date.now() - catalogAt > 10000) loadCatalog(true); // objets rendus visibles par le MJ entre-temps
     renderSearchResults();
     document.getElementById('addItemPage').classList.add('open');
   }
@@ -7502,6 +7659,7 @@
       capKnown: capacities.map(c => c.name),
       capUsesLeft: Object.fromEntries(capacities.filter(c => c.usesMax).map(c => [c.name, c.usesLeft])),
       combatOrder: combatItems.map(c => c.id),
+      notes: (document.getElementById('notesArea') || {}).innerHTML || '',
       appData: {
         companionInCombat: window.AppData.companionInCombat, computedCA: window.AppData.computedCA,
       },
@@ -7625,8 +7783,27 @@
     fill(d.companionHuntBoard, 1, 'compHuntTotal', 'compHuntList');
     { const el = document.getElementById('compHuntNum'); if (el) el.textContent = (d.companionHuntBoard || []).length; }
   }
+  // États attribués au compagnon par le MJ (champ companionStates)
+  let compStatesShown = '';
+  function renderCompanionStates(d) {
+    const row = document.getElementById('compStatesRow');
+    if (!row) return;
+    const list = Array.isArray(d && d.companionStates) ? d.companionStates : [];
+    const sig = JSON.stringify(list);
+    if (sig === compStatesShown) return;
+    compStatesShown = sig;
+    row.innerHTML = '';
+    list.forEach(n => {
+      const chip = document.createElement('div');
+      chip.className = 'comp-state-chip';
+      chip.textContent = n;
+      chip.addEventListener('click', () => showBlockModal(n, STATE_EFFECTS[n] || ''));
+      row.appendChild(chip);
+    });
+  }
   function applyMjOwned(d) {
     if (!d) return;
+    renderCompanionStates(d);
     renderHuntBoards(d);
     if (d.themeColor && d.themeColor !== lastThemeFromData) { lastThemeFromData = d.themeColor; applyTheme(d.themeColor, true); }
     const newInnate = Array.isArray(d.innateSpells) ? d.innateSpells : [];
@@ -7649,6 +7826,7 @@
       items.length = 0; if (saved.items) items.push(...saved.items); window.AppData.items = items;
       try { arkanMergeAmmo(items); } catch (e) { console.warn('Munitions', e); }
       items.forEach(it => {
+        if (/^\s*(potion|philtre|élixir|elixir)\b/i.test(it.name || '') && (it.category === 'objet' || it.category === 'objet_magique')) { it.category = 'potion'; it.equipable = false; it.equipped = false; }
         if (typeof it.weight === 'string') {
           const m = it.weight.replace(',', '.').match(/(\d+(?:\.\d+)?)\s*(kg|g)?\b/i);
           it.weight = m ? (m[2] && m[2].toLowerCase() === 'g' ? parseFloat(m[1]) / 1000 : parseFloat(m[1])) : 0;
@@ -7656,6 +7834,11 @@
       });
       coins.pp = 0; coins.po = 0; coins.pe = 0; coins.pa = 0; coins.pc = 0;
       if (saved.coins) Object.assign(coins, saved.coins);
+      // Notes libres (mise en forme comprise) : pas de remplacement pendant que le joueur écrit
+      const notesEl = document.getElementById('notesArea');
+      if (notesEl && typeof saved.notes === 'string' && document.activeElement !== notesEl && notesEl.innerHTML !== saved.notes) {
+        notesEl.innerHTML = saved.notes.replace(/<\s*(script|iframe|object|embed|style)[\s\S]*?<\s*\/\s*\1\s*>/gi, '').replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+      }
       if (saved.maxHp != null) maxHp = saved.maxHp;
       if (saved.currentHp != null) currentHp = Math.min(saved.currentHp, maxHp);
       tempHp = saved.tempHp || 0; tempHpMax = saved.tempHpMax || 0;
@@ -7876,8 +8059,8 @@
       return l;
     };
     fillRow(firstRow, casters[0]);
+    firstRow.before(makeLabel(casters[0]));
     if (casters.length > 1) {
-      firstRow.before(makeLabel(casters[0]));
       const second = firstRow.cloneNode(true);
       second.id = 'topRowCasterC2';
       [...second.children].forEach(c => c.removeAttribute('id'));
@@ -8009,8 +8192,9 @@
       window.AppData.unarmored = ((p.capEffects || {}).unarmored) || [];
       const levelTooltip = document.querySelector('#levelCard .tooltip-pop');
       if (levelTooltip) {
-        const lv = Math.min(20, p.level || 1);
-        levelTooltip.textContent = lv < 20 ? `Niveau — ${p.xp || 0} / ${XP_TABLE[lv + 1]} XP` : `Niveau — ${p.xp || 0} XP`;
+        const lv = Math.min(20, shownLevelOf(p));
+        levelTooltip.textContent = (lv < 20 ? `Niveau — ${p.xp || 0} / ${XP_TABLE[lv + 1]} XP` : `Niveau — ${p.xp || 0} XP`)
+          + (lv > (p.level || 1) ? ' · en attente de validation du MJ' : '');
       }
       updateXpRing(p.xp, p.level);
 
@@ -8058,7 +8242,14 @@
 
       // Niveau, bonus de maîtrise, CA directe
       const levelNumEl = document.querySelector('#levelCard .ring-number');
-      if (levelNumEl) levelNumEl.textContent = p.level || 1;
+      if (levelNumEl) levelNumEl.textContent = shownLevelOf(p);
+      // Animation dès que l'XP fait passer un niveau (une seule fois par niveau et par appareil)
+      try {
+        const key = 'arkanShownLevel_' + (window._gatePlayerId || 'demo'), shown = shownLevelOf(p);
+        const before = parseInt(localStorage.getItem(key), 10);
+        localStorage.setItem(key, String(shown));
+        if (!isNaN(before) && shown > before && !MJ_VIEW) setTimeout(() => triggerLevelUp(shown), 400);
+      } catch (e) {}
       const masteryEl = document.querySelector('#masteryCard .mastery-badge');
       if (masteryEl) masteryEl.textContent = fmtSignedMod(profBonusForLevel(p.level || 1));
       const caEl = document.getElementById('caValue');
@@ -8159,6 +8350,7 @@
     }
   }
 
+  document.addEventListener('input', e => { if (e.target && e.target.id === 'notesArea') schedulePlayerStateSave(); });
   function schedulePlayerStateSave() {
     if (!playerLoaded) return;
     clearTimeout(playerStateSaveTimer);
@@ -8191,12 +8383,10 @@
     if (d.mjRev && d.mjRev !== lastMjRev) {
       // Fiche modifiée par le MJ (niveau, caractéristiques…) : on réapplique l'identité sans perdre l'état en cours
       lastMjRev = d.mjRev;
-      const leveledUp = (d.level || 1) > (window.AppData.totalCharacterLevel || 1);
       const snapshot = collectPlayerState();
       applyIdentity(d);
       applyPlayerState({ ...snapshot, knownSpellNames: d.knownSpellNames, maxHp: d.maxHp,
         states: exhaustionDirty ? states : d.states, exhaustion: exhaustionDirty ? exhaustionLevel : d.exhaustion });
-      if (leveledUp && typeof triggerLevelUp === 'function') triggerLevelUp();
     } else {
       applyMjOwned(d);
     }
@@ -8216,6 +8406,7 @@
       playerLoaded = true;
       lastSavedJson = JSON.stringify(collectPlayerState());
       absorbPendingItems(data.data);
+      renderCompanionStates(data.data);
     } else {
       // Première connexion : on part d'une ardoise vierge, pas des données de démo d'Elowen.
       items.length = 0; window.AppData.items = items;
@@ -8233,7 +8424,7 @@
       schedulePlayerStateSave(); // on enregistre cette ardoise vierge comme point de départ
     }
     // Sauvegarde automatique périodique, en plus des sauvegardes déclenchées par les actions.
-    setInterval(pollFromMj, 8000);
+    setInterval(pollFromMj, 5000);
   })();
 
 </script>
