@@ -1527,6 +1527,13 @@
   .pnjv-link { color: var(--ink); cursor: pointer; text-decoration: underline; text-decoration-color: rgba(201,169,97,.45); text-underline-offset: 3px; }
   .pnjv-link:hover { color: var(--gold); }
   .pnjv-link.missing { cursor: default; text-decoration: none; opacity: .55; }
+  /* Suggestions tirées du Lore (saisie des commerces) */
+  .lore-sugg-field { position: relative; }
+  .lore-sugg { display: none; position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; z-index: 30; max-height: 220px; overflow-y: auto; background: var(--card); border: 1px solid var(--card-border); border-radius: 10px; box-shadow: 0 10px 28px rgba(0,0,0,.45); }
+  .lore-sugg.open { display: block; }
+  .lore-sugg-item { padding: 8px 12px; font-size: 13px; cursor: pointer; color: var(--ink); }
+  .lore-sugg-item:hover, .lore-sugg-item.active { background: var(--gold-soft, rgba(201,169,97,.14)); color: var(--gold); }
+  .lore-sugg-empty { padding: 8px 12px; font-size: 12px; opacity: .6; }
   /* Saisie : personnel du commerce */
   .gmf-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   .gmf-chip-row:empty { display: none; }
@@ -2320,7 +2327,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 08/10 (75)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 08/10 (76)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -3947,13 +3954,13 @@
   <div class="modal-box" style="max-width:500px;">
     <h3 id="gmfTitle">Commerce</h3>
     <div class="form-field"><label>Nom</label><input type="text" id="gmfName"></div>
-    <div class="form-field"><label>Ville ou village</label>
-      <input type="text" id="gmfVille" list="gmfVilleList" placeholder="Commence à taper le nom (Lore › Géographie)" autocomplete="off">
-      <datalist id="gmfVilleList"></datalist>
+    <div class="form-field lore-sugg-field"><label>Ville ou village</label>
+      <input type="text" id="gmfVille" placeholder="Commence à taper le nom (Lore › Géographie)" autocomplete="off">
+      <div class="lore-sugg" id="gmfVilleSugg"></div>
     </div>
-    <div class="form-field"><label>Personnel</label>
-      <input type="text" id="gmfStaffInput" list="gmfStaffList" placeholder="Nom d'un PNJ (Lore › PNJ), puis Entrée" autocomplete="off">
-      <datalist id="gmfStaffList"></datalist>
+    <div class="form-field lore-sugg-field"><label>Personnel</label>
+      <input type="text" id="gmfStaffInput" placeholder="Nom d'un PNJ (Lore › PNJ)" autocomplete="off">
+      <div class="lore-sugg" id="gmfStaffSugg"></div>
       <div class="gmf-chip-row" id="gmfStaffChips"></div>
     </div>
     <div class="photo-preview-box" id="gmfPhotoPreview" onclick="document.getElementById('gmfPhotoInput').click()"><div class="photo-preview-placeholder" id="gmfPhotoPlaceholder"><span>Photo</span></div></div>
@@ -4286,7 +4293,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 08/10 (75)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 08/10 (76)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -43192,10 +43199,13 @@
     setGeoPhotoPreview('gmfPhotoPreview', 'gmfPhotoPlaceholder', x && x.photo);
     document.getElementById('gmfNewTag').value = '';
     renderCommerceTagsGrid(x ? (x.tags || []) : []);
-    // Ville et personnel : suggestions tirées du Lore
-    const opt = n => `<option value="${String(n).replace(/"/g, '&quot;')}"></option>`;
-    document.getElementById('gmfVilleList').innerHTML = villesDatabase.map(v => opt(v.name)).join('');
-    document.getElementById('gmfStaffList').innerHTML = pnjDatabase.map(p => opt(p.name)).join('');
+    // Ville et personnel : suggestions tirées du Lore pendant la saisie
+    attachLoreSuggest('gmfVille', 'gmfVilleSugg', () => villesDatabase, o => { document.getElementById('gmfVille').value = o.name; });
+    attachLoreSuggest('gmfStaffInput', 'gmfStaffSugg', () => pnjDatabase.filter(p => !commerceStaff.includes(p.id)), o => {
+      if (!commerceStaff.includes(o.id)) commerceStaff.push(o.id);
+      document.getElementById('gmfStaffInput').value = '';
+      renderCommerceStaff();
+    });
     const v = x && x.villeId ? villesDatabase.find(o => o.id === x.villeId) : null;
     document.getElementById('gmfVille').value = v ? v.name : '';
     commerceStaff = x ? (x.employes || []).filter(pid => pnjDatabase.some(p => p.id === pid)) : [];
@@ -43221,13 +43231,48 @@
     renderCommerceStaff();
     return true;
   }
-  document.addEventListener('keydown', e => { if (e.target && e.target.id === 'gmfStaffInput' && e.key === 'Enter') { e.preventDefault(); addCommerceStaffFromInput(); } });
-  // Choix dans la liste de suggestions : ajout direct
-  document.addEventListener('input', e => {
-    if (!e.target || e.target.id !== 'gmfStaffInput') return;
-    const val = e.target.value.trim().toLowerCase();
-    if (val && pnjDatabase.some(o => o.name.toLowerCase() === val) && (!e.inputType || e.inputType === 'insertReplacementText')) addCommerceStaffFromInput();
-  });
+  // Liste de suggestions sous un champ : filtre sans tenir compte des accents ni des majuscules, flèches + Entrée ou clic
+  const loreNorm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  function attachLoreSuggest(inputId, boxId, getList, onPick) {
+    const inp = document.getElementById(inputId), box = document.getElementById(boxId);
+    if (!inp || !box || inp.dataset.suggReady) return;
+    inp.dataset.suggReady = '1';
+    let matches = [], active = -1;
+    const close = () => { box.classList.remove('open'); active = -1; };
+    const pick = o => { onPick(o); close(); };
+    const render = () => {
+      const q = loreNorm(inp.value);
+      if (!q) { close(); return; }
+      const list = getList();
+      matches = list.filter(o => loreNorm(o.name).startsWith(q)).concat(list.filter(o => !loreNorm(o.name).startsWith(q) && loreNorm(o.name).includes(q))).slice(0, 12);
+      active = matches.length ? 0 : -1;
+      box.innerHTML = matches.length
+        ? matches.map((o, i) => `<div class="lore-sugg-item${i === active ? ' active' : ''}" data-i="${i}">${String(o.name).replace(/</g, '&lt;')}</div>`).join('')
+        : '<div class="lore-sugg-empty">Aucun résultat dans le Lore</div>';
+      box.classList.add('open');
+    };
+    inp.addEventListener('input', render);
+    inp.addEventListener('focus', () => { if (inp.value.trim()) render(); });
+    inp.addEventListener('blur', () => setTimeout(close, 150));
+    inp.addEventListener('keydown', e => {
+      if (!box.classList.contains('open')) { if (e.key === 'Enter') e.preventDefault(); return; }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!matches.length) return;
+        active = (active + (e.key === 'ArrowDown' ? 1 : -1) + matches.length) % matches.length;
+        box.querySelectorAll('.lore-sugg-item').forEach((el, i) => el.classList.toggle('active', i === active));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (active > -1 && matches[active]) pick(matches[active]);
+      } else if (e.key === 'Escape') { e.stopPropagation(); close(); }
+    });
+    box.addEventListener('mousedown', e => {
+      const it = e.target.closest('.lore-sugg-item');
+      if (!it) return;
+      e.preventDefault();
+      pick(matches[+it.dataset.i]);
+    });
+  }
   function renderCommerceTagsGrid(activeTags) {
     document.getElementById('gmfTagsGrid').innerHTML = commerceTagsDatabase.map(t => `
       <div class="attribuer-chip ${activeTags.includes(t) ? 'active' : ''}" data-commerce-tag="${t}" style="${activeTags.includes(t) ? 'border-color:var(--violet); background:var(--violet-soft); color:var(--violet);' : ''}">${t}</div>
