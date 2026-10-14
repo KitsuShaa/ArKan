@@ -1521,6 +1521,9 @@
   /* Blocs liés à droite du titre (commerces : ville, personnel) */
   .pnjv-links { display: flex; flex-direction: column; gap: 6px; margin: 0 auto 0 22px; min-width: 0; max-width: 46%; }
   .pnjv-links:empty { display: none; }
+  /* Fiche en blocs (commerces) : Nom, Type, Ville, Personnel sur une grille 2 × 2, même style */
+  #modalPnjView .wizard-header.pnjv-boxed #pnjvName, #modalPnjView .wizard-header.pnjv-boxed #pnjvSub { display: none; }
+  #modalPnjView .wizard-header.pnjv-boxed .pnjv-links { display: grid; grid-auto-flow: column; grid-template-rows: auto auto; grid-template-columns: repeat(2, minmax(0, max-content)); gap: 6px; margin-left: 0; max-width: none; }
   .pnjv-link-box { display: flex; align-items: baseline; gap: 8px; padding: 6px 12px; border: 1px solid var(--card-border); border-radius: 10px; background: var(--card); font-size: 12.5px; }
   .pnjv-link-label { font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); flex-shrink: 0; }
   .pnjv-link-vals { display: flex; flex-wrap: wrap; gap: 4px 10px; min-width: 0; }
@@ -2327,7 +2330,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 08/10 (76)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 08/10 (77)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4293,7 +4296,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 08/10 (76)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 08/10 (77)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -43155,8 +43158,10 @@
       const staff = (x.employes || []).map(pid => pnjDatabase.find(p => p.id === pid)).filter(Boolean);
       const box = (label, inner) => `<div class="pnjv-link-box"><span class="pnjv-link-label">${label}</span><span class="pnjv-link-vals">${inner}</span></div>`;
       setViewLinks(
-        box('Ville', ville ? `<span class="pnjv-link" onclick="openVilleView('${ville.id}')">${esc(ville.name)}</span>` : '<span class="pnjv-link missing">—</span>')
-        + box(staff.length > 1 ? 'Personnel' : 'Tenu par', staff.length ? staff.map(p => `<span class="pnjv-link" onclick="openPnjView('${p.id}')">${esc(p.name)}</span>`).join('') : '<span class="pnjv-link missing">—</span>'));
+        box('Nom', `<span>${esc(x.name)}</span>`)
+        + box('Type', '<span>Commerce</span>')
+        + box('Ville', ville ? `<span class="pnjv-link" onclick="openVilleView('${ville.id}')">${esc(ville.name)}</span>` : '<span class="pnjv-link missing">—</span>')
+        + box(staff.length > 1 ? 'Personnel' : 'Tenu par', staff.length ? staff.map(p => `<span class="pnjv-link" onclick="openPnjView('${p.id}')">${esc(p.name)}</span>`).join('') : '<span class="pnjv-link missing">—</span>'), true);
     }
     document.getElementById('pnjvBody').innerHTML = `
       <div class="lv" style="grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) minmax(0,1.9fr);">
@@ -43519,12 +43524,16 @@
   let pendingViewTags = null;
   function useLoreLayout(name) { pendingLoreLayout = name; }
   function setViewTags(tags) { pendingViewTags = tags && tags.length ? tags : null; }
-  let pendingViewLinks = null;
-  function setViewLinks(html) { pendingViewLinks = html || null; }
+  let pendingViewLinks = null, pendingViewBoxed = false;
+  function setViewLinks(html, boxed) { pendingViewLinks = html || null; pendingViewBoxed = !!boxed; }
   function applyLoreLayout() {
     const linksEl = document.getElementById('pnjvLinks');
-    if (linksEl) linksEl.innerHTML = pendingViewLinks || '';
-    pendingViewLinks = null;
+    if (linksEl) {
+      linksEl.innerHTML = pendingViewLinks || '';
+      const head = linksEl.closest('.wizard-header');
+      if (head) head.classList.toggle('pnjv-boxed', pendingViewBoxed);
+    }
+    pendingViewLinks = null; pendingViewBoxed = false;
     const tagsEl = document.getElementById('pnjvTags');
     if (tagsEl) tagsEl.innerHTML = pendingViewTags ? pendingViewTags.map(t => `<span class="pnjv-tag">${t}</span>`).join('') : '';
     pendingViewTags = null;
