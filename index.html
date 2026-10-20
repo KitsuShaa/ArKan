@@ -2175,6 +2175,30 @@
   .hist-prep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
   .hist-prep-text { width: 100%; resize: none; background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); color: var(--ink); padding: 18px 20px; font-family: var(--font-serif); font-size: 14.5px; line-height: 1.7; }
   .hist-prep-text:focus { outline: none; border-color: var(--gold); }
+  /* Prépa de session : éditeur mis en forme */
+  .prep-toolbar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px; margin-bottom: 8px; background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius-md); }
+  .prep-tb-btn { min-width: 32px; height: 30px; padding: 0 8px; border-radius: 7px; border: 1px solid transparent; background: transparent; color: var(--ink-soft, var(--ink)); cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+  .prep-tb-btn:hover { background: rgba(255,255,255,.06); color: var(--ink); }
+  .prep-tb-btn.on { border-color: rgba(201,169,97,.5); color: var(--gold); background: rgba(201,169,97,.10); }
+  .prep-tb-btn svg { width: 16px; height: 16px; }
+  .prep-tb-sep { width: 1px; height: 20px; background: var(--card-border); margin: 0 4px; }
+  .prep-rich { min-height: 300px; white-space: normal; overflow-wrap: anywhere; cursor: text; }
+  .prep-rich:empty::before { content: attr(data-placeholder); opacity: .4; }
+  .prep-rich ul, .prep-rich ol { margin: 4px 0; padding-left: 26px; }
+  .prep-rich ul ul { list-style: circle; } .prep-rich ul ul ul { list-style: square; }
+  .prep-rich li { margin: 2px 0; }
+  .prep-rich p { margin: 0; }
+  .prep-fold { margin: 8px 0; border: 1px solid var(--card-border); border-radius: 10px; background: rgba(255,255,255,.02); }
+  .prep-fold-head { display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: var(--ink-soft, var(--ink)); }
+  .prep-fold-toggle, .prep-fold-del { flex-shrink: 0; cursor: pointer; user-select: none; display: inline-flex; width: 18px; height: 18px; align-items: center; justify-content: center; border-radius: 5px; color: var(--ink-faint, #8a8478); transition: transform .15s; }
+  .prep-fold-toggle:hover, .prep-fold-del:hover { color: var(--gold); background: rgba(255,255,255,.05); }
+  .prep-fold-toggle::before { content: '▾'; font-size: 13px; }
+  .prep-fold.closed .prep-fold-toggle { transform: rotate(-90deg); }
+  .prep-fold-title { flex: 1; min-width: 0; outline: none; }
+  .prep-fold-del { opacity: 0; font-size: 14px; }
+  .prep-fold-head:hover .prep-fold-del { opacity: 1; }
+  .prep-fold-body { padding: 4px 16px 12px 38px; border-top: 1px solid var(--card-border); }
+  .prep-fold.closed .prep-fold-body { display: none; }
   .hist-save-state { font-size: 11.5px; color: var(--ink-faint); }
   .hist-notes { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
   .hist-note { width: 220px; height: 220px; border-radius: 4px 4px 14px 4px; box-shadow: 0 6px 14px rgba(0,0,0,.35); display: flex; flex-direction: column; position: relative; transition: transform .15s; }
@@ -2330,7 +2354,7 @@
 <div id="mjLoginOverlay" style="position:fixed; inset:0; background:#14100a; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif;">
   <div id="mjLoginBox" style="width:100%; max-width:320px; padding:32px 28px; background:#1c1710; border:1px solid rgba(201,162,75,0.25); border-radius:16px;">
     <div style="font-family:'Spectral',serif; font-size:20px; color:#c9a24b; text-align:center; margin-bottom:6px;">ArKan</div>
-    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 08/10 (77)</span></div>
+    <div style="font-size:12.5px; color:#9c9080; text-align:center; margin-bottom:22px;">Console Maître du Jeu<br><span style="font-size:10.5px;opacity:.6;">version du 08/10 (78)</span></div>
     <div style="margin-bottom:12px;">
       <label style="display:block; font-size:12px; color:#9c9080; margin-bottom:5px;">E-mail</label>
       <input type="email" id="mjLoginUser" autocomplete="username" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:8px; border:1px solid rgba(201,162,75,0.25); background:#14100a; color:#e8e0d0; font-size:14px;">
@@ -4296,7 +4320,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div id="consoleVersionBadge" title="Version de la console">version du 08/10 (77)</div>
+<div id="consoleVersionBadge" title="Version de la console">version du 08/10 (78)</div>
 <div class="mail-notif-popup" id="mailNotifPopup" onclick="jumpToMailNotif()">
   <div class="mnp-icon">✉️</div>
   <div class="mnp-body">
@@ -45753,10 +45777,142 @@
         <button class="hist-icon-btn" title="Renommer / supprimer" onclick="openHistPrepaForm('${p.id}')">${HIST_ICONS.edit}</button>
         <span class="hist-save-state" id="histPrepState" style="margin-left:auto;">Enregistré</span>
       </div>
-      <textarea class="hist-prep-text" id="histPrepText" placeholder="Écris ta prépa ici…" oninput="onHistPrepInput()" onblur="histPrepFlush()">${histEsc(p.texte)}</textarea>
+      <div class="prep-toolbar" id="prepToolbar">
+        <button class="prep-tb-btn" data-cmd="bold" title="Gras (Ctrl+B)"><b>G</b></button>
+        <button class="prep-tb-btn" data-cmd="italic" title="Italique (Ctrl+I)"><i style="font-family:Georgia,serif;">I</i></button>
+        <button class="prep-tb-btn" data-cmd="underline" title="Souligné (Ctrl+U)"><u>S</u></button>
+        <button class="prep-tb-btn" data-cmd="strikeThrough" title="Barré"><s>ab</s></button>
+        <span class="prep-tb-sep"></span>
+        <button class="prep-tb-btn" data-cmd="justifyLeft" title="Aligner à gauche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 10h10M4 14h16M4 18h10"/></svg></button>
+        <button class="prep-tb-btn" data-cmd="justifyCenter" title="Centrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 10h10M4 14h16M7 18h10"/></svg></button>
+        <button class="prep-tb-btn" data-cmd="justifyRight" title="Aligner à droite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M10 10h10M4 14h16M10 18h10"/></svg></button>
+        <span class="prep-tb-sep"></span>
+        <button class="prep-tb-btn" data-cmd="insertUnorderedList" title="Liste à puces (ou tape « - » en début de ligne) · Tab : sous-liste · Maj+Tab : remonter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="7" r="1.2" fill="currentColor"/><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="5" cy="17" r="1.2" fill="currentColor"/><path d="M10 7h10M10 12h10M10 17h10"/></svg></button>
+        <span class="prep-tb-sep"></span>
+        <button class="prep-tb-btn" data-cmd="fold" title="Cadre repliable (le texte sélectionné va dedans)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 9l2 2 2-2"/><path d="M3 14h18"/></svg><span style="font-size:12px;">Cadre</span></button>
+      </div>
+      <div class="hist-prep-text prep-rich" id="histPrepText" contenteditable="true" spellcheck="true" data-placeholder="Écris ta prépa ici…"></div>
     `;
-    const ta = document.getElementById('histPrepText');
-    ta.style.height = Math.max(300, (window.innerHeight - ta.getBoundingClientRect().top - 24) / arkanZ()) + 'px';
+    const ed = document.getElementById('histPrepText');
+    ed.innerHTML = prepToHtml(p.texte);
+    prepEnsureTrailing(ed);
+    ed.addEventListener('input', () => { prepAutoList(ed); onHistPrepInput(); });
+    ed.addEventListener('blur', histPrepFlush);
+    ed.addEventListener('keydown', e => prepKeydown(e, ed));
+    ed.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text/plain')); });
+    ed.addEventListener('click', e => {
+      const t = e.target.closest('.prep-fold-toggle, .prep-fold-del');
+      if (!t) return;
+      e.preventDefault();
+      const fold = t.closest('.prep-fold');
+      if (t.classList.contains('prep-fold-toggle')) fold.classList.toggle('closed');
+      else { // supprimer le cadre en gardant son contenu
+        const body = fold.querySelector('.prep-fold-body');
+        while (body && body.firstChild) fold.parentNode.insertBefore(body.firstChild, fold);
+        fold.remove();
+      }
+      onHistPrepInput();
+    });
+    const tb = document.getElementById('prepToolbar');
+    tb.addEventListener('mousedown', e => { if (e.target.closest('.prep-tb-btn')) e.preventDefault(); }); // garde la sélection
+    tb.addEventListener('click', e => {
+      const b = e.target.closest('.prep-tb-btn'); if (!b) return;
+      ed.focus();
+      if (b.dataset.cmd === 'fold') prepInsertFold(ed);
+      else document.execCommand(b.dataset.cmd, false, null);
+      prepToolbarState(); onHistPrepInput();
+    });
+    document.addEventListener('selectionchange', prepToolbarState);
+  }
+  // ---- Éditeur de prépa : texte mis en forme (HTML), anciennes prépas en texte brut converties à l'ouverture ----
+  const PREP_MARK = '<!--arkan-rich-->';
+  function prepToHtml(t) {
+    t = t || '';
+    if (t.startsWith(PREP_MARK)) return t.slice(PREP_MARK.length);
+    if (!t.trim()) return '';
+    return t.split('\n').map(l => `<div>${l.trim() ? histEsc(l) : '<br>'}</div>`).join('');
+  }
+  function prepClean(html) {
+    return html.replace(/<\s*(script|iframe|object|embed|style)[\s\S]*?<\s*\/\s*\1\s*>/gi, '').replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+  }
+  function prepToolbarState() {
+    const tb = document.getElementById('prepToolbar'), ed = document.getElementById('histPrepText');
+    if (!tb || !ed) { document.removeEventListener('selectionchange', prepToolbarState); return; }
+    const sel = window.getSelection();
+    if (!sel.rangeCount || !ed.contains(sel.anchorNode)) return;
+    tb.querySelectorAll('.prep-tb-btn').forEach(b => {
+      const c = b.dataset.cmd;
+      if (c === 'fold') return;
+      let on = false; try { on = document.queryCommandState(c); } catch (e) {}
+      b.classList.toggle('on', !!on);
+    });
+  }
+  // Un paragraphe vide après le dernier cadre, pour pouvoir écrire en dessous
+  function prepEnsureTrailing(ed) {
+    const last = ed.lastElementChild;
+    if (last && last.classList.contains('prep-fold')) ed.insertAdjacentHTML('beforeend', '<div><br></div>');
+  }
+  function prepInsertFold(ed) {
+    const sel = window.getSelection();
+    const fold = document.createElement('div');
+    fold.className = 'prep-fold';
+    fold.innerHTML = '<div class="prep-fold-head"><span class="prep-fold-toggle" contenteditable="false" title="Replier / déplier"></span><div class="prep-fold-title">Titre du cadre</div><span class="prep-fold-del" contenteditable="false" title="Retirer le cadre (le texte reste)">×</span></div><div class="prep-fold-body"></div>';
+    const body = fold.querySelector('.prep-fold-body');
+    let range = sel.rangeCount && ed.contains(sel.anchorNode) ? sel.getRangeAt(0) : null;
+    if (range && !range.collapsed) {
+      // Le texte sélectionné passe dans le cadre (on prend les lignes entières)
+      const blockOf = n => { while (n && n.parentNode !== ed) n = n.parentNode; return n; };
+      const a = blockOf(range.startContainer), z = blockOf(range.endContainer);
+      if (a && z) { range = document.createRange(); range.setStartBefore(a); range.setEndAfter(z); }
+      body.appendChild(range.extractContents());
+      range.insertNode(fold);
+    } else {
+      body.innerHTML = '<div><br></div>';
+      let block = range ? range.startContainer : null;
+      while (block && block.parentNode !== ed) block = block.parentNode;
+      if (block && block !== ed) block.after(fold); else ed.appendChild(fold);
+    }
+    prepEnsureTrailing(ed);
+    // Curseur dans le titre, tout sélectionné pour le renommer directement
+    const title = fold.querySelector('.prep-fold-title');
+    const r = document.createRange(); r.selectNodeContents(title);
+    sel.removeAllRanges(); sel.addRange(r);
+  }
+  // « - » ou « * » suivi d'un espace en début de ligne : liste à puces
+  function prepAutoList(ed) {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+    const node = sel.anchorNode;
+    if (!node || node.nodeType !== 3 || sel.anchorOffset !== 2) return;
+    if (!/^[-*•][\s\u00a0]$/.test(node.textContent.slice(0, 2))) return;
+    let el = node.parentNode;
+    if (el.closest && el.closest('li')) return;
+    if (node.previousSibling) return;
+    node.textContent = node.textContent.slice(2);
+    const r = document.createRange(); r.setStart(node, 0); r.collapse(true);
+    sel.removeAllRanges(); sel.addRange(r);
+    document.execCommand('insertUnorderedList', false, null);
+  }
+  function prepKeydown(e, ed) {
+    const sel = window.getSelection();
+    const inLi = sel.rangeCount && sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentNode).closest('li');
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (inLi) document.execCommand(e.shiftKey ? 'outdent' : 'indent', false, null);
+      else if (!e.shiftKey) document.execCommand('insertText', false, '\u00a0\u00a0\u00a0\u00a0');
+      onHistPrepInput();
+    }
+    // Entrée dans le titre d'un cadre : on passe dans le cadre au lieu de couper le titre
+    const title = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentNode).closest('.prep-fold-title');
+    if (e.key === 'Enter' && title) {
+      e.preventDefault();
+      const fold = title.closest('.prep-fold');
+      fold.classList.remove('closed');
+      const body = fold.querySelector('.prep-fold-body');
+      if (!body.firstChild) body.innerHTML = '<div><br></div>';
+      const r = document.createRange(); r.setStart(body.firstChild, 0); r.collapse(true);
+      sel.removeAllRanges(); sel.addRange(r);
+    }
   }
   let histPrepTimer = null;
   function onHistPrepInput() {
@@ -45768,8 +45924,10 @@
     clearTimeout(histPrepTimer);
     const ta = document.getElementById('histPrepText');
     const p = histData.prepas.find(x => x.id === histPrepId);
-    if (!ta || !p || ta.value === (p.texte || '')) return;
-    p.texte = ta.value;
+    if (!ta || !p) return;
+    const html = PREP_MARK + prepClean(ta.innerHTML);
+    if (html === (p.texte || '') || (!ta.textContent.trim() && !ta.querySelector('.prep-fold') && !(p.texte || '').trim())) return;
+    p.texte = html;
     histSave('histoire_prepas', { id: p.id, nom: p.nom, texte: p.texte, ordre: p.ordre }).then(ok => {
       const st = document.getElementById('histPrepState'); if (st) st.textContent = ok ? 'Enregistré' : '⚠️ Non enregistré';
     });
